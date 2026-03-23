@@ -3,11 +3,17 @@
 <html lang="sk">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover" />
+<meta name="color-scheme" content="dark" />
+<meta name="theme-color" content="#07090c" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Fuelio" />
 <title>Fuelio – Jozefove jazdy</title>
 <link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,300;0,400;0,600;0,700;0,900;1,300&family=Barlow+Condensed:wght@400;600;700;900&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   :root {
+    color-scheme: dark;
     --bg: #07090c;
     --surface: #0d1117;
     --surface2: #141b22;
@@ -31,6 +37,7 @@
   }
 
 - { box-sizing: border-box; margin: 0; padding: 0; }
+  img, svg, canvas, video { max-width: 100%; }
 
 body {
 font-family: ‘Barlow’, sans-serif;
@@ -39,6 +46,13 @@ background: var(–bg);
 color: var(–text);
 min-height: 100vh;
 overflow-x: hidden;
+-webkit-text-size-adjust: 100%;
+text-size-adjust: 100%;
+}
+/* Force dark mode – never allow iOS to override */
+@media (prefers-color-scheme: light) {
+:root { color-scheme: dark; }
+body { background: #07090c !important; color: #e2e8f0 !important; }
 }
 
 /* ─── BG TEXTURE ─── */
@@ -540,8 +554,21 @@ text-transform: uppercase;
 letter-spacing: 2px;
 margin-bottom: 14px;
 }
-.nav-mobile { display: none; position: fixed; bottom: 0; left: 0; right: 0; background: var(–surface); border-top: 1px solid var(–border); z-index: 99; padding: 6px 0; justify-content: space-around; }
-.nav-mobile-btn { display: flex; flex-direction: column; align-items: center; gap: 2px; background: none; border: none; color: var(–muted2); cursor: pointer; padding: 4px 8px; font-family: ‘Barlow’, sans-serif; font-size: 0.58rem; text-transform: uppercase; letter-spacing: 0.5px; }
+.nav-mobile {
+display: none;
+position: fixed;
+bottom: 0; left: 0; right: 0;
+background: var(–surface);
+border-top: 1px solid var(–border);
+z-index: 999;
+padding: 8px 0;
+padding-bottom: calc(8px + env(safe-area-inset-bottom));
+justify-content: space-around;
+backdrop-filter: blur(16px);
+-webkit-backdrop-filter: blur(16px);
+box-shadow: 0 -4px 24px rgba(0,0,0,0.4);
+}
+.nav-mobile-btn { display: flex; flex-direction: column; align-items: center; gap: 2px; background: none; border: none; color: var(–muted2); cursor: pointer; padding: 6px 6px; font-family: ‘Barlow’, sans-serif; font-size: 0.55rem; text-transform: uppercase; letter-spacing: 0.5px; flex: 1; -webkit-tap-highlight-color: transparent; }
 .nav-mobile-btn .ico { font-size: 1.2rem; }
 .nav-mobile-btn.active { color: var(–accent); }
 
@@ -767,7 +794,7 @@ html, body { overflow-x: hidden; max-width: 100vw; width: 100%; }
 main { padding-bottom: 72px !important; }
 
 ```
-header { padding: 0 12px; min-height: 52px; height: auto; flex-wrap: nowrap; }
+header { padding: 0 12px; min-height: 52px; height: auto; flex-wrap: nowrap; width: 100%; max-width: 100vw; overflow: hidden; }
 .skoda-emblem { width: 26px; height: 26px; }
 .logo { font-size: 1.1rem; }
 .logo-sub { display: none; }
@@ -863,7 +890,7 @@ td, th { padding: 8px 10px; }
 
 <!-- CAR TOP BAR -->
 
-<div style="background:var(--surface);border-bottom:1px solid var(--border);padding:8px 20px;overflow-x:auto;-webkit-overflow-scrolling:touch;">
+<div style="background:var(--surface);border-bottom:1px solid var(--border);padding:8px 20px;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;max-width:100vw;">
   <div id="carTopBar" style="display:flex;gap:8px;align-items:center;min-height:36px;"></div>
 </div>
 
