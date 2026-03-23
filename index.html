@@ -1425,29 +1425,55 @@ td, th { padding: 8px 10px; }
       <pre style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:14px;font-size:0.75rem;overflow-x:auto;color:#aaf;line-height:1.6;">function doPost(e) {
 ```
 
+try {
 var data = JSON.parse(e.postData.contents);
 var ss = SpreadsheetApp.openById(data.sheetId);
 var sheet = ss.getSheetByName(data.sheetName)
 || ss.insertSheet(data.sheetName);
-if(sheet.getLastRow()===0) sheet.appendRow(data.headers);
+// Add header row if sheet is empty
+if (sheet.getLastRow() === 0) {
+sheet.appendRow(data.headers);
+sheet.getRange(1, 1, 1, data.headers.length)
+.setFontWeight(‘bold’)
+.setBackground(’#1a3520’)
+.setFontColor(’#4ade80’);
+sheet.setFrozenRows(1);
+}
+// Check for duplicate by ID (column A)
+var idCol = sheet.getRange(‘A:A’).getValues().flat();
+var existingRow = idCol.indexOf(data.row[0]);
+if (existingRow > 0) {
+// Update existing row
+sheet.getRange(existingRow + 1, 1, 1, data.row.length).setValues([data.row]);
+} else {
 sheet.appendRow(data.row);
+}
 return ContentService.createTextOutput(
-JSON.stringify({ok:true})
+JSON.stringify({ok: true})
 ).setMimeType(ContentService.MimeType.JSON);
+} catch(err) {
+return ContentService.createTextOutput(
+JSON.stringify({ok: false, error: err.toString()})
+).setMimeType(ContentService.MimeType.JSON);
+}
 }
 
 function doGet(e) {
-var sheetId = e.parameter.sheetId;
-var sheetName = e.parameter.sheetName;
-var ss = SpreadsheetApp.openById(sheetId);
-var sheet = ss.getSheetByName(sheetName);
-if(!sheet) return ContentService.createTextOutput(
+try {
+var ss = SpreadsheetApp.openById(e.parameter.sheetId);
+var sheet = ss.getSheetByName(e.parameter.sheetName);
+if (!sheet) return ContentService.createTextOutput(
 JSON.stringify({rows:[]})
 ).setMimeType(ContentService.MimeType.JSON);
 var data = sheet.getDataRange().getValues();
 return ContentService.createTextOutput(
-JSON.stringify({rows:data})
+JSON.stringify({rows: data})
 ).setMimeType(ContentService.MimeType.JSON);
+} catch(err) {
+return ContentService.createTextOutput(
+JSON.stringify({rows:[], error: err.toString()})
+).setMimeType(ContentService.MimeType.JSON);
+}
 }</pre>
 </div>
 
@@ -1605,6 +1631,7 @@ JSON.stringify({rows:data})
       <div class="scan-result-row"><span class="scan-result-label">Mena</span><span class="scan-result-val" id="srCurrency">–</span></div>
       <div class="scan-result-row"><span class="scan-result-label">Typ paliva</span><span class="scan-result-val" id="srFuelType">–</span></div>
       <div class="scan-result-row"><span class="scan-result-label">Dátum</span><span class="scan-result-val" id="srDate">–</span></div>
+      <div class="scan-result-row"><span class="scan-result-label">Čerpacia stanica</span><span class="scan-result-val" id="srStation">–</span></div>
     </div>
     <div id="scanError" style="color:var(--danger);font-size:0.82rem;margin-top:10px;display:none;"></div>
     <div style="display:flex;gap:10px;margin-top:16px;">
@@ -2033,7 +2060,15 @@ async function handleOdometerScan(e) {
           role: 'user',
           content: [
             { type: 'image', source: { type: 'base64', media_type: file.type || 'image/jpeg', data: b64 } },
-            { type: 'text', text: 'Toto je fotka tachometra auta. Vyčítaj celkový počet najazdených kilometrov (odometer/mileage). Vráť IBA číslo bez medzier, bodiek alebo iného textu. Príklad: 85420' }
+            { type: 'text', text: `Si expert na čítanie tachometrov áut. Z tejto fotky vyčítaj CELKOVÝ počet najazdených kilometrov (odometer/mileage/km total).
+
+Hľadaj veľké číslo na displeji tachometra - zvyčajne je to najväčšie číslo v strede alebo dole na displeji, môže mať jednotku "km" alebo "KM".
+
+DÔLEŽITÉ:
+- Vráť IBA samotné číslo, bez medzier, bez bodiek, bez iného textu
+- Napríklad: 85420 alebo 11903 alebo 125000
+- Nie: "85.420 km" alebo "85,420" - iba číslo
+- Ak vidíš viacero čísel, vyber to ktoré reprezentuje celkový nájazd (odometer), nie rýchlosť ani denný počítadlo` }
           ]
         }]
       })
@@ -2727,37 +2762,76 @@ async function testGoogle() {
 
 async function pushToGoogle(rec, sheetName) {
   if (!state.google.url || !state.google.sheetId) return;
-  try {
-    let headers, row;
-    const car = state.cars.find(c=>c.id===rec.carId);
-    if (rec.type === 'fuel') {
-      headers = ['ID','Auto','Dátum','Km','Litrov','Suma €','Cena/L','Typ paliva','Poznámka'];
-      row = [rec.id, car?.name||'', rec.date, rec.km, rec.liters, rec.total, rec.pricePerL, rec.fuelType, rec.note];
-    } else if (rec.type === 'income') {
-      headers = ['ID','Auto','Dátum','Typ príjmu','Suma €','Popis','Poznámka'];
-      row = [rec.id, car?.name||'', rec.date, rec.incomeType, rec.amount, rec.desc, rec.note];
-    } else {
-      headers = ['ID','Auto','Dátum','Typ','Suma €','Km','Popis','Poznámka'];
-      row = [rec.id, car?.name||'', rec.date, rec.costType, rec.amount, rec.km, rec.desc, rec.note];
-    }
-    await fetch(state.google.url, {
-      method: 'POST',
-      body: JSON.stringify({ sheetId: state.google.sheetId, sheetName, headers, row })
-    });
-  } catch(e) { console.warn('Google sync failed', e); }
+  const car = state.cars.find(c=>c.id===rec.carId);
+  const d = fmtDate(rec.date); // dd.mm.yyyy
+  let headers, row;
+  if (rec.type === 'fuel') {
+    headers = ['ID','Auto','ŠPZ','Dátum','Km','Litrov','Suma €','Cena/L (EUR)','Pôvodná cena/L','Mena','Typ paliva','Poznámka'];
+    row = [rec.id, car?.name||'', car?.plate||'', d, rec.km, rec.liters,
+           (+rec.total||0).toFixed(2), (+rec.pricePerL||0).toFixed(3),
+           rec.origPrice||'', rec.origCurrency||'EUR', rec.fuelType||'', rec.note||''];
+  } else if (rec.type === 'income') {
+    headers = ['ID','Auto','ŠPZ','Dátum','Typ príjmu','Suma €','Pôvodná suma','Mena','Popis','Poznámka'];
+    row = [rec.id, car?.name||'', car?.plate||'', d, rec.incomeType||'',
+           (+rec.amount||0).toFixed(2), rec.origAmount||'', rec.origCurrency||'EUR',
+           rec.desc||'', rec.note||''];
+  } else {
+    headers = ['ID','Auto','ŠPZ','Dátum','Typ nákladu','Suma €','Pôvodná suma','Mena','Km','Popis','Poznámka'];
+    row = [rec.id, car?.name||'', car?.plate||'', d, rec.costType||'',
+           (+rec.amount||0).toFixed(2), rec.origAmount||'', rec.origCurrency||'EUR',
+           rec.km||'', rec.desc||'', rec.note||''];
+  }
+  await fetch(state.google.url, {
+    method: 'POST',
+    body: JSON.stringify({ sheetId: state.google.sheetId, sheetName, headers, row })
+  });
 }
 
 async function syncToGoogle() {
   if (!state.google.url || !state.google.sheetId) { toast('Nastav Google Sheets!'); return; }
-  document.getElementById('googleStatus').textContent = 'Synchronizujem...';
-  let ok = 0;
+  const statusEl = document.getElementById('googleStatus');
+  statusEl.style.color = 'var(--muted2)';
+  statusEl.textContent = 'Synchronizujem...';
+
+  let ok = 0, errors = 0;
+
+  // 1. Export sheet Auta
+  try {
+    const carsHeaders = ['ID','Názov','ŠPZ','Farba'];
+    // clear + rewrite whole sheet by sending all cars
+    for (const car of state.cars) {
+      await fetch(state.google.url, {
+        method: 'POST',
+        body: JSON.stringify({
+          sheetId: state.google.sheetId,
+          sheetName: 'Auta',
+          headers: carsHeaders,
+          row: [car.id, car.name, car.plate||'', car.color||'']
+        })
+      });
+      ok++;
+    }
+    statusEl.textContent = `Autá (${state.cars.length})... `;
+  } catch(e) { errors++; console.warn('Cars sync failed', e); }
+
+  // 2. Export all records grouped by type
+  const total = state.records.length;
+  let i = 0;
   for (const rec of state.records) {
-    await pushToGoogle(rec, rec.type==='fuel'?'Tankovanie':rec.type==='income'?'Prijmy':'Naklady');
-    ok++;
+    i++;
+    if (i % 10 === 0) statusEl.textContent = `Záznamy ${i}/${total}...`;
+    try {
+      await pushToGoogle(rec, rec.type==='fuel'?'Tankovanie':rec.type==='income'?'Prijmy':'Naklady');
+      ok++;
+    } catch(e) { errors++; console.warn('Record sync failed', rec.id, e); }
   }
-  document.getElementById('googleStatus').textContent = `✓ Synchronizovaných ${ok} záznamov`;
-  document.getElementById('googleStatus').style.color = '#4caf50';
-  toast(`Sync hotový: ${ok} záznamov ✓`);
+
+  const msg = errors > 0
+    ? `Hotovo: ${ok} exportovaných, ${errors} chýb`
+    : `✓ Exportovaných ${ok} záznamov + ${state.cars.length} áut`;
+  statusEl.textContent = msg;
+  statusEl.style.color = errors > 0 ? 'var(--danger)' : 'var(--income)';
+  toast(errors > 0 ? `⚠ ${errors} chýb pri exporte` : `✓ Sync hotový: ${ok} záznamov`);
 }
 
 // ─── SCAN RECEIPT ───
@@ -2810,7 +2884,21 @@ async function handleScanFile(e) {
           role: 'user',
           content: [
             { type: 'image', source: { type: 'base64', media_type: file.type || 'image/jpeg', data: b64 } },
-            { type: 'text', text: `Toto je účtenka z čerpacej stanice. Vyčítaj hodnoty a vráť IBA čistý JSON bez iného textu:\n{"liters":číslo_alebo_null,"pricePerLiter":číslo_alebo_null,"totalAmount":číslo_alebo_null,"currency":"EUR_alebo_CZK_alebo_PLN","fuelType":"Benzín_alebo_Diesel_alebo_LPG_alebo_null","date":"YYYY-MM-DD_alebo_null"}` }
+            { type: 'text', text: `Si expert na čítanie účteniek z čerpacích staníc (Slovnaft, MOL, OMV, Shell, Benzina atď.).
+
+Z tejto účtenky vyčítaj PRESNE tieto hodnoty a vráť IBA čistý JSON, žiadny iný text:
+
+{
+  "liters": číslo (hľadaj: "L", "litrov", napr. "10.510 L" alebo "16.160 L"),
+  "pricePerLiter": číslo (hľadaj: "EUR/L", "Kč/l", napr. "1.539 EUR/L" alebo "39.900 Kč/l"),
+  "totalAmount": číslo (hľadaj: "SUMA:", "Suma:", "CELKEM:", napr. "16.06" alebo "636.30"),
+  "currency": "EUR" alebo "CZK" alebo "PLN" (podľa symbolu EUR/Kč/zł),
+  "fuelType": "Benzín" ak EVO 95/Natural 95/BA 95, "Nafta" ak Diesel/EVO Diesel, "LPG" ak LPG, inak "Benzín",
+  "date": "YYYY-MM-DD" (hľadaj "Dátum vyhotovenia:", "Datum vytvoření:", napr. "16.03.2026" -> "2026-03-16"),
+  "station": názov čerpacej stanice (napr. "Slovnaft", "MOL", "OMV")
+}
+
+Ak hodnotu nevieš prečítať, daj null. Vráť VÝLUČNE JSON, nič iné.` }
           ]
         }]
       })
@@ -2826,6 +2914,7 @@ async function handleScanFile(e) {
     document.getElementById('srCurrency').textContent  = scanData.currency || '–';
     document.getElementById('srFuelType').textContent  = scanData.fuelType || '–';
     document.getElementById('srDate').textContent      = scanData.date || '–';
+    document.getElementById('srStation').textContent   = scanData.station || '–';
 
     document.getElementById('scanLoading').style.display = 'none';
     document.getElementById('scanResult').style.display = 'block';
@@ -2848,9 +2937,22 @@ function useScanResult() {
   }
   if (scanData.fuelType) {
     const sel = document.getElementById('fFuelType');
-    for (let o of sel.options) { if (o.value === scanData.fuelType) { sel.value = o.value; break; } }
+    for (let o of sel.options) {
+      if (o.value === scanData.fuelType || o.text.includes(scanData.fuelType)) {
+        sel.value = o.value; break;
+      }
+    }
   }
   if (scanData.date) document.getElementById('fDate').value = scanData.date;
+  // if total is available, use it directly
+  if (scanData.totalAmount) {
+    // temporarily set total directly if both liters and pricePerLiter missing
+    if (!scanData.liters || !scanData.pricePerLiter) {
+      document.getElementById('fTotal').removeAttribute('readonly');
+      document.getElementById('fTotal').value = scanData.totalAmount;
+      document.getElementById('fTotal').setAttribute('readonly','');
+    }
+  }
   recalcFuel();
   document.getElementById('scanModal').classList.remove('open');
   switchTab('fuel');
