@@ -1503,7 +1503,8 @@ function doGet(e) {
         <div style="display:flex;gap:10px;">
           <button class="btn-primary" onclick="saveGoogleConfig()">Uložiť prepojenie</button>
           <button class="btn-secondary" onclick="testGoogle()">Otestovať</button>
-          <button class="btn-secondary" onclick="syncToGoogle()">⬆ Sync do Sheetu</button>
+          <button class="btn-secondary" onclick="syncToGoogle()">⬆ Sync do Google Sheets</button>
+          <button class="btn-secondary" onclick="exportFuelioCSV()">📥 Export CSV (Fuelio)</button>
         </div>
 
         <div id="googleStatus" style="font-size:0.82rem;color:var(--muted);"></div>
@@ -1647,6 +1648,7 @@ function doGet(e) {
 <div id="toast"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 
 <script>
 // ─── STATE ───
@@ -2053,64 +2055,63 @@ function openOdometerScan() {
 async function handleOdometerScan(e) {
   const file = e.target.files[0];
   if (!file) return;
+
   const reader = new FileReader();
   reader.onload = ev => {
     const img = document.getElementById('odoPreviewImg');
     img.src = ev.target.result; img.style.display = 'block';
   };
   reader.readAsDataURL(file);
+
   document.getElementById('odoLoading').style.display = 'block';
+  document.getElementById('odoLoading').innerHTML = '<div class="scan-spinner"></div>OCR číta tachometer...';
   document.getElementById('odoResult').style.display = 'none';
   document.getElementById('odoUseBtn').style.display = 'none';
   document.getElementById('odoError').style.display = 'none';
 
-  const b64 = await new Promise((res, rej) => {
-    const r = new FileReader();
-    r.onload = () => res(r.result.split(',')[1]);
-    r.onerror = rej;
-    r.readAsDataURL(file);
-  });
-
   try {
-    const apiKey = state.anthropicKey || '';
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true'
-      },
-      body: JSON.stringify({
-        model: 'claude-opus-4-5',
-        max_tokens: 100,
-        messages: [{
-          role: 'user',
-          content: [
-            { type: 'image', source: { type: 'base64', media_type: file.type || 'image/jpeg', data: b64 } },
-            { type: 'text', text: `Si expert na čítanie tachometrov áut. Z tejto fotky vyčítaj CELKOVÝ počet najazdených kilometrov (odometer/mileage/km total).
-
-Hľadaj veľké číslo na displeji tachometra - zvyčajne je to najväčšie číslo v strede alebo dole na displeji, môže mať jednotku "km" alebo "KM".
-
-DÔLEŽITÉ:
-- Vráť IBA samotné číslo, bez medzier, bez bodiek, bez iného textu
-- Napríklad: 85420 alebo 11903 alebo 125000
-- Nie: "85.420 km" alebo "85,420" - iba číslo
-- Ak vidíš viacero čísel, vyber to ktoré reprezentuje celkový nájazd (odometer), nie rýchlosť ani denný počítadlo` }
-          ]
-        }]
-      })
+    const result = await Tesseract.recognize(file, 'eng', {
+      logger: m => {
+        if (m.status === 'recognizing text') {
+          document.getElementById('odoLoading').innerHTML =
+            '<div class="scan-spinner"></div>OCR: ' + Math.round(m.progress*100) + '%...';
+        }
+      }
     });
-    const data = await response.json();
-    if (!response.ok) throw new Error(data.error?.message || 'API chyba: ' + response.status);
-    if (!data.content) throw new Error('Prázdna odpoveď z API');
-    const text = data.content.map(c => c.text||'').join('').trim().replace(/[^0-9]/g,'');
-    const km = parseInt(text);
-    if (!km || km < 100) throw new Error('Nepodarilo sa vyčítať km (dostali sme: "' + data.content.map(c=>c.text||'').join('') + '")');
+
+    const text = result.data.text;
+
+    // Find odometer value – largest number that looks like km (4-7 digits)
+    // Škoda Octavia IV: "14191 km" in top right
+    // Older: "216918 km" at bottom, ignore "trip XXX km"
+    const allNumbers = [];
+    const kmPattern = /(\d{4,7})[.,]?\d*\s*km/gi;
+    let m;
+    while ((m = kmPattern.exec(text)) !== null) {
+      const v = parseInt(m[1].replace(/[.,]/g,''));
+      if (v >= 100 && v <= 9999999) allNumbers.push(v);
+    }
+    // Also find large standalone numbers (without km unit)
+    const numPattern = /(\d{4,7})/g;
+    while ((m = numPattern.exec(text)) !== null) {
+      const v = parseInt(m[1]);
+      if (v >= 1000 && v <= 999999) allNumbers.push(v);
+    }
+
+    // Remove trip computer values (usually small, <5000)
+    // The odometer is the largest plausible value
+    const candidates = [...new Set(allNumbers)].sort((a,b) => b - a);
+    const km = candidates[0];
+
+    if (!km || km < 100) {
+      throw new Error('Nepodarilo sa vyčítať km. Skús priblížiť displej a foť kolmo. Raw text: "' + text.replace(/\n/g,' ').substring(0,80) + '"');
+    }
+
     document.getElementById('odoValue').textContent = km.toLocaleString('sk-SK');
     document.getElementById('odoResult').style.display = 'block';
     document.getElementById('odoUseBtn').style.display = '';
     document.getElementById('odoUseBtn').dataset.km = km;
+
   } catch(err) {
     const el = document.getElementById('odoError');
     el.textContent = 'Chyba: ' + err.message;
@@ -2169,7 +2170,7 @@ function parseFuelioCSV(text, filename) {
     }
 
     let section = null;
-    let vehicleName = '', vehiclePlate = '';
+    let vehicleName = '', vehiclePlate = '', vehicleDesc = '';
     const fuelRows = [], costRows = [];
     const catMap = {};
 
@@ -2187,6 +2188,7 @@ function parseFuelioCSV(text, filename) {
       if (section === 'vdata') {
         vehicleName = cols[0] || 'Fuelio auto';
         vehiclePlate = cols[8] || '';
+        vehicleDesc  = cols[1] || ''; // Description often contains color
         section = null; continue;
       }
       if (section === 'lhdr' && (cols[0] === 'Data' || cols[0] === 'Date')) { section = 'ldata'; continue; }
@@ -2238,7 +2240,7 @@ function parseFuelioCSV(text, filename) {
       + importedIncomes.slice(0,3).map(r=>'<div style="color:var(--income)">💰 '+r.date+' · '+r.incomeType+' · '+r.desc+' · '+r.amount+'€</div>').join('')
       + '</div>';
 
-    window._pendingImport = { vehicleName, vehiclePlate, importedFuels, importedCosts, importedIncomes };
+    window._pendingImport = { vehicleName, vehiclePlate, vehicleDesc, importedFuels, importedCosts, importedIncomes };
     document.getElementById('importConfirmBtn').style.display = '';
 
   } catch(err) {
@@ -2253,7 +2255,19 @@ function confirmImport() {
 
   let car = state.cars.find(c => c.name.toLowerCase() === data.vehicleName.toLowerCase());
   if (!car) {
-    car = { id: Date.now()+'', name: data.vehicleName, plate: data.vehiclePlate, color: '#f9a825' };
+    // Auto-assign color based on car description (color name in Fuelio)
+    const desc = (data.vehicleDesc || '').toLowerCase();
+    const nameLC = data.vehicleName.toLowerCase();
+    let autoColor = '#8896a8'; // default silver
+    if (/čierna|čierne|black|schwarz/.test(desc+nameLC)) autoColor = '#374151';
+    else if (/biela|biele|white|weiss/.test(desc+nameLC)) autoColor = '#e2e8f0';
+    else if (/červená|červené|red|rot/.test(desc+nameLC)) autoColor = '#f87171';
+    else if (/modrá|modré|blue|blau/.test(desc+nameLC)) autoColor = '#60a5fa';
+    else if (/zelená|zelené|green|grun/.test(desc+nameLC)) autoColor = '#4ade80';
+    else if (/sivá|šedá|grey|gray|silber|silver/.test(desc+nameLC)) autoColor = '#8896a8';
+    else if (/hnedá|braun|brown/.test(desc+nameLC)) autoColor = '#92400e';
+    else if (/žltá|yellow|gelb/.test(desc+nameLC)) autoColor = '#fbbf24';
+    car = { id: Date.now()+'', name: data.vehicleName, plate: data.vehiclePlate, color: autoColor };
     state.cars.push(car);
   }
   state.selectedCar = car;
@@ -2525,7 +2539,7 @@ function renderCharts() {
   const consVal = calcConsumption(fuels);
   const avgCons = consVal ? consVal.toFixed(1) : '–';
   const totalFuelCost = fuels.reduce((s,r)=>s+(r.total||0),0);
-  const costPerKm = kmRange > 0 ? (totalFuelCost/kmRange).toFixed(3) : '–';
+  const costPerKm = kmRange > 0 ? (totalFuelCost/kmRange).toFixed(2) : '–';
   const totalOtherCost = costs.reduce((s,r)=>s+(r.amount||0),0);
   const totalAllCost = totalFuelCost + totalOtherCost;
   const totalIncome = filterRecordsByPeriod(state.records.filter(r=>r.type==='income'&&(!carId||r.carId===carId))).reduce((s,r)=>s+(r.amount||0),0);
@@ -2539,7 +2553,7 @@ function renderCharts() {
   document.getElementById('ssFuelCost').textContent = costPerKm !== '–' ? costPerKm + ' €' : '–';
   document.getElementById('ssFuelCostSub').textContent = costPerKm !== '–' ? costPerKm + ' €/km' : '€/km palivo';
   document.getElementById('ssTotalCost').textContent = totalAllCost > 0 ? totalAllCost.toFixed(2) + ' €' : '0 €';
-  document.getElementById('ssTotalCostSub').textContent = kmRange > 0 ? (totalAllCost/kmRange).toFixed(3) + ' €/km' : 'palivo + opravy';
+  document.getElementById('ssTotalCostSub').textContent = kmRange > 0 ? (totalAllCost/kmRange).toFixed(2) + ' €/km' : 'palivo + opravy';
   document.getElementById('ssTotalIncome').textContent = totalIncome > 0 ? totalIncome.toFixed(2) + ' €' : '0 €';
   const profitEl = document.getElementById('ssProfit');
   profitEl.textContent = (profit >= 0 ? '+' : '') + profit.toFixed(2) + ' €';
@@ -2561,7 +2575,7 @@ function renderCharts() {
     if (sorted.length >= 2) {
       const kmD = sorted[sorted.length-1].km - sorted[0].km;
       const lSum = sorted.slice(1).reduce((s,r)=>s+(parseFloat(r.liters)||0),0);
-      if (kmD > 0) consMap[key] = [+(lSum/kmD*100).toFixed(2)];
+      if (kmD > 0) consMap[key] = [+(lSum/kmD*100).toFixed(1)];
     }
   });
   const consKeys = Object.keys(consMap).sort();
@@ -2573,7 +2587,7 @@ function renderCharts() {
     const key = consKeys[idx];
     const recs = fuels.filter(r=>(axisMode==='year'?r.date?.slice(0,4):r.date?.slice(0,7))===key);
     showDrilldown(`Spotreba – ${key}`,['Dátum','Km','Litrov','l/100km'],
-      recs.map((r,i,a)=>{ const prev=a[i-1]; const kmD=prev?r.km-prev.km:0; return [fmtDate(r.date), r.km, r.liters+'l', kmD>0?(r.liters/kmD*100).toFixed(2):'–']; }));
+      recs.map((r,i,a)=>{ const prev=a[i-1]; const kmD=prev?r.km-prev.km:0; return [fmtDate(r.date), r.km, r.liters+'l', kmD>0?(r.liters/kmD*100).toFixed(1):'–']; }));
   }, 'l');
 
   // ── Fuel price €/l ──
@@ -2942,6 +2956,7 @@ async function handleScanFile(e) {
   const file = e.target.files[0];
   if (!file) return;
 
+  // Show preview
   const reader = new FileReader();
   reader.onload = ev => {
     const img = document.getElementById('scanPreviewImg');
@@ -2951,64 +2966,26 @@ async function handleScanFile(e) {
   reader.readAsDataURL(file);
 
   document.getElementById('scanLoading').style.display = 'block';
+  document.getElementById('scanLoading').innerHTML = '<div class="scan-spinner"></div>OCR číta doklad (zadarmo, bez API)...';
   document.getElementById('scanResult').style.display = 'none';
   document.getElementById('scanUseBtn').style.display = 'none';
   document.getElementById('scanError').style.display = 'none';
 
-  const b64 = await new Promise((res, rej) => {
-    const r = new FileReader();
-    r.onload = () => res(r.result.split(',')[1]);
-    r.onerror = rej;
-    r.readAsDataURL(file);
-  });
-
   try {
-    const apiKey2 = state.anthropicKey || '';
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey2,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true'
-      },
-      body: JSON.stringify({
-        model: 'claude-opus-4-5',
-        max_tokens: 500,
-        messages: [{
-          role: 'user',
-          content: [
-            { type: 'image', source: { type: 'base64', media_type: file.type || 'image/jpeg', data: b64 } },
-            { type: 'text', text: `Si expert na čítanie účteniek z čerpacích staníc (Slovnaft, MOL, OMV, Shell, Benzina atď.).
-
-Z tejto účtenky vyčítaj PRESNE tieto hodnoty a vráť IBA čistý JSON, žiadny iný text:
-
-{
-  "liters": číslo (hľadaj: "L", "litrov", napr. "10.510 L" alebo "16.160 L"),
-  "pricePerLiter": číslo (hľadaj: "EUR/L", "Kč/l", napr. "1.539 EUR/L" alebo "39.900 Kč/l"),
-  "totalAmount": číslo (hľadaj: "SUMA:", "Suma:", "CELKEM:", napr. "16.06" alebo "636.30"),
-  "currency": "EUR" alebo "CZK" alebo "PLN" (podľa symbolu EUR/Kč/zł),
-  "fuelType": "Benzín" ak EVO 95/Natural 95/BA 95, "Nafta" ak Diesel/EVO Diesel, "LPG" ak LPG, inak "Benzín",
-  "date": "YYYY-MM-DD" (hľadaj "Dátum vyhotovenia:", "Datum vytvoření:", napr. "16.03.2026" -> "2026-03-16"),
-  "station": názov čerpacej stanice (napr. "Slovnaft", "MOL", "OMV")
-}
-
-Ak hodnotu nevieš prečítať, daj null. Vráť VÝLUČNE JSON, nič iné.` }
-          ]
-        }]
-      })
+    // Use Tesseract.js – free, runs locally in browser
+    const result = await Tesseract.recognize(file, 'ces+slk+eng', {
+      logger: m => {
+        if (m.status === 'recognizing text') {
+          document.getElementById('scanLoading').innerHTML =
+            '<div class="scan-spinner"></div>OCR: ' + Math.round(m.progress*100) + '%...';
+        }
+      }
     });
 
-    const data = await response.json();
-    if (!response.ok) throw new Error(data.error?.message || 'API chyba: ' + response.status);
-    if (!data.content) throw new Error('Prázdna odpoveď z API');
-    const rawText = data.content.map(c => c.text || '').join('').trim();
-    const cleaned = rawText.replace(/```json|```/g, '').trim();
-    try {
-      scanData = JSON.parse(cleaned);
-    } catch(parseErr) {
-      throw new Error('Neplatný formát odpovede: ' + rawText.substring(0, 100));
-    }
+    const text = result.data.text;
+
+    // Parse the OCR text
+    scanData = parseReceiptText(text);
 
     document.getElementById('srLiters').textContent    = scanData.liters != null ? scanData.liters + ' l' : '–';
     document.getElementById('srPriceL').textContent    = scanData.pricePerLiter != null ? scanData.pricePerLiter + ' ' + (scanData.currency||'') : '–';
@@ -3021,12 +2998,84 @@ Ak hodnotu nevieš prečítať, daj null. Vráť VÝLUČNE JSON, nič iné.` }
     document.getElementById('scanLoading').style.display = 'none';
     document.getElementById('scanResult').style.display = 'block';
     document.getElementById('scanUseBtn').style.display = '';
+
   } catch(err) {
     document.getElementById('scanLoading').style.display = 'none';
     const el = document.getElementById('scanError');
     el.textContent = 'Chyba pri čítaní dokladu: ' + err.message;
     el.style.display = 'block';
   }
+}
+
+// Parse OCR text from receipt
+function parseReceiptText(text) {
+  const lines = text.split('\n').map(l => l.trim()).filter(l => l);
+  const result = { liters: null, pricePerLiter: null, totalAmount: null,
+                   currency: 'EUR', fuelType: 'Benzín', date: null, station: null };
+
+  // Detect station
+  if (/slovnaft/i.test(text)) result.station = 'Slovnaft';
+  else if (/MOL/i.test(text)) result.station = 'MOL';
+  else if (/OMV/i.test(text)) result.station = 'OMV';
+  else if (/shell/i.test(text)) result.station = 'Shell';
+  else if (/benzina|benzína/i.test(text)) result.station = 'Benzina';
+
+  // Detect currency
+  if (/Kč|CZK|korun/i.test(text)) result.currency = 'CZK';
+  else if (/PLN|zł/i.test(text)) result.currency = 'PLN';
+  else result.currency = 'EUR';
+
+  // Detect fuel type
+  if (/diesel|nafta|EVO\s*D/i.test(text)) result.fuelType = 'Nafta';
+  else if (/LPG/i.test(text)) result.fuelType = 'LPG';
+  else result.fuelType = 'Benzín';
+
+  // Parse liters – look for patterns like "10.510 L" "16.160 L" "20.200 l"
+  const literPatterns = [
+    /(\d+[.,]\d+)\s*[Ll](?:\s|$)/,
+    /(\d+[.,]\d+)\s*litr/i,
+    /\*\d+\s+(\d+[.,]\d+)\s*[Ll]/,
+  ];
+  for (const pat of literPatterns) {
+    const m = text.match(pat);
+    if (m) { result.liters = parseFloat(m[1].replace(',','.')); break; }
+  }
+
+  // Parse price per liter – "1.539 EUR/L" "39.900 Kč/l" "1,296 €/l"
+  const pricePerLPatterns = [
+    /(\d+[.,]\d+)\s*(?:EUR|€)\s*\/\s*[Ll]/i,
+    /(\d+[.,]\d+)\s*Kč\s*\/\s*[Ll]/i,
+    /(\d+[.,]\d+)\s*\/\s*[Ll]/i,
+    /[Ll]itr[ae]?\s+(\d+[.,]\d+)/i,
+    /(\d+[.,]\d{3})\s+(?:EUR|€|Kč)/,
+  ];
+  for (const pat of pricePerLPatterns) {
+    const m = text.match(pat);
+    if (m) {
+      const v = parseFloat(m[1].replace(',','.'));
+      if (v > 0.5 && v < 5) { result.pricePerLiter = v; break; } // sanity check
+    }
+  }
+
+  // Parse total – SUMA / CELKEM / SUM lines
+  const totalPatterns = [
+    /(?:SUMA|Suma|CELKEM|Celkem|SUM)[:\s]+(\d+[.,]\d+)/i,
+    /UHRADENÉ[:\s]+(\d+[.,]\d+)/i,
+    /ZAPLACENO[:\s]+(\d+[.,]\d+)/i,
+    /Total[:\s]+(\d+[.,]\d+)/i,
+  ];
+  for (const pat of totalPatterns) {
+    const m = text.match(pat);
+    if (m) { result.totalAmount = parseFloat(m[1].replace(',','.')); break; }
+  }
+
+  // Parse date – "16.03.2026" "19.03.2026 17:01"
+  const dateMatch = text.match(/(\d{1,2})[.\/-](\d{2})[.\/-](\d{4})/);
+  if (dateMatch) {
+    result.date = dateMatch[3] + '-' + dateMatch[2].padStart(2,'0') + '-' + dateMatch[1].padStart(2,'0');
+  }
+
+  return result;
 }
 
 function useScanResult() {
@@ -3063,15 +3112,102 @@ function useScanResult() {
 
 // ─── SAMPLE CSV ───
 function downloadSampleCSV() {
-  const csv = `## Vehicle\n"Name","Make","Model","Year","Fuel","Date format","Note","Unit","Plate"\n"Škoda Octavia","Škoda","Octavia","2020","Gasoline","yyyy-MM-dd","","km","BA123AB"\n\n## Log\n"Date","Mileage","Fuel amount","Fuel type","Total price","Note","Partial","Missed","Latitude","Longitude"\n"2024-01-15","85000","48.5","Gasoline","76.95","OMV Bratislava","0","0","",""\n"2024-02-03","85623","52.1","Gasoline","83.36","Shell Brno","0","0","",""\n"2024-02-28","86290","44.8","Gasoline","71.68","","0","0","",""\n"2024-03-15","86890","50.2","Gasoline","80.32","OMV","0","0","",""\n\n## Costs\n"Date","Mileage","Category","Price","Note","","","","",""\n"2024-01-20","85100","Service","150.00","Výmena oleja a filtrov","","","","",""\n"2024-02-15","85700","Insurance","320.00","Polročné poistenie","","","","",""\n"2024-03-01","86000","Tires","480.00","Zimné pneumatiky 4ks","","","","",""\n`;
+  const csv = `"## Vehicle"\n"Name","Description","DistUnit","FuelUnit","ConsumptionUnit","ImportCSVDateFormat","VIN","Insurance","Plate","Make","Model","Year","TankCount","Tank1Type","Tank2Type","Active","Tank1Capacity","Tank2Capacity","FuelUnitTank2","FuelConsumptionTank2"\n"Škoda Octavia IV","Čierna","0","0","0","yyyy-MM-dd","","","BA123AB","Škoda","Octavia","2025","1","110","0","1","45.0","0.0","0","0"\n"## Log"\n"Data","Odo (km)","Fuel (litres)","Full","Price (optional)","l/100km (optional)","latitude (optional)","longitude (optional)","City (optional)","Notes (optional)","Missed","TankNumber","FuelType","VolumePrice","StationID (optional)","ExcludeDistance","UniqueId","TankCalc","Weather"\n"2026-01-15 10:00","85000.0","48.5","1","76.95","5.7","0.0","0.0","","","0","1","110","1.587","0","0.0","1","0.0",\n"## CostCategories"\n"CostTypeID","Name","priority","color"\n"1","Služba","0",""\n"35","Spolujazda","0","#B71C1C"\n"36","Firemne jazdy","0","#FF5722"\n"## Costs"\n"CostTitle","Date","Odo","CostTypeID","Notes","Cost","flag","idR","read","RemindOdo","RemindDate","isTemplate","RepeatOdo","RepeatMonths","isIncome","UniqueId"\n"Spolujazda","2026-01-20 10:00","0","35","","50.0","0","0","1","0","2011-01-01","0","0","0","1","1"\n"Oprava","2026-01-25 10:00","85100","1","Výmena oleja","120.0","0","0","1","0","2011-01-01","0","0","0","0","2"\n`;
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'fuelio-vzor-export.csv';
-  a.click();
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  a.download = 'fuelio-vzor-export.csv'; a.click();
   toast('Vzorový CSV stiahnutý ✓');
 }
 
+function exportFuelioCSV() {
+  if (state.cars.length === 0) { toast('Žiadne autá na export!'); return; }
+
+  // Cost category mapping (Fuelio IDs)
+  const costCatMap = {
+    'Oprava':'1','Servis':'9','Poistenie':'31','STK / EK':'33','STK+EK':'33',
+    'Pneumatiky':'8','Olej / filtre':'9','Diaľničná známka':'7','Parkovanie':'5',
+    'Umytie':'6','Materiál':'32','AdBlue':'34','Registrácia':'4','Cena vozidla':'2','Iné':'1'
+  };
+  const incomeCatMap = {
+    'Spolujazda':'35','Firemne jazdy':'36','Prenájom auta':'36',
+    'Náhrada za cestu':'36','Predaj dielu':'32','Iné':'35'
+  };
+  const fuelTypeMap = { 'Benzín':'110','Nafta':'112','LPG':'120','CNG':'130','Elektrina':'200' };
+
+  // Build combined category list
+  const usedCats = {};
+  state.records.forEach(r => {
+    if (r.type === 'cost')   { const id = costCatMap[r.costType]||'1';   usedCats[id] = r.costType; }
+    if (r.type === 'income') { const id = incomeCatMap[r.incomeType]||'35'; usedCats[id] = r.incomeType; }
+  });
+  const defaultCats = {'1':'Služba','2':'Cena vozidla','4':'Registrácia','5':'Parkovanie',
+    '6':'Umytie','7':'Mýto','8':'Pneumatiky','9':'Servis','31':'Poistenie',
+    '32':'Materiál','33':'STK+EK','34':'AdBlue','35':'Spolujazda','36':'Firemne jazdy'};
+  const allCats = {...defaultCats, ...usedCats};
+
+  let uid = 1;
+
+  state.cars.forEach(car => {
+    const carFuels = state.records.filter(r => r.type==='fuel' && r.carId===car.id)
+      .sort((a,b)=>new Date(a.date)-new Date(b.date));
+    const carCosts = state.records.filter(r => (r.type==='cost'||r.type==='income') && r.carId===car.id)
+      .sort((a,b)=>new Date(a.date)-new Date(b.date));
+
+    // ── Vehicle section ──
+    let csv = '"## Vehicle"\n';
+    csv += '"Name","Description","DistUnit","FuelUnit","ConsumptionUnit","ImportCSVDateFormat","VIN","Insurance","Plate","Make","Model","Year","TankCount","Tank1Type","Tank2Type","Active","Tank1Capacity","Tank2Capacity","FuelUnitTank2","FuelConsumptionTank2"\n';
+    const tankSize = car.tankSize || 50;
+    const model = car.name.includes('Octavia') ? 'Octavia' : car.name.split(' ').pop();
+    const make  = car.name.split(' ')[0];
+    csv += `"${car.name}","${car.color||''}","0","0","0","yyyy-MM-dd","","","${car.plate||''}","${make}","${model}","2025","1","110","0","1","${tankSize}.0","0.0","0","0"\n`;
+
+    // ── Log section ──
+    csv += '"## Log"\n';
+    csv += '"Data","Odo (km)","Fuel (litres)","Full","Price (optional)","l/100km (optional)","latitude (optional)","longitude (optional)","City (optional)","Notes (optional)","Missed","TankNumber","FuelType","VolumePrice","StationID (optional)","ExcludeDistance","UniqueId","TankCalc","Weather"\n';
+    carFuels.forEach(r => {
+      const dt = r.date + ' 10:00';
+      const full = (r.fullTank===true||r.fullTank===1||r.fullTank==='1') ? '1' : '0';
+      const ft = fuelTypeMap[r.fuelType] || '110';
+      const priceL = parseFloat(r.pricePerL)||0;
+      const l100 = r.liters && r.km ? '' : '';
+      csv += `"${dt}","${r.km}.0","${r.liters}","${full}","${(+r.total||0).toFixed(2)}","","0.0","0.0","","${r.note||''}","0","1","${ft}","${priceL.toFixed(3)}","0","0.0","${uid++}","0.0",\n`;
+    });
+
+    // ── CostCategories section ──
+    csv += '"## CostCategories"\n';
+    csv += '"CostTypeID","Name","priority","color"\n';
+    Object.entries(allCats).forEach(([id,name]) => {
+      csv += `"${id}","${name}","0",""\n`;
+    });
+
+    // ── Costs section ──
+    csv += '"## Costs"\n';
+    csv += '"CostTitle","Date","Odo","CostTypeID","Notes","Cost","flag","idR","read","RemindOdo","RemindDate","isTemplate","RepeatOdo","RepeatMonths","isIncome","UniqueId"\n';
+    carCosts.forEach(r => {
+      const dt = r.date + ' 10:00';
+      const isIncome = r.type === 'income' ? '1' : '0';
+      const catId = r.type==='income'
+        ? (incomeCatMap[r.incomeType]||'35')
+        : (costCatMap[r.costType]||'1');
+      const title = r.type==='income' ? (r.desc||r.incomeType||'Príjem') : (r.desc||r.costType||'Náklad');
+      const amt = (+r.amount||0).toFixed(2);
+      csv += `"${title}","${dt}","${r.km||0}","${catId}","${r.note||''}","${amt}","0","0","1","0","2011-01-01","0","0","0","${isIncome}","${uid++}"\n`;
+    });
+
+    // ── Category section ──
+    csv += '"## Category"\n"IdCategory","Name"\n"1","Súkromné"\n"2","Práca"\n';
+
+    // Download
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    const safeName = car.name.replace(/[^a-zA-Z0-9]/g,'_');
+    a.download = `fuelio_${safeName}_export.csv`;
+    a.click();
+  });
+
+  toast(`Export hotový: ${state.cars.length} auto(a) ✓`);
+}
 function setMobileNav(btn) {
   document.querySelectorAll('.nav-mobile-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
