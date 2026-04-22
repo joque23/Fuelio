@@ -2,128 +2,62 @@
 <html lang="sk">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover" />
-<meta name="color-scheme" content="dark" />
-<meta name="theme-color" content="#07090c" />
-<meta name="apple-mobile-web-app-capable" content="yes" />
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-<meta name="apple-mobile-web-app-title" content="Fuelio" />
-<title>Fuelio – Jozefove jazdy</title>
-<link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,300;0,400;0,600;0,700;0,900;1,300&family=Barlow+Condensed:wght@400;600;700;900&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AutoBook – Kniha jázd</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   :root {
-    color-scheme: dark;
-    --bg: #07090c;
-    --surface: #0d1117;
-    --surface2: #141b22;
-    --border: #1c2430;
-    --border2: #243040;
-    --accent: #4ade80;
-    --accent-dim: #166534;
-    --accent2: #86efac;
-    --danger: #f87171;
-    --text: #e2e8f0;
-    --muted: #4a5568;
-    --muted2: #718096;
-    --fuel: #fbbf24;
-    --cost: #60a5fa;
-    --income: #4ade80;
-    --radius: 16px;
-    --radius-sm: 10px;
-    --radius-lg: 22px;
-    --shadow: 0 4px 24px rgba(0,0,0,0.4);
-    --shadow-sm: 0 2px 8px rgba(0,0,0,0.3);
+    --bg: #0e0f13;
+    --surface: #16181f;
+    --surface2: #1e2029;
+    --border: #2a2d38;
+    --accent: #e8ff47;
+    --accent2: #47c3ff;
+    --danger: #ff5e5e;
+    --text: #f0f1f5;
+    --muted: #6b6f80;
+    --fuel: #f9a825;
+    --cost: #47c3ff;
+    --radius: 12px;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  img, svg, canvas, video { max-width: 100%; }
 
   body {
-    font-family: 'Barlow', sans-serif;
-    font-weight: 400;
+    font-family: 'DM Mono', monospace;
     background: var(--bg);
     color: var(--text);
     min-height: 100vh;
     overflow-x: hidden;
-    -webkit-text-size-adjust: 100%;
-    text-size-adjust: 100%;
   }
-  /* Force dark mode – never allow iOS to override */
-  @media (prefers-color-scheme: light) {
-    :root { color-scheme: dark; }
-    body { background: #07090c !important; color: #e2e8f0 !important; }
-  }
-
-  /* ─── BG TEXTURE ─── */
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background:
-      radial-gradient(ellipse 80% 40% at 50% -10%, rgba(74,222,128,0.06) 0%, transparent 70%),
-      radial-gradient(ellipse 40% 60% at 90% 80%, rgba(74,222,128,0.03) 0%, transparent 60%);
-    pointer-events: none;
-    z-index: 0;
-  }
-
-  header, main, .modal-overlay { position: relative; z-index: 1; }
 
   /* ─── HEADER ─── */
   header {
-    padding: 0 36px;
-    padding-top: env(safe-area-inset-top);
-    height: calc(68px + env(safe-area-inset-top));
+    padding: 24px 32px;
     display: flex;
     align-items: center;
     justify-content: space-between;
     border-bottom: 1px solid var(--border);
     position: sticky;
     top: 0;
-    background: rgba(8,10,13,0.98);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    background: rgba(14,15,19,0.92);
+    backdrop-filter: blur(12px);
     z-index: 100;
   }
 
-  .logo-wrap {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-  }
-
-  /* Škoda winged arrow SVG logo */
-  .skoda-emblem {
-    width: 38px;
-    height: 38px;
-    flex-shrink: 0;
-  }
-
   .logo {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-weight: 900;
-    font-size: 1.55rem;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: var(--text);
-    line-height: 1;
-  }
-  .logo span {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1.4rem;
+    letter-spacing: -0.5px;
     color: var(--accent);
   }
-  .logo-sub {
-    font-family: 'Barlow', sans-serif;
-    font-size: 0.65rem;
-    font-weight: 300;
-    color: var(--muted);
-    letter-spacing: 3px;
-    text-transform: uppercase;
-    margin-top: 2px;
-  }
+  .logo span { color: var(--text); }
 
   .header-right {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
   }
 
   /* ─── CAR SELECTOR ─── */
@@ -132,20 +66,18 @@
     align-items: center;
     gap: 8px;
     background: var(--surface2);
-    border: 1px solid var(--border2);
-    border-radius: 50px;
-    padding: 7px 14px;
+    border: 1px solid var(--border);
+    border-radius: 30px;
+    padding: 6px 14px;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: border-color 0.2s;
     font-size: 0.82rem;
-    font-family: 'Barlow', sans-serif;
   }
-  .car-pill:hover { border-color: var(--accent); background: rgba(74,222,128,0.05); }
+  .car-pill:hover { border-color: var(--accent); }
   .car-dot {
-    width: 7px; height: 7px;
+    width: 8px; height: 8px;
     border-radius: 50%;
     background: var(--accent);
-    box-shadow: 0 0 6px var(--accent);
   }
 
   /* ─── GOOGLE BTN ─── */
@@ -153,142 +85,97 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    padding: 7px 14px;
-    border-radius: 6px;
-    border: 1px solid var(--border2);
+    padding: 8px 16px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
     background: var(--surface2);
-    color: var(--muted2);
+    color: var(--text);
     cursor: pointer;
-    font-family: 'Barlow', sans-serif;
-    font-size: 0.82rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.8rem;
     transition: all 0.2s;
   }
-  .btn-google:hover { border-color: var(--accent); color: var(--accent); }
-  .btn-google.connected { border-color: var(--accent); color: var(--accent); }
+  .btn-google:hover { border-color: var(--accent2); color: var(--accent2); }
+  .btn-google.connected { border-color: #4caf50; color: #4caf50; }
 
   /* ─── MAIN LAYOUT ─── */
   main {
-    max-width: 1280px;
+    max-width: 1200px;
     margin: 0 auto;
-    padding: 28px 24px;
+    padding: 32px 24px;
     display: grid;
-    grid-template-columns: 240px 1fr;
-    gap: 20px;
-    overflow: hidden;
-    width: 100%;
+    grid-template-columns: 260px 1fr;
+    gap: 24px;
   }
 
   /* ─── SIDEBAR ─── */
   .sidebar {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 16px;
   }
 
-  /* Hero car banner in sidebar */
-  .sidebar-hero {
-    border-radius: var(--radius);
-    overflow: hidden;
-    border: 1px solid var(--border);
-    background: linear-gradient(135deg, #0a1a12 0%, #0f1318 60%, #0a1520 100%);
-    padding: 16px;
-    position: relative;
-  }
-  .sidebar-hero-label {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 0.65rem;
-    font-weight: 600;
-    letter-spacing: 3px;
-    text-transform: uppercase;
-    color: var(--accent);
-    margin-bottom: 6px;
-  }
-  .sidebar-hero-title {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-weight: 900;
-    font-size: 1.3rem;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    color: var(--text);
-    line-height: 1.1;
-  }
-  .sidebar-car-svg {
-    width: 100%;
-    margin-top: 8px;
-    opacity: 0.9;
-  }
-
-  .nav-group { display: flex; flex-direction: column; gap: 2px; }
+  .nav-group { display: flex; flex-direction: column; gap: 4px; }
   .nav-label {
-    font-size: 0.6rem;
+    font-size: 0.68rem;
     color: var(--muted);
     text-transform: uppercase;
-    letter-spacing: 2.5px;
-    padding: 0 10px 8px;
-    font-family: 'Barlow Condensed', sans-serif;
-    font-weight: 600;
+    letter-spacing: 1.5px;
+    padding: 0 12px 6px;
   }
 
   .nav-item {
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 9px 10px;
-    border-radius: 6px;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: var(--radius);
     cursor: pointer;
-    color: var(--muted2);
+    color: var(--muted);
     font-size: 0.88rem;
-    font-family: 'Barlow', sans-serif;
-    font-weight: 400;
     transition: all 0.15s;
     border: 1px solid transparent;
   }
   .nav-item:hover { background: var(--surface2); color: var(--text); }
   .nav-item.active {
-    background: rgba(74,222,128,0.07);
+    background: var(--surface2);
     color: var(--accent);
-    border-color: rgba(74,222,128,0.2);
+    border-color: var(--border);
   }
-  .nav-icon {
-    font-size: 0.95rem;
-    width: 20px;
-    text-align: center;
-    opacity: 0.9;
-  }
+  .nav-icon { font-size: 1rem; width: 20px; text-align: center; }
 
   /* ─── CARS LIST ─── */
-  .cars-list { display: flex; flex-direction: column; gap: 4px; }
+  .cars-list { display: flex; flex-direction: column; gap: 6px; }
 
   .car-item {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 8px 10px;
-    border-radius: 6px;
+    padding: 10px 12px;
+    border-radius: var(--radius);
     cursor: pointer;
     border: 1px solid transparent;
     transition: all 0.15s;
-    font-size: 0.84rem;
-    font-family: 'Barlow', sans-serif;
+    font-size: 0.85rem;
   }
   .car-item:hover { background: var(--surface2); }
-  .car-item.selected { background: rgba(74,222,128,0.06); border-color: rgba(74,222,128,0.25); }
-  .car-item-left { display: flex; align-items: center; gap: 9px; }
-  .car-color { width: 8px; height: 8px; border-radius: 50%; box-shadow: 0 0 5px currentColor; }
-  .car-name { font-weight: 600; color: var(--text); }
-  .car-sub { font-size: 0.7rem; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
+  .car-item.selected { background: var(--surface2); border-color: var(--accent); }
+  .car-item-left { display: flex; align-items: center; gap: 10px; }
+  .car-color { width: 10px; height: 10px; border-radius: 50%; }
+  .car-name { font-weight: 500; }
+  .car-sub { font-size: 0.72rem; color: var(--muted); }
 
   .btn-add-car {
     display: flex;
     align-items: center;
     gap: 8px;
-    padding: 8px 10px;
-    border-radius: 6px;
-    border: 1px dashed var(--border2);
+    padding: 10px 12px;
+    border-radius: var(--radius);
+    border: 1px dashed var(--border);
     background: transparent;
     color: var(--muted);
     cursor: pointer;
-    font-family: 'Barlow', sans-serif;
+    font-family: 'DM Mono', monospace;
     font-size: 0.82rem;
     transition: all 0.2s;
     width: 100%;
@@ -296,105 +183,66 @@
   .btn-add-car:hover { border-color: var(--accent); color: var(--accent); }
 
   /* ─── CONTENT ─── */
-  .content { display: flex; flex-direction: column; gap: 20px; min-width: 0; overflow: hidden; }
+  .content { display: flex; flex-direction: column; gap: 24px; }
 
   /* ─── STATS ROW ─── */
   .stats-row {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     gap: 12px;
-    width: 100%;
   }
 
   .stat-card {
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    padding: 18px 20px;
-    transition: all 0.2s;
+    border-radius: var(--radius);
+    padding: 18px;
+    transition: border-color 0.2s;
     position: relative;
     overflow: hidden;
-    box-shadow: var(--shadow-sm);
   }
-  .stat-card::after {
+  .stat-card::before {
     content: '';
     position: absolute;
-    bottom: 0; left: 0; right: 0;
-    height: 1px;
-    opacity: 0.5;
+    top: 0; left: 0; right: 0;
+    height: 2px;
   }
-  .stat-card.fuel::after { background: var(--fuel); }
-  .stat-card.cost::after { background: var(--cost); }
-  .stat-card.km::after { background: var(--accent); }
-  .stat-card.avg::after { background: #c084fc; }
-  .stat-card.income-card::after { background: var(--income); }
+  .stat-card.fuel::before { background: var(--fuel); }
+  .stat-card.cost::before { background: var(--cost); }
+  .stat-card.km::before { background: var(--accent); }
+  .stat-card.avg::before { background: #b47fff; }
 
-  .stat-card:hover { border-color: var(--border2); transform: translateY(-1px); }
-  .stat-label {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 0.68rem;
-    font-weight: 600;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    margin-bottom: 8px;
-  }
-  .stat-value {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 2rem;
-    font-weight: 900;
-    line-height: 1;
-    letter-spacing: -0.5px;
-  }
-  .stat-unit {
-    font-size: 0.72rem;
-    color: var(--muted);
-    margin-top: 5px;
-    font-family: 'Barlow', sans-serif;
-    font-weight: 300;
-  }
+  .stat-card:hover { border-color: var(--accent); }
+  .stat-label { font-size: 0.72rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+  .stat-value { font-family: 'Syne', sans-serif; font-size: 1.8rem; font-weight: 700; line-height: 1; }
+  .stat-unit { font-size: 0.75rem; color: var(--muted); margin-top: 4px; }
   .stat-card.fuel .stat-value { color: var(--fuel); }
   .stat-card.cost .stat-value { color: var(--cost); }
   .stat-card.km .stat-value { color: var(--accent); }
-  .stat-card.avg .stat-value { color: #c084fc; }
-  .stat-card.income-card .stat-value { color: var(--income); }
-
-  /* decorative icon on stat card */
-  .stat-card .stat-icon {
-    position: absolute;
-    right: 14px;
-    top: 12px;
-    font-size: 1.4rem;
-    opacity: 0.15;
-  }
+  .stat-card.avg .stat-value { color: #b47fff; }
 
   /* ─── PANEL ─── */
   .panel {
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
+    border-radius: var(--radius);
     overflow: hidden;
     display: none;
-    box-shadow: var(--shadow-sm);
   }
   .panel.active { display: block; }
 
   .panel-header {
-    padding: 14px 20px;
+    padding: 16px 20px;
     border-bottom: 1px solid var(--border);
     display: flex;
     align-items: center;
     justify-content: space-between;
-    background: linear-gradient(90deg, rgba(74,222,128,0.04) 0%, transparent 60%);
   }
   .panel-title {
-    font-family: 'Barlow Condensed', sans-serif;
+    font-family: 'Syne', sans-serif;
     font-weight: 700;
-    font-size: 1.05rem;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
+    font-size: 1rem;
   }
-  .panel-title-accent { color: var(--accent); margin-right: 6px; }
 
   /* ─── FORM ─── */
   .form-grid {
@@ -404,32 +252,28 @@
     padding: 20px;
   }
 
-  .field { display: flex; flex-direction: column; gap: 5px; }
+  .field { display: flex; flex-direction: column; gap: 6px; }
   .field label {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 0.65rem;
-    font-weight: 600;
-    color: var(--muted2);
+    font-size: 0.72rem;
+    color: var(--muted);
     text-transform: uppercase;
-    letter-spacing: 1.5px;
+    letter-spacing: 1px;
   }
 
   .field input, .field select, .field textarea {
     background: var(--surface2);
-    border: 1px solid var(--border2);
-    border-radius: 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
     color: var(--text);
-    padding: 9px 12px;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.82rem;
-    font-weight: 400;
+    padding: 10px 12px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.85rem;
     outline: none;
-    transition: border-color 0.2s, box-shadow 0.2s;
+    transition: border-color 0.2s;
     width: 100%;
   }
   .field input:focus, .field select:focus, .field textarea:focus {
     border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(74,222,128,0.08);
   }
   .field select option { background: var(--surface2); }
   .field.span2 { grid-column: span 2; }
@@ -443,34 +287,31 @@
 
   .btn-primary {
     background: var(--accent);
-    color: #050f09;
+    color: #0e0f13;
     border: none;
-    border-radius: 50px;
-    padding: 11px 28px;
-    font-family: 'Barlow Condensed', sans-serif;
+    border-radius: 8px;
+    padding: 10px 24px;
+    font-family: 'Syne', sans-serif;
     font-weight: 700;
-    font-size: 0.92rem;
-    letter-spacing: 1px;
-    text-transform: uppercase;
+    font-size: 0.88rem;
     cursor: pointer;
-    transition: all 0.2s;
-    box-shadow: 0 0 0 rgba(74,222,128,0);
+    transition: opacity 0.2s, transform 0.1s;
   }
-  .btn-primary:hover { background: var(--accent2); box-shadow: 0 0 24px rgba(74,222,128,0.35); transform: translateY(-1px); }
-  .btn-primary:active { transform: scale(0.97) translateY(0); }
+  .btn-primary:hover { opacity: 0.88; }
+  .btn-primary:active { transform: scale(0.97); }
 
   .btn-secondary {
     background: transparent;
-    color: var(--muted2);
-    border: 1px solid var(--border2);
-    border-radius: 50px;
+    color: var(--muted);
+    border: 1px solid var(--border);
+    border-radius: 8px;
     padding: 10px 20px;
-    font-family: 'Barlow', sans-serif;
+    font-family: 'DM Mono', monospace;
     font-size: 0.85rem;
     cursor: pointer;
     transition: all 0.2s;
   }
-  .btn-secondary:hover { border-color: var(--muted2); color: var(--text); background: rgba(255,255,255,0.03); }
+  .btn-secondary:hover { border-color: var(--text); color: var(--text); }
 
   /* ─── TABLE ─── */
   .table-wrap { overflow-x: auto; }
@@ -478,207 +319,80 @@
   table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 0.84rem;
-    font-family: 'Barlow', sans-serif;
+    font-size: 0.85rem;
   }
   thead { background: var(--surface2); }
   th {
-    padding: 9px 16px;
+    padding: 10px 16px;
     text-align: left;
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 0.65rem;
-    font-weight: 600;
+    font-size: 0.7rem;
     color: var(--muted);
     text-transform: uppercase;
-    letter-spacing: 1.5px;
+    letter-spacing: 1px;
+    font-weight: 400;
     white-space: nowrap;
   }
   td {
-    padding: 11px 16px;
+    padding: 12px 16px;
     border-bottom: 1px solid var(--border);
     color: var(--text);
   }
-  tr:hover td { background: rgba(74,222,128,0.025); }
+  tr:hover td { background: var(--surface2); }
   tr:last-child td { border-bottom: none; }
 
   .badge {
     display: inline-flex;
     align-items: center;
-    gap: 4px;
+    gap: 5px;
     padding: 3px 10px;
-    border-radius: 50px;
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 0.7rem;
-    font-weight: 600;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
+    border-radius: 30px;
+    font-size: 0.72rem;
+    font-weight: 500;
   }
-  .badge.fuel { background: rgba(251,191,36,0.1); color: var(--fuel); border: 1px solid rgba(251,191,36,0.2); }
-  .badge.repair { background: rgba(96,165,250,0.1); color: var(--cost); border: 1px solid rgba(96,165,250,0.2); }
-  .badge.insurance { background: rgba(192,132,252,0.1); color: #c084fc; border: 1px solid rgba(192,132,252,0.2); }
-  .badge.income { background: rgba(74,222,128,0.1); color: var(--income); border: 1px solid rgba(74,222,128,0.2); }
-  .badge.other { background: rgba(107,111,128,0.1); color: var(--muted2); border: 1px solid var(--border2); }
-
-  .mono { font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; }
+  .badge.fuel { background: rgba(249,168,37,0.12); color: var(--fuel); }
+  .badge.repair { background: rgba(71,195,255,0.1); color: var(--cost); }
+  .badge.insurance { background: rgba(180,127,255,0.1); color: #b47fff; }
+  .badge.other { background: rgba(107,111,128,0.15); color: var(--muted); }
 
   .del-btn {
     background: none;
     border: none;
     color: var(--muted);
     cursor: pointer;
-    font-size: 0.82rem;
+    font-size: 0.9rem;
     padding: 4px 8px;
-    border-radius: 4px;
+    border-radius: 6px;
     transition: all 0.15s;
   }
-  .del-btn:hover { background: rgba(248,113,113,0.1); color: var(--danger); }
+  .del-btn:hover { background: rgba(255,94,94,0.1); color: var(--danger); }
 
   /* ─── CHART SECTION ─── */
   .charts-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 16px;
+    gap: 20px;
     padding: 20px;
   }
   .chart-box {
     background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    padding: 18px;
+    border-radius: var(--radius);
+    padding: 16px;
   }
   .chart-title {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 0.7rem;
-    font-weight: 600;
+    font-size: 0.78rem;
     color: var(--muted);
     text-transform: uppercase;
-    letter-spacing: 2px;
+    letter-spacing: 1px;
     margin-bottom: 14px;
   }
-  .nav-mobile {
-    display: none;
-    width: 100%;
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-    z-index: 98;
-    padding: 0;
-    justify-content: space-around;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-  }
-  .nav-mobile::-webkit-scrollbar { display: none; }
-  .nav-mobile-btn { display: flex; flex-direction: column; align-items: center; gap: 3px; background: none; border: none; color: var(--muted2); cursor: pointer; padding: 10px 6px; font-family: 'Barlow', sans-serif; font-size: 0.56rem; text-transform: uppercase; letter-spacing: 0.5px; flex: 1; min-width: 52px; -webkit-tap-highlight-color: transparent; }
-  .nav-mobile-btn .ico { font-size: 1.3rem; line-height: 1; }
-  .nav-mobile-btn.active { color: var(--accent); }
-
-  /* ─── CURRENCY SELECTOR ─── */
-  .currency-row {
-    display: flex; gap: 6px; align-items: center; flex-wrap: wrap;
-  }
-  .currency-btn {
-    padding: 4px 12px;
-    border-radius: 5px;
-    border: 1px solid var(--border2);
-    background: var(--surface2);
-    color: var(--muted2);
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.78rem;
-    cursor: pointer;
-    transition: all 0.15s;
-  }
-  .currency-btn:hover { border-color: var(--accent); color: var(--accent); }
-  .currency-btn.active { background: rgba(74,222,128,0.1); border-color: var(--accent); color: var(--accent); font-weight: 500; }
-  .currency-rate {
-    font-size: 0.72rem;
-    color: var(--muted);
-    font-family: 'JetBrains Mono', monospace;
-  }
-
-  /* ─── SCAN BUTTON ─── */
-  .btn-scan {
-    display: flex; align-items: center; gap: 8px;
-    padding: 9px 18px;
-    border-radius: 6px;
-    border: 1px solid rgba(74,222,128,0.3);
-    background: rgba(74,222,128,0.06);
-    color: var(--accent);
-    font-family: 'Barlow Condensed', sans-serif;
-    font-weight: 700;
-    font-size: 0.88rem;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-  .btn-scan:hover { background: rgba(74,222,128,0.12); box-shadow: 0 0 16px rgba(74,222,128,0.15); }
-
-  /* ─── SCAN MODAL ─── */
-  .scan-drop-zone {
-    border: 2px dashed var(--border2);
-    border-radius: 10px;
-    padding: 28px 20px;
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.2s;
-    background: var(--surface2);
-    position: relative;
-  }
-  .scan-drop-zone:hover, .scan-drop-zone.drag-over {
-    border-color: var(--accent);
-    background: rgba(74,222,128,0.04);
-  }
-  .scan-drop-zone input[type=file] {
-    position: absolute; inset: 0; opacity: 0; cursor: pointer;
-  }
-  .scan-preview {
-    max-width: 100%; max-height: 200px;
-    border-radius: 8px; margin-top: 12px;
-    border: 1px solid var(--border);
-    display: none;
-  }
-  .scan-result {
-    background: var(--surface2);
-    border: 1px solid var(--border2);
-    border-radius: 8px;
-    padding: 14px;
-    margin-top: 14px;
-    font-size: 0.82rem;
-    display: none;
-  }
-  .scan-result-row {
-    display: flex; justify-content: space-between; align-items: center;
-    padding: 5px 0;
-    border-bottom: 1px solid var(--border);
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.8rem;
-  }
-  .scan-result-row:last-child { border-bottom: none; }
-  .scan-result-label { color: var(--muted2); }
-  .scan-result-val { color: var(--accent); font-weight: 500; }
-  .scan-loading {
-    display: none;
-    text-align: center;
-    padding: 20px;
-    color: var(--muted2);
-    font-size: 0.85rem;
-  }
-  .scan-spinner {
-    width: 28px; height: 28px;
-    border: 2px solid var(--border2);
-    border-top-color: var(--accent);
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-    margin: 0 auto 10px;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
+  canvas { width: 100% !important; }
 
   /* ─── MODAL ─── */
   .modal-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0,0,0,0.75);
-    backdrop-filter: blur(6px);
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(4px);
     z-index: 200;
     display: none;
     align-items: center;
@@ -687,23 +401,19 @@
   .modal-overlay.open { display: flex; }
   .modal {
     background: var(--surface);
-    border: 1px solid var(--border2);
-    border-radius: 24px;
+    border: 1px solid var(--border);
+    border-radius: 16px;
     padding: 28px;
     width: 360px;
-    animation: slideUp 0.25s cubic-bezier(0.34,1.56,0.64,1);
-    box-shadow: 0 8px 48px rgba(0,0,0,0.6);
+    animation: slideUp 0.25s ease;
   }
   @keyframes slideUp {
-    from { opacity: 0; transform: translateY(24px) scale(0.97); }
-    to { opacity: 1; transform: translateY(0) scale(1); }
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
   }
   .modal h3 {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 1.2rem;
-    font-weight: 900;
-    letter-spacing: 1px;
-    text-transform: uppercase;
+    font-family: 'Syne', sans-serif;
+    font-size: 1.1rem;
     margin-bottom: 20px;
     color: var(--accent);
   }
@@ -713,15 +423,15 @@
     background: var(--surface2);
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    padding: 18px;
+    padding: 20px;
   }
   .setup-box p {
     font-size: 0.82rem;
-    color: var(--muted2);
-    line-height: 1.7;
+    color: var(--muted);
+    line-height: 1.6;
     margin-bottom: 14px;
   }
-  .setup-box a { color: var(--accent); text-decoration: none; }
+  .setup-box a { color: var(--accent2); text-decoration: none; }
   .setup-box a:hover { text-decoration: underline; }
   .setup-step {
     display: flex;
@@ -729,14 +439,14 @@
     align-items: flex-start;
     margin-bottom: 10px;
     font-size: 0.82rem;
-    color: var(--muted2);
+    color: var(--muted);
   }
   .step-num {
     background: var(--accent);
-    color: #050f09;
-    font-family: 'Barlow Condensed', sans-serif;
-    font-weight: 900;
-    font-size: 0.7rem;
+    color: #0e0f13;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 0.72rem;
     width: 20px; height: 20px;
     border-radius: 50%;
     display: flex;
@@ -752,100 +462,41 @@
     bottom: 24px;
     right: 24px;
     background: var(--surface2);
-    border: 1px solid rgba(74,222,128,0.4);
-    border-radius: 8px;
-    padding: 11px 20px;
-    font-size: 0.84rem;
-    font-family: 'Barlow', sans-serif;
+    border: 1px solid var(--accent);
+    border-radius: 10px;
+    padding: 12px 20px;
+    font-size: 0.85rem;
     color: var(--accent);
     z-index: 300;
     transform: translateY(60px);
     opacity: 0;
-    transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1);
+    transition: all 0.3s;
     pointer-events: none;
-    box-shadow: 0 4px 24px rgba(0,0,0,0.4);
   }
   #toast.show { transform: translateY(0); opacity: 1; }
 
   /* ─── EMPTY STATE ─── */
   .empty {
-    padding: 52px 20px;
+    padding: 48px 20px;
     text-align: center;
     color: var(--muted);
     font-size: 0.85rem;
-    font-family: 'Barlow', sans-serif;
-    font-weight: 300;
   }
-  .empty-icon { font-size: 2.5rem; margin-bottom: 10px; opacity: 0.5; }
+  .empty-icon { font-size: 2.5rem; margin-bottom: 10px; }
 
   /* ─── RESPONSIVE ─── */
-  @media (max-width: 960px) {
+  @media (max-width: 900px) {
     main { grid-template-columns: 1fr; }
-    .stats-row { grid-template-columns: repeat(3, 1fr) !important; }
+    .stats-row { grid-template-columns: repeat(2, 1fr); }
     .charts-grid { grid-template-columns: 1fr; }
     .form-grid { grid-template-columns: 1fr 1fr; }
-    .sidebar-hero { display: none; }
   }
-
-  @media (max-width: 640px) {
-    html, body { overflow-x: hidden; max-width: 100vw; width: 100%; }
-    .content { overflow: hidden; }
-    *, *::before, *::after { box-sizing: border-box; }
-    main { padding-bottom: 72px !important; }
-
-    header { padding: 0 12px; padding-top: env(safe-area-inset-top); min-height: calc(52px + env(safe-area-inset-top)); height: auto; flex-wrap: nowrap; width: 100%; max-width: 100vw; overflow: hidden; }
-    .skoda-emblem { width: 26px; height: 26px; }
-    .logo { font-size: 1.1rem; }
-    .logo-sub { display: none; }
-    .header-right { gap: 6px; }
-    .car-pill { padding: 5px 10px; font-size: 0.78rem; }
-    .btn-google span + span, .btn-google svg ~ * { display: none; }
-    .btn-google { padding: 6px 10px; min-width: 0; }
-
-    main { padding: 8px; gap: 12px; overflow: hidden; width: 100%; }
-
-    .stats-row { grid-template-columns: 1fr 1fr !important; gap: 8px; width: 100%; }
-    .stat-card { padding: 10px 12px; }
-    .stat-value { font-size: 1.3rem; }
-    .stat-icon { display: none; }
-
-    .panel-header { padding: 10px 12px; gap: 6px; flex-wrap: wrap; }
-    .panel-title { font-size: 0.9rem; }
-    .btn-scan { font-size: 0.72rem; padding: 6px 10px; }
-
-    .form-grid { grid-template-columns: 1fr !important; gap: 10px; padding: 12px; }
-    .field.span2, .field.span3 { grid-column: span 1 !important; }
-    .form-actions { padding: 0 12px 12px; flex-wrap: wrap; gap: 8px; }
-    .btn-primary, .btn-secondary { font-size: 0.82rem; padding: 9px 16px; }
-
-    /* tables – scroll inside their box, never page-wide */
-    .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; max-width: 100%; }
-    table { min-width: 420px; font-size: 0.76rem; }
-    td, th { padding: 8px 10px; }
-
-    /* charts – single column, no padding issues */
-    #statsPanel > div[style*="grid"] { grid-template-columns: 1fr !important; padding: 10px !important; }
-    #statsSummary { grid-template-columns: 1fr 1fr 1fr !important; }
-    #statsSummary + div { grid-template-columns: 1fr 1fr 1fr !important; }
-    .chart-box { padding: 10px; }
-    .chart-box[style*="span 2"] { grid-column: span 1 !important; }
-
-    /* modal full width */
-    .modal { width: calc(100vw - 24px) !important; padding: 18px; margin: 0; }
-    .modal-overlay { padding: 12px; align-items: flex-end; }
-
-    /* top car bar */
-    #carTopBar { gap: 6px; }
-
-    /* sidebar nav – horizontal scroll on mobile */
-    .sidebar { display: none; }
-    .nav-mobile { display: flex !important; }
-  }
-
-  @media (max-width: 380px) {
-    .stats-row { grid-template-columns: 1fr 1fr !important; }
-    #statsSummary { grid-template-columns: 1fr 1fr !important; }
-    #statsSummary + div { grid-template-columns: 1fr !important; }
+  @media (max-width: 600px) {
+    header { padding: 16px; }
+    main { padding: 16px; }
+    .stats-row { grid-template-columns: 1fr 1fr; }
+    .form-grid { grid-template-columns: 1fr; }
+    .field.span2, .field.span3 { grid-column: span 1; }
   }
 </style>
 </head>
@@ -853,132 +504,23 @@
 
 <!-- HEADER -->
 <header>
-  <div class="logo-wrap">
-    <!-- Škoda official logo shape -->
-    <svg class="skoda-emblem" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <!-- outer ring -->
-      <circle cx="50" cy="50" r="47" fill="#0d1f12" stroke="#4ade80" stroke-width="1.8"/>
-      <circle cx="50" cy="50" r="40" fill="none" stroke="#1a3d22" stroke-width="0.8"/>
-      <!-- Škoda winged arrow – accurate shape -->
-      <!-- main arrow body pointing right -->
-      <path d="M18 50 L48 24 L44 38 L72 30 L52 50 L72 70 L44 62 L48 76 Z" fill="#4ade80"/>
-      <!-- inner shadow/detail -->
-      <path d="M32 50 L48 35 L45 43 L60 38 L50 50 L60 62 L45 57 L48 65 Z" fill="#0d1f12" opacity="0.35"/>
-    </svg>
-    <div>
-      <div class="logo">Fuelio</div>
-      <div class="logo-sub">Škoda · Osobná kniha jázd</div>
-    </div>
-  </div>
+  <div class="logo">Auto<span>Book</span></div>
   <div class="header-right">
     <div id="carPill" class="car-pill" onclick="document.getElementById('carsModal').classList.add('open')">
       <div class="car-dot" id="pillDot"></div>
       <span id="pillName">Vyber auto</span>
-      <span style="color:var(--muted);margin-left:4px;font-size:0.7rem;">▾</span>
+      <span style="color:var(--muted)">▾</span>
     </div>
     <button class="btn-google" id="gBtn" onclick="toggleGoogleSetup()">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z"/><path d="M12 4v16M4 12h16"/></svg>
-      Google Sheets
+      <span>💾</span> Export / Import
     </button>
   </div>
 </header>
-
-<!-- CAR TOP BAR -->
-<div style="background:var(--surface);border-bottom:1px solid var(--border);padding:8px 20px;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;max-width:100vw;width:100%;">
-  <div id="carTopBar" style="display:flex;gap:8px;align-items:center;min-height:36px;"></div>
-</div>
-
-<!-- MOBILE TOP NAV -->
-<div class="nav-mobile" id="mobileNav">
-  <button class="nav-mobile-btn active" onclick="switchTab('dashboard');setMobileNav(this)"><span class="ico">◈</span>Prehľad</button>
-  <button class="nav-mobile-btn" onclick="switchTab('fuel');setMobileNav(this)"><span class="ico">⛽</span>Tankuj</button>
-  <button class="nav-mobile-btn" onclick="switchTab('costs');setMobileNav(this)"><span class="ico">🔧</span>Náklady</button>
-  <button class="nav-mobile-btn" onclick="switchTab('income');setMobileNav(this)"><span class="ico">💰</span>Príjmy</button>
-  <button class="nav-mobile-btn" onclick="switchTab('stats');setMobileNav(this)"><span class="ico">◎</span>Štat.</button>
-  <button class="nav-mobile-btn" onclick="document.getElementById('carsModal').classList.add('open')"><span class="ico">🚗</span>Autá</button>
-  <button class="nav-mobile-btn" onclick="openImport()"><span class="ico">📥</span>Import</button>
-</div>
 
 <!-- MAIN -->
 <main>
   <!-- SIDEBAR -->
   <aside class="sidebar">
-
-    <!-- Škoda car illustration -->
-    <div class="sidebar-hero">
-      <div class="sidebar-hero-label">Škoda Octavia IV</div>
-      <div class="sidebar-hero-title">Moje<br>vozidlá</div>
-      <!-- Škoda Octavia IV sedan silhouette -->
-      <svg class="sidebar-car-svg" viewBox="0 0 280 110" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <!-- ground reflection -->
-        <ellipse cx="140" cy="107" rx="118" ry="4" fill="#4ade80" opacity="0.06"/>
-        <!-- body shadow -->
-        <ellipse cx="140" cy="100" rx="112" ry="6" fill="#000" opacity="0.3"/>
-        <!-- main body -->
-        <path d="M18 72 L18 62 Q20 58 30 57 L52 57 Q58 42 70 34 Q85 25 110 22 L168 22 Q188 22 200 28 Q214 34 222 44 L240 50 Q252 53 258 58 L262 62 L262 72 Q262 76 258 76 L22 76 Q18 76 18 72Z" fill="#0d1810" stroke="#1a3520" stroke-width="1"/>
-        <!-- roof highlight -->
-        <path d="M72 35 Q86 26 110 23 L168 23 Q186 23 198 29 Q210 34 218 43 L168 43 Q155 28 130 26 Q108 24 88 30 Z" fill="#162a1a" opacity="0.8"/>
-        <!-- windshield front -->
-        <path d="M168 23 Q187 23 199 29 Q212 35 220 44 L168 44 Q158 30 140 26 L168 23Z" fill="#0a2218" stroke="#1a3520" stroke-width="0.5"/>
-        <!-- windshield front glass -->
-        <path d="M170 25 Q186 25 197 31 Q208 36 215 43 L169 43 Q160 31 143 27 Z" fill="#0f3020" opacity="0.7"/>
-        <!-- windshield rear -->
-        <path d="M72 35 Q86 26 108 23 L140 26 Q118 28 103 36 Q90 42 82 44 L72 44Z" fill="#0a2218" stroke="#1a3520" stroke-width="0.5"/>
-        <!-- rear glass -->
-        <path d="M74 35 Q87 27 108 24 L138 27 Q117 29 103 37 Q91 42 84 44 L74 44Z" fill="#0f3020" opacity="0.7"/>
-        <!-- side windows -->
-        <path d="M112 24 L165 24 L165 43 Q152 30 138 26 Q126 23 112 24Z" fill="#0a2218" stroke="#1a3520" stroke-width="0.4" opacity="0.9"/>
-        <!-- door lines -->
-        <line x1="132" y1="44" x2="136" y2="76" stroke="#1a3520" stroke-width="0.8"/>
-        <line x1="168" y1="44" x2="170" y2="76" stroke="#1a3520" stroke-width="0.8"/>
-        <!-- door handles -->
-        <rect x="148" y="60" width="12" height="3" rx="1.5" fill="#4ade80" opacity="0.3"/>
-        <rect x="180" y="60" width="12" height="3" rx="1.5" fill="#4ade80" opacity="0.3"/>
-        <!-- front bumper detail -->
-        <path d="M240 50 Q255 53 260 58 L262 63 L238 63 Z" fill="#0a1e10" stroke="#1a3520" stroke-width="0.5"/>
-        <!-- front grille -->
-        <path d="M242 54 L258 57 L258 62 L240 62Z" fill="#061208"/>
-        <line x1="244" y1="54" x2="244" y2="62" stroke="#4ade80" stroke-width="0.4" opacity="0.4"/>
-        <line x1="249" y1="55" x2="249" y2="62" stroke="#4ade80" stroke-width="0.4" opacity="0.4"/>
-        <line x1="254" y1="56" x2="254" y2="62" stroke="#4ade80" stroke-width="0.4" opacity="0.4"/>
-        <!-- headlight right (front) -->
-        <path d="M232 50 Q242 48 250 52 L248 57 Q240 54 232 56Z" fill="#4ade80" opacity="0.2"/>
-        <path d="M234 51 Q242 49 248 53 L246 56 Q239 53 234 55Z" fill="#4ade80" opacity="0.15"/>
-        <!-- DRL line -->
-        <path d="M232 52 L250 55" stroke="#4ade80" stroke-width="1.2" opacity="0.5" stroke-linecap="round"/>
-        <!-- taillight left (rear) -->
-        <path d="M18 57 L28 57 L28 68 L18 68Z" fill="#f87171" opacity="0.25" rx="2"/>
-        <path d="M20 58 L26 58 L26 66 L20 66Z" fill="#f87171" opacity="0.2"/>
-        <!-- rear light line -->
-        <path d="M18 60 L28 60" stroke="#f87171" stroke-width="1" opacity="0.5"/>
-        <!-- wheels -->
-        <circle cx="76" cy="84" r="20" fill="#060e08" stroke="#243020" stroke-width="1.5"/>
-        <circle cx="76" cy="84" r="14" fill="#080f0a" stroke="#1a2a1a" stroke-width="1"/>
-        <circle cx="76" cy="84" r="8" fill="#0a1a0d" stroke="#4ade80" stroke-width="1" opacity="0.7"/>
-        <!-- wheel spokes front -->
-        <line x1="76" y1="70" x2="76" y2="84" stroke="#4ade80" stroke-width="0.8" opacity="0.5"/>
-        <line x1="90" y1="84" x2="76" y2="84" stroke="#4ade80" stroke-width="0.8" opacity="0.5"/>
-        <line x1="76" y1="98" x2="76" y2="84" stroke="#4ade80" stroke-width="0.8" opacity="0.5"/>
-        <line x1="62" y1="84" x2="76" y2="84" stroke="#4ade80" stroke-width="0.8" opacity="0.5"/>
-        <line x1="86" y1="74" x2="76" y2="84" stroke="#4ade80" stroke-width="0.8" opacity="0.35"/>
-        <circle cx="76" cy="84" r="3" fill="#4ade80" opacity="0.6"/>
-
-        <circle cx="200" cy="84" r="20" fill="#060e08" stroke="#243020" stroke-width="1.5"/>
-        <circle cx="200" cy="84" r="14" fill="#080f0a" stroke="#1a2a1a" stroke-width="1"/>
-        <circle cx="200" cy="84" r="8" fill="#0a1a0d" stroke="#4ade80" stroke-width="1" opacity="0.7"/>
-        <!-- wheel spokes rear -->
-        <line x1="200" y1="70" x2="200" y2="84" stroke="#4ade80" stroke-width="0.8" opacity="0.5"/>
-        <line x1="214" y1="84" x2="200" y2="84" stroke="#4ade80" stroke-width="0.8" opacity="0.5"/>
-        <line x1="200" y1="98" x2="200" y2="84" stroke="#4ade80" stroke-width="0.8" opacity="0.5"/>
-        <line x1="186" y1="84" x2="200" y2="84" stroke="#4ade80" stroke-width="0.8" opacity="0.5"/>
-        <line x1="210" y1="74" x2="200" y2="84" stroke="#4ade80" stroke-width="0.8" opacity="0.35"/>
-        <circle cx="200" cy="84" r="3" fill="#4ade80" opacity="0.6"/>
-        <!-- Škoda badge -->
-        <circle cx="216" cy="40" r="6" fill="#0a1a0d" stroke="#4ade80" stroke-width="0.8" opacity="0.7"/>
-        <path d="M212 40 L215 37 L215 40 L218 38 L215 41Z" fill="#4ade80" opacity="0.6" transform="scale(0.8) translate(35,10)"/>
-      </svg>
-    </div>
-
     <div class="nav-group">
       <div class="nav-label">Menu</div>
       <div class="nav-item active" onclick="switchTab('dashboard')">
@@ -988,19 +530,13 @@
         <span class="nav-icon">⛽</span> Tankovanie
       </div>
       <div class="nav-item" onclick="switchTab('costs')">
-        <span class="nav-icon">🔧</span> Náklady
-      </div>
-      <div class="nav-item" onclick="switchTab('income')">
-        <span class="nav-icon">💰</span> Príjmy
+        <span class="nav-icon">??</span> Náklady
       </div>
       <div class="nav-item" onclick="switchTab('stats')">
         <span class="nav-icon">◎</span> Štatistiky
       </div>
       <div class="nav-item" onclick="switchTab('google')">
-        <span class="nav-icon">☁</span> Google Sheets
-      </div>
-      <div class="nav-item" onclick="openImport()">
-        <span class="nav-icon">📥</span> Import Fuelio
+        <span class="nav-icon">💾</span> Export / Import
       </div>
     </div>
 
@@ -1015,64 +551,33 @@
   <div class="content">
 
     <!-- STATS -->
-    <div class="stats-row" id="statsRow" id="statsRow">
+    <div class="stats-row" id="statsRow">
       <div class="stat-card fuel">
-        <div class="stat-icon">⛽</div>
         <div class="stat-label">Celkom litrov</div>
         <div class="stat-value" id="statLiters">0</div>
-        <div class="stat-unit">natankovaných</div>
+        <div class="stat-unit">litrov natankovaných</div>
       </div>
       <div class="stat-card cost">
-        <div class="stat-icon">🔧</div>
         <div class="stat-label">Celkové náklady</div>
         <div class="stat-value" id="statCosts">0 €</div>
-        <div class="stat-unit">palivo + opravy + iné</div>
+        <div class="stat-unit">opravy + iné</div>
       </div>
       <div class="stat-card km">
-        <div class="stat-icon">🛣</div>
         <div class="stat-label">Najazdené km</div>
         <div class="stat-value" id="statKm">0</div>
         <div class="stat-unit">posledné tankovanie</div>
       </div>
       <div class="stat-card avg">
-        <div class="stat-icon">📊</div>
         <div class="stat-label">Spotreba</div>
         <div class="stat-value" id="statAvg">–</div>
         <div class="stat-unit">l / 100 km priemer</div>
-      </div>
-      <div class="stat-card income-card">
-        <div class="stat-icon">💰</div>
-        <div class="stat-label">Celkové príjmy</div>
-        <div class="stat-value" id="statIncome">0 €</div>
-        <div class="stat-unit">spolujazda + iné</div>
       </div>
     </div>
 
     <!-- DASHBOARD -->
     <div class="panel active" id="dashboardPanel">
       <div class="panel-header">
-        <div class="panel-title"><span class="panel-title-accent">◈</span> Záznamy</div>
-        <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
-          <select id="dashYear" onchange="renderDashboard()" style="background:var(--surface2);border:1px solid var(--border2);border-radius:50px;color:var(--text);padding:5px 12px;font-family:'JetBrains Mono',monospace;font-size:0.78rem;outline:none;">
-            <option value="">Všetky roky</option>
-          </select>
-          <select id="dashMonth" onchange="renderDashboard()" style="background:var(--surface2);border:1px solid var(--border2);border-radius:50px;color:var(--text);padding:5px 12px;font-family:'JetBrains Mono',monospace;font-size:0.78rem;outline:none;">
-            <option value="">Všetky mesiace</option>
-            <option value="01">Január</option>
-            <option value="02">Február</option>
-            <option value="03">Marec</option>
-            <option value="04">Apríl</option>
-            <option value="05">Máj</option>
-            <option value="06">Jún</option>
-            <option value="07">Júl</option>
-            <option value="08">August</option>
-            <option value="09">September</option>
-            <option value="10">Október</option>
-            <option value="11">November</option>
-            <option value="12">December</option>
-          </select>
-          <span id="dashCount" style="font-size:0.75rem;color:var(--muted);font-family:'JetBrains Mono',monospace;"></span>
-        </div>
+        <div class="panel-title">Posledné záznamy</div>
       </div>
       <div class="table-wrap">
         <table>
@@ -1084,7 +589,7 @@
           <tbody id="dashboardTable"></tbody>
         </table>
         <div class="empty" id="dashboardEmpty">
-          <div class="empty-icon">🚗</div>
+          <div class="empty-icon">??</div>
           <div>Zatiaľ žiadne záznamy.<br>Pridaj prvé tankovanie alebo náklad!</div>
         </div>
       </div>
@@ -1093,11 +598,7 @@
     <!-- FUEL FORM -->
     <div class="panel" id="fuelPanel">
       <div class="panel-header">
-        <div class="panel-title"><span class="panel-title-accent">⛽</span> Nové tankovanie</div>
-        <button class="btn-scan" onclick="openScanModal()">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg>
-          Skenovať doklad
-        </button>
+        <div class="panel-title">⛽ Nové tankovanie</div>
       </div>
       <div class="form-grid">
         <div class="field">
@@ -1106,54 +607,29 @@
         </div>
         <div class="field">
           <label>Stav tachometra (km)</label>
-          <div style="display:flex;gap:6px;align-items:center;">
-            <input type="number" id="fKm" placeholder="napr. 85420" style="flex:1" />
-            <button class="btn-scan" style="padding:8px 12px;font-size:0.75rem;white-space:nowrap;flex-shrink:0;" onclick="openOdometerScan()" title="Odfotiť tachometer">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2z"/><path d="M12 6v2M12 16v2M6 12H4M20 12h-2"/></svg>
-              Tachometer
-            </button>
-          </div>
-        </div>
-        <div class="field">
-          <label>Typ paliva</label>
-          <select id="fFuelType">
-            <option value="Benzín">⛽ Benzín</option>
-            <option value="Nafta">🛢 Nafta (Diesel)</option>
-            <option value="LPG">🔵 LPG</option>
-            <option value="CNG">🟡 CNG</option>
-            <option value="Elektrina">⚡ Elektrina (kWh)</option>
-          </select>
-        </div>
-        <div class="field">
-          <label>Typ tankovania</label>
-          <select id="fFullTank">
-            <option value="1">✅ Plná nádrž</option>
-            <option value="0">⚡ Čiastočné</option>
-          </select>
+          <input type="number" id="fKm" placeholder="napr. 85420" />
         </div>
         <div class="field">
           <label>Litrov</label>
           <input type="number" step="0.01" id="fLiters" placeholder="napr. 45.5" />
         </div>
         <div class="field">
-          <label>Cena / liter</label>
-          <div style="display:flex;gap:6px;align-items:center;">
-            <input type="number" step="0.001" id="fPriceL" placeholder="napr. 1.589" style="flex:1" />
-            <select id="fCurrencyL" onchange="recalcFuel()" style="width:72px;padding:9px 6px;font-size:0.78rem;">
-              <option value="EUR">EUR</option>
-              <option value="CZK">CZK</option>
-              <option value="PLN">PLN</option>
-            </select>
-          </div>
+          <label>Cena celkom (€)</label>
+          <input type="number" step="0.01" id="fTotal" placeholder="napr. 72.80" />
         </div>
         <div class="field">
-          <label>Cena celkom (EUR)</label>
-          <input type="number" step="0.01" id="fTotal" placeholder="auto-výpočet" readonly style="color:var(--accent);font-weight:500;" />
+          <label>Cena / liter (€)</label>
+          <input type="number" step="0.001" id="fPriceL" placeholder="auto-výpočet" readonly />
         </div>
-        <div class="field span3" id="fTankWarning" style="display:none;">
-          <div style="background:rgba(251,191,36,0.1);border:1px solid rgba(251,191,36,0.3);border-radius:10px;padding:8px 12px;font-size:0.8rem;color:var(--fuel);">
-            ⚠️ Zadané litre prekračujú kapacitu nádrže auta. Skontroluj hodnoty.
-          </div>
+        <div class="field">
+          <label>Typ paliva</label>
+          <select id="fFuelType">
+            <option>Benzín</option>
+            <option>Diesel</option>
+            <option>LPG</option>
+            <option>CNG</option>
+            <option>Elektrina (kWh)</option>
+          </select>
         </div>
         <div class="field span3">
           <label>Poznámka</label>
@@ -1169,7 +645,7 @@
     <!-- COSTS FORM -->
     <div class="panel" id="costsPanel">
       <div class="panel-header">
-        <div class="panel-title"><span class="panel-title-accent">🔧</span> Nový náklad</div>
+        <div class="panel-title">?? Nový náklad</div>
       </div>
       <div class="form-grid">
         <div class="field">
@@ -1190,19 +666,8 @@
           </select>
         </div>
         <div class="field">
-          <label>Suma</label>
-          <div style="display:flex;gap:6px;align-items:center;">
-            <input type="number" step="0.01" id="cAmount" placeholder="napr. 120.00" style="flex:1" />
-            <select id="cCurrency" onchange="recalcCost()" style="width:72px;padding:9px 6px;font-size:0.78rem;">
-              <option value="EUR">EUR</option>
-              <option value="CZK">CZK</option>
-              <option value="PLN">PLN</option>
-            </select>
-          </div>
-        </div>
-        <div class="field">
-          <label>Suma v EUR</label>
-          <input type="number" step="0.01" id="cAmountEur" placeholder="auto-prepočet" readonly style="color:var(--accent);font-weight:500;" />
+          <label>Suma (€)</label>
+          <input type="number" step="0.01" id="cAmount" placeholder="napr. 120.00" />
         </div>
         <div class="field">
           <label>Stav tachometra (km)</label>
@@ -1226,7 +691,7 @@
     <!-- INCOME PANEL -->
     <div class="panel" id="incomePanel">
       <div class="panel-header">
-        <div class="panel-title"><span class="panel-title-accent">💰</span> Nový príjem</div>
+        <div class="panel-title">💰 Nový príjem</div>
       </div>
       <div class="form-grid">
         <div class="field">
@@ -1237,34 +702,20 @@
           <label>Typ príjmu</label>
           <select id="iType">
             <option>Spolujazda</option>
-            <option>Firemná jazda</option>
+            <option>Firemné jazdy</option>
+            <option>Prenájom auta</option>
             <option>Náhrada za cestu</option>
             <option>Predaj dielu</option>
             <option>Iné</option>
           </select>
         </div>
         <div class="field">
-          <label>Suma</label>
-          <div style="display:flex;gap:6px;align-items:center;">
-            <input type="number" step="0.01" id="iAmount" placeholder="napr. 15.00" style="flex:1" />
-            <select id="iCurrency" onchange="recalcIncome()" style="width:72px;padding:9px 6px;font-size:0.78rem;">
-              <option value="EUR">EUR</option>
-              <option value="CZK">CZK</option>
-              <option value="PLN">PLN</option>
-            </select>
-          </div>
-        </div>
-        <div class="field">
-          <label>Suma v EUR</label>
-          <input type="number" step="0.01" id="iAmountEur" placeholder="auto-prepočet" readonly style="color:var(--income);font-weight:500;" />
-        </div>
-        <div class="field span2">
-          <label>Popis</label>
-          <input type="text" id="iDesc" placeholder="napr. Spolujazda Bratislava–Košice" />
+          <label>Suma (€)</label>
+          <input type="number" step="0.01" id="iAmount" placeholder="napr. 25.00" />
         </div>
         <div class="field span3">
-          <label>Poznámka</label>
-          <input type="text" id="iNote" placeholder="nepovinné" />
+          <label>Popis</label>
+          <input type="text" id="iDesc" placeholder="napr. Spolujazda BA-KE" />
         </div>
       </div>
       <div class="form-actions">
@@ -1273,256 +724,73 @@
       </div>
     </div>
 
-    <!-- STATS PANEL -->    <div class="panel" id="statsPanel">
+    <!-- STATS PANEL -->
+    <div class="panel" id="statsPanel">
       <div class="panel-header">
-        <div class="panel-title"><span class="panel-title-accent">◎</span> Štatistiky</div>
-        <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
-          <div id="statFilterBtns" style="display:flex;gap:4px;">
-            <button class="currency-btn active" onclick="setStatPeriod('all',this)">Všetko</button>
-            <button class="currency-btn" onclick="setStatPeriod('year',this)">Rok</button>
-            <button class="currency-btn" onclick="setStatPeriod('month',this)">Mesiac</button>
-          </div>
-          <select id="statYear" onchange="renderCharts()" style="display:none;background:var(--surface2);border:1px solid var(--border2);border-radius:5px;color:var(--text);padding:4px 10px;font-family:'JetBrains Mono',monospace;font-size:0.78rem;outline:none;"></select>
-          <select id="statMonth" onchange="renderCharts()" style="display:none;background:var(--surface2);border:1px solid var(--border2);border-radius:5px;color:var(--text);padding:4px 10px;font-family:'JetBrains Mono',monospace;font-size:0.78rem;outline:none;">
-            <option value="01">Január</option><option value="02">Február</option>
-            <option value="03">Marec</option><option value="04">Apríl</option>
-            <option value="05">Máj</option><option value="06">Jún</option>
-            <option value="07">Júl</option><option value="08">August</option>
-            <option value="09">September</option><option value="10">Október</option>
-            <option value="11">November</option><option value="12">December</option>
-          </select>
-          <div style="display:flex;gap:4px;border-left:1px solid var(--border2);padding-left:8px;">
-            <button class="currency-btn active" id="axisMonthBtn" onclick="setAxisMode('month',this)">Mesačne</button>
-            <button class="currency-btn" id="axisYearBtn" onclick="setAxisMode('year',this)">Ročne</button>
-          </div>
-        </div>
+        <div class="panel-title">◎ Štatistiky</div>
       </div>
-
-      <!-- Fuelio-style summary row -->
-      <div id="statsSummary" style="display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);border-bottom:1px solid var(--border);">
-        <div style="background:var(--surface);padding:12px 10px;text-align:center;">
-          <div style="font-family:'Barlow Condensed',sans-serif;font-size:0.6rem;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:4px;">Tankovaní</div>
-          <div id="ssFillups" style="font-family:'Barlow Condensed',sans-serif;font-size:1.4rem;font-weight:900;color:var(--fuel);">–</div>
-          <div id="ssFillupsSub" style="font-size:0.68rem;color:var(--muted);margin-top:2px;">interval</div>
-        </div>
-        <div style="background:var(--surface);padding:12px 10px;text-align:center;">
-          <div style="font-family:'Barlow Condensed',sans-serif;font-size:0.6rem;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:4px;">Najazdené</div>
-          <div id="ssTotalKm" style="font-family:'Barlow Condensed',sans-serif;font-size:1.4rem;font-weight:900;color:var(--accent);">–</div>
-          <div style="font-size:0.68rem;color:var(--muted);margin-top:2px;">km celkovo</div>
-        </div>
-        <div style="background:var(--surface);padding:12px 10px;text-align:center;">
-          <div style="font-family:'Barlow Condensed',sans-serif;font-size:0.6rem;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:4px;">Spotreba</div>
-          <div id="ssConsumption" style="font-family:'Barlow Condensed',sans-serif;font-size:1.4rem;font-weight:900;color:var(--accent);">–</div>
-          <div style="font-size:0.68rem;color:var(--muted);margin-top:2px;">l/100km (plné nádrže)</div>
-        </div>
-        <div style="background:var(--surface);padding:12px 10px;text-align:center;">
-          <div style="font-family:'Barlow Condensed',sans-serif;font-size:0.6rem;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:4px;">Cena / km</div>
-          <div id="ssFuelCost" style="font-family:'Barlow Condensed',sans-serif;font-size:1.4rem;font-weight:900;color:var(--cost);">–</div>
-          <div id="ssFuelCostSub" style="font-size:0.68rem;color:var(--muted);margin-top:2px;">€/km palivo</div>
-        </div>
-      </div>
-      <!-- income / costs / profit row -->
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);border-bottom:1px solid var(--border);">
-        <div style="background:var(--surface);padding:12px 16px;text-align:center;">
-          <div style="font-family:'Barlow Condensed',sans-serif;font-size:0.62rem;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:4px;">Celk. náklady</div>
-          <div id="ssTotalCost" style="font-family:'Barlow Condensed',sans-serif;font-size:1.4rem;font-weight:900;color:#f87171;">–</div>
-          <div id="ssTotalCostSub" style="font-size:0.7rem;color:var(--muted);margin-top:2px;">palivo + opravy</div>
-        </div>
-        <div style="background:var(--surface);padding:12px 16px;text-align:center;">
-          <div style="font-family:'Barlow Condensed',sans-serif;font-size:0.62rem;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:4px;">Celk. príjmy</div>
-          <div id="ssTotalIncome" style="font-family:'Barlow Condensed',sans-serif;font-size:1.4rem;font-weight:900;color:var(--income);">–</div>
-          <div style="font-size:0.7rem;color:var(--muted);margin-top:2px;">spolujazda + iné</div>
-        </div>
-        <div style="background:var(--surface);padding:12px 16px;text-align:center;">
-          <div style="font-family:'Barlow Condensed',sans-serif;font-size:0.62rem;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:4px;">Zisk / Strata</div>
-          <div id="ssProfit" style="font-family:'Barlow Condensed',sans-serif;font-size:1.4rem;font-weight:900;">–</div>
-          <div style="font-size:0.7rem;color:var(--muted);margin-top:2px;">príjmy − náklady</div>
-        </div>
-      </div>
-
-      <!-- income by period table -->
-      <div id="incomeByPeriodWrap" style="border-bottom:1px solid var(--border);">
-        <div style="padding:10px 16px 0;display:flex;align-items:center;justify-content:space-between;">
-          <div style="font-family:'Barlow Condensed',sans-serif;font-size:0.65rem;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--muted);">Príjmy po obdobiach</div>
-        </div>
-        <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;">
-          <table style="width:100%;border-collapse:collapse;font-size:0.82rem;" id="incomeByPeriodTable">
-            <thead id="incomeByPeriodHead"></thead>
-            <tbody id="incomeByPeriodBody"></tbody>
-          </table>
-        </div>
-      </div>
-
-      <!-- drilldown detail -->
-      <div id="chartDrilldown" style="display:none;margin:12px 16px 0;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;overflow:hidden;">
-        <div style="padding:9px 14px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
-          <div id="drilldownTitle" style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:0.85rem;letter-spacing:0.5px;text-transform:uppercase;color:var(--accent);"></div>
-          <button onclick="document.getElementById('chartDrilldown').style.display='none'" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:1rem;">✕</button>
-        </div>
-        <div style="max-height:200px;overflow-y:auto;">
-          <table style="width:100%;border-collapse:collapse;font-size:0.82rem;">
-            <thead><tr id="drilldownHead" style="background:var(--surface);"></tr></thead>
-            <tbody id="drilldownBody"></tbody>
-          </table>
-        </div>
-      </div>
-
-      <!-- charts – Fuelio layout: consumption + fuel price on top, monthly costs + categories bottom -->
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:16px;">
+      <div class="charts-grid">
         <div class="chart-box">
-          <div class="chart-title">Spotreba l/100km <span style="font-size:0.62rem;color:var(--accent);opacity:0.7;">(klikni)</span></div>
-          <canvas id="chartConsumption" height="160"></canvas>
+          <div class="chart-title">Výdaje na palivo (posledné záznamy)</div>
+          <canvas id="chartFuel" height="180"></canvas>
         </div>
         <div class="chart-box">
-          <div class="chart-title">Cena paliva (€/l) <span style="font-size:0.62rem;color:var(--accent);opacity:0.7;">(klikni)</span></div>
-          <canvas id="chartFuelPrice" height="160"></canvas>
+          <div class="chart-title">Náklady podľa kategórie</div>
+          <canvas id="chartCosts" height="180"></canvas>
         </div>
         <div class="chart-box">
-          <div class="chart-title">Mesačné náklady € <span style="font-size:0.62rem;color:var(--accent);opacity:0.7;">(klikni)</span></div>
-          <canvas id="chartMonthly" height="160"></canvas>
+          <div class="chart-title">Spotreba l/100km</div>
+          <canvas id="chartConsumption" height="180"></canvas>
         </div>
         <div class="chart-box">
-          <div class="chart-title">Kategórie nákladov <span style="font-size:0.62rem;color:var(--accent);opacity:0.7;">(klikni)</span></div>
-          <canvas id="chartCosts" height="160"></canvas>
-        </div>
-        <div class="chart-box" style="grid-column:span 2;">
-          <div class="chart-title">Výdaje na palivo € <span style="font-size:0.62rem;color:var(--accent);opacity:0.7;">(klikni)</span></div>
-          <canvas id="chartFuel" height="130"></canvas>
-        </div>
-        <div class="chart-box" style="grid-column:span 2;">
-          <div class="chart-title">Príjmy vs Náklady vs Zisk <span style="font-size:0.62rem;color:var(--accent);opacity:0.7;">(klikni)</span></div>
-          <canvas id="chartProfit" height="130"></canvas>
+          <div class="chart-title">Mesačné výdaje celkovo (€)</div>
+          <canvas id="chartMonthly" height="180"></canvas>
         </div>
       </div>
     </div>
 
-    <!-- GOOGLE PANEL -->
+    <!-- EXPORT PANEL -->
     <div class="panel" id="googlePanel">
       <div class="panel-header">
-        <div class="panel-title"><span class="panel-title-accent">☁</span> Google Sheets prepojenie</div>
+        <div class="panel-title">💾 Export &amp; Záloha</div>
       </div>
-      <div style="padding:20px; display:flex; flex-direction:column; gap:16px;">
+      <div style="padding:20px;display:flex;flex-direction:column;gap:16px;">
 
-        <!-- currency rates -->
-        <div class="setup-box" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
-          <div>
-            <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:0.75rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">Výmenné kurzy (1 EUR)</div>
-            <div style="display:flex;gap:16px;font-family:'JetBrains Mono',monospace;font-size:0.85rem;">
-              <span>CZK = <span id="rateCZK" style="color:var(--accent);font-weight:500;">…</span></span>
-              <span>PLN = <span id="ratePLN" style="color:var(--accent);font-weight:500;">…</span></span>
-            </div>
-          </div>
-          <button class="btn-secondary" onclick="fetchRates()" style="display:flex;align-items:center;gap:6px;font-size:0.8rem;">
-            <span>↻</span> Aktualizovať kurzy
-          </button>
-        </div>
         <div class="setup-box">
-          <p>Pre prepojenie s Google Sheets potrebuješ <strong>Google Apps Script</strong> – bezplatná služba od Google. Tvoje dáta sa uložia priamo do tvojho Google Sheetu.</p>
-          <div class="setup-step"><span class="step-num">1</span><span>Otvor <a href="https://script.google.com" target="_blank">script.google.com</a> a vytvor nový projekt.</span></div>
-          <div class="setup-step"><span class="step-num">2</span><span>Vlož skript nižšie do editora a klikni <em>Nasadiť → Nové nasadenie → Web App</em>. Prístup nastav na <em>Ktokoľvek</em>.</span></div>
-          <div class="setup-step"><span class="step-num">3</span><span>Skopíruj vygenerovanú URL a vlož ju sem.</span></div>
+          <p><strong>Export do CSV</strong> – kompatibilný s Fuelio. Každé auto = jeden súbor.</p>
+          <div id="exportCarList" style="margin:12px 0;display:flex;flex-direction:column;gap:6px;"></div>
+          <button class="btn-primary" onclick="exportFuelioCSV()">📥 Exportovať CSV</button>
         </div>
 
         <div class="setup-box">
-          <div class="chart-title" style="margin-bottom:10px;">Google Apps Script kód (skopíruj):</div>
-          <pre style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:14px;font-size:0.75rem;overflow-x:auto;color:#aaf;line-height:1.6;">function doPost(e) {
-  try {
-    var data = JSON.parse(e.postData.contents);
-    var ss = SpreadsheetApp.openById(data.sheetId);
-    var sheet = ss.getSheetByName(data.sheetName)
-               || ss.insertSheet(data.sheetName);
-    // Add header row if sheet is empty
-    if (sheet.getLastRow() === 0) {
-      sheet.appendRow(data.headers);
-      sheet.getRange(1, 1, 1, data.headers.length)
-           .setFontWeight('bold')
-           .setBackground('#1a3520')
-           .setFontColor('#4ade80');
-      sheet.setFrozenRows(1);
-    }
-    // Check for duplicate by ID (column A)
-    var idCol = sheet.getRange('A:A').getValues().flat();
-    var existingRow = idCol.indexOf(data.row[0]);
-    if (existingRow > 0) {
-      // Update existing row
-      sheet.getRange(existingRow + 1, 1, 1, data.row.length).setValues([data.row]);
-    } else {
-      sheet.appendRow(data.row);
-    }
-    return ContentService.createTextOutput(
-      JSON.stringify({ok: true})
-    ).setMimeType(ContentService.MimeType.JSON);
-  } catch(err) {
-    return ContentService.createTextOutput(
-      JSON.stringify({ok: false, error: err.toString()})
-    ).setMimeType(ContentService.MimeType.JSON);
-  }
-}
-
-function doGet(e) {
-  try {
-    var ss = SpreadsheetApp.openById(e.parameter.sheetId);
-    var sheet = ss.getSheetByName(e.parameter.sheetName);
-    if (!sheet) return ContentService.createTextOutput(
-      JSON.stringify({rows:[]})
-    ).setMimeType(ContentService.MimeType.JSON);
-    var data = sheet.getDataRange().getValues();
-    return ContentService.createTextOutput(
-      JSON.stringify({rows: data})
-    ).setMimeType(ContentService.MimeType.JSON);
-  } catch(err) {
-    return ContentService.createTextOutput(
-      JSON.stringify({rows:[], error: err.toString()})
-    ).setMimeType(ContentService.MimeType.JSON);
-  }
-}</pre>
+          <p><strong>Import z CSV</strong> – nahraj zálohu alebo export z Fuelio.</p>
+          <input type="file" id="importFileInput" accept=".csv" onchange="handleImportFile(event)" style="display:none" />
+          <button class="btn-primary" onclick="document.getElementById('importFileInput').click()">📤 Importovať CSV</button>
+          <div id="importPreview" style="margin-top:12px;font-size:0.8rem;color:var(--muted);"></div>
+          <button id="importConfirmBtn" class="btn-secondary" onclick="confirmImport()" style="display:none;margin-top:8px;">✓ Potvrdiť import</button>
         </div>
 
-        <!-- Anthropic API key for scanning -->
-        <div class="setup-box" style="margin-bottom:0;">
-          <div style="font-family:'Barlow Condensed',sans-serif;font-size:0.75rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent);margin-bottom:8px;">🔑 Anthropic API kľúč (pre skenovanie dokladov)</div>
-          <p style="margin-bottom:10px;">Potrebný pre skenovanie účteniek a tachometra. Získaš ho na <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a> → API Keys.</p>
-          <div class="field">
-            <label>Anthropic API Key</label>
-            <input type="password" id="anthropicKey" placeholder="sk-ant-..." />
-          </div>
-          <div style="font-size:0.75rem;color:var(--muted);margin-top:6px;">⚠️ Kľúč sa ukladá len lokálne v tvojom prehliadači, nikam sa neodosiela.</div>
+        <div class="setup-box">
+          <p><strong>Záloha na Google Disk</strong></p>
+          <div class="setup-step"><span class="step-num">1</span><span>Exportuj CSV vyššie</span></div>
+          <div class="setup-step"><span class="step-num">2</span><span>iPhone: Súbory → Stiahnuté → drž súbor → Zdieľať</span></div>
+          <div class="setup-step"><span class="step-num">3</span><span>Vyber <strong>Uložiť do Drive</strong></span></div>
+          <a href="https://drive.google.com" target="_blank" class="btn-secondary" style="display:inline-block;margin-top:8px;text-decoration:none;text-align:center;">☁ Otvoriť Google Disk</a>
         </div>
 
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-          <div class="field">
-            <label>Apps Script URL</label>
-            <input type="text" id="gsUrl" placeholder="https://script.google.com/macros/s/..." />
-          </div>
-          <div class="field">
-            <label>Google Sheet ID</label>
-            <input type="text" id="gsId" placeholder="z URL tvojho Sheetu" />
-          </div>
-        </div>
-
-        <div style="display:flex;gap:10px;">
-          <button class="btn-primary" onclick="saveGoogleConfig()">Uložiť prepojenie</button>
-          <button class="btn-secondary" onclick="testGoogle()">Otestovať</button>
-          <button class="btn-secondary" onclick="syncToGoogle()">⬆ Sync do Google Sheets</button>
-          <button class="btn-secondary" onclick="exportFuelioCSV()">📥 Export CSV (Fuelio)</button>
-        </div>
-
-        <div id="googleStatus" style="font-size:0.82rem;color:var(--muted);"></div>
       </div>
     </div>
 
   </div>
 </main>
 
-<!-- CARS MODAL - manage cars -->
+<!-- CARS MODAL -->
 <div class="modal-overlay" id="carsModal" onclick="if(event.target===this)this.classList.remove('open')">
-  <div class="modal" style="width:400px;max-width:96vw;">
-    <h3>🚗 Moje autá</h3>
+  <div class="modal">
+    <h3>Vyber auto</h3>
     <div id="modalCarsList" style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px;"></div>
-    <div style="display:flex;gap:8px;">
-      <button class="btn-primary" onclick="openAddCar();document.getElementById('carsModal').classList.remove('open')">+ Pridať auto</button>
-      <button class="btn-secondary" onclick="document.getElementById('carsModal').classList.remove('open')">Zavrieť</button>
-    </div>
+    <button class="btn-primary" onclick="openAddCar();document.getElementById('carsModal').classList.remove('open')">+ Nové auto</button>
+    <button class="btn-secondary" style="margin-left:8px;" onclick="document.getElementById('carsModal').classList.remove('open')">Zavrieť</button>
   </div>
 </div>
 
@@ -1533,7 +801,6 @@ function doGet(e) {
     <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:20px;">
       <div class="field"><label>Názov auta</label><input type="text" id="newCarName" placeholder="napr. Škoda Octavia" /></div>
       <div class="field"><label>ŠPZ</label><input type="text" id="newCarPlate" placeholder="napr. BA123AB" /></div>
-      <div class="field"><label>Veľkosť nádrže (litrov)</label><input type="number" id="newCarTank" placeholder="napr. 45" min="10" max="200" /></div>
       <div class="field">
         <label>Farba</label>
         <div style="display:flex;gap:8px;flex-wrap:wrap;" id="colorPicker">
@@ -1551,105 +818,9 @@ function doGet(e) {
   </div>
 </div>
 
-<!-- IMPORT MODAL -->
-<div class="modal-overlay" id="importModal" onclick="if(event.target===this)this.classList.remove('open')">
-  <div class="modal" style="width:500px;max-width:96vw;">
-    <h3>📥 Import z Fuelio</h3>
-    <div style="font-size:0.82rem;color:var(--muted2);margin-bottom:14px;line-height:1.7;">
-      V aplikácii Fuelio choď do <strong style="color:var(--text)">Nastavenia → Záloha → Exportovať CSV</strong>.<br>
-      Súbor nájdeš na Google Disku v priečinku <strong style="color:var(--accent)">Android/Fuelio/backup-csv/</strong>
-    </div>
-
-    <!-- sample CSV download -->
-    <div style="background:rgba(74,222,128,0.05);border:1px solid rgba(74,222,128,0.2);border-radius:8px;padding:12px 14px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;gap:10px;">
-      <div>
-        <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:0.8rem;letter-spacing:0.5px;text-transform:uppercase;color:var(--accent);margin-bottom:2px;">Vzorový CSV súbor</div>
-        <div style="font-size:0.75rem;color:var(--muted2);">Stiahni vzor – uvidíš presný formát Fuelio exportu</div>
-      </div>
-      <button class="btn-scan" style="white-space:nowrap;font-size:0.78rem;padding:7px 14px;" onclick="downloadSampleCSV()">⬇ Stiahnuť vzor</button>
-    </div>
-
-    <div class="field" style="margin-bottom:14px;">
-      <label>Vyber CSV súbor z Fuelio</label>
-      <input type="file" id="importFileInput" accept=".csv,.txt" onchange="handleImportFile(event)"
-        style="background:var(--surface2);border:1px solid var(--border2);border-radius:6px;color:var(--text);padding:10px 12px;font-family:'Barlow',sans-serif;font-size:0.82rem;width:100%;cursor:pointer;" />
-    </div>
-    <div id="importPreview" style="margin-bottom:16px;"></div>
-    <div style="display:flex;gap:10px;align-items:center;">
-      <button class="btn-primary" id="importConfirmBtn" style="display:none" onclick="confirmImport()">✓ Importovať</button>
-      <button class="btn-secondary" onclick="document.getElementById('importModal').classList.remove('open')">Zavrieť</button>
-    </div>
-  </div>
-</div>
-
-<!-- ODOMETER SCAN MODAL -->
-<div class="modal-overlay" id="odometerModal" onclick="if(event.target===this)this.classList.remove('open')">
-  <div class="modal" style="width:460px;max-width:96vw;">
-    <h3>🔢 Odfotiť tachometer</h3>
-    <p style="font-size:0.82rem;color:var(--muted2);margin-bottom:14px;line-height:1.6;">Odfotte displej tachometra – AI vyčíta počet kilometrov.</p>
-    <div class="scan-drop-zone" id="odoDropZone">
-      <input type="file" id="odoFileInput" accept="image/*" capture="environment" onchange="handleOdometerScan(event)" />
-      <div style="font-size:2rem;margin-bottom:6px;">🔢</div>
-      <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:0.9rem;letter-spacing:0.5px;text-transform:uppercase;color:var(--muted2);">Kliknite alebo odfotte tachometer</div>
-      <img id="odoPreviewImg" class="scan-preview" />
-    </div>
-    <div class="scan-loading" id="odoLoading">
-      <div class="scan-spinner"></div>AI číta tachometer...
-    </div>
-    <div id="odoResult" style="display:none;margin-top:14px;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:14px;">
-      <div style="font-family:'Barlow Condensed',sans-serif;font-size:0.7rem;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;">Vyčítaný stav</div>
-      <div style="font-family:'JetBrains Mono',monospace;font-size:1.6rem;font-weight:500;color:var(--accent);" id="odoValue">–</div>
-      <div style="font-size:0.75rem;color:var(--muted);margin-top:4px;">km</div>
-    </div>
-    <div id="odoError" style="color:var(--danger);font-size:0.82rem;margin-top:10px;display:none;"></div>
-    <div style="display:flex;gap:10px;margin-top:16px;">
-      <button class="btn-primary" id="odoUseBtn" style="display:none" onclick="useOdometerResult()">✓ Použiť</button>
-      <button class="btn-secondary" onclick="document.getElementById('odometerModal').classList.remove('open')">Zavrieť</button>
-    </div>
-  </div>
-</div>
-
-<!-- SCAN RECEIPT MODAL -->
-<div class="modal-overlay" id="scanModal" onclick="if(event.target===this)this.classList.remove('open')">
-  <div class="modal" style="width:520px;max-width:96vw;">
-    <h3>📷 Skenovanie dokladu</h3>
-    <p style="font-size:0.82rem;color:var(--muted2);margin-bottom:14px;line-height:1.6;">
-      Odfotte alebo nahrajte účtenku z čerpacky. AI automaticky vyčíta litre, cenu a ďalšie údaje.
-    </p>
-    <div class="scan-drop-zone" id="scanDropZone">
-      <input type="file" id="scanFileInput" accept="image/*" capture="environment" onchange="handleScanFile(event)" />
-      <div style="font-size:2rem;margin-bottom:8px;">📄</div>
-      <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:0.95rem;letter-spacing:0.5px;text-transform:uppercase;color:var(--muted2);">Kliknite alebo potiahnite sem foto dokladu</div>
-      <div style="font-size:0.75rem;color:var(--muted);margin-top:4px;">JPG, PNG, HEIC · max 10 MB</div>
-      <img id="scanPreviewImg" class="scan-preview" />
-    </div>
-    <div class="scan-loading" id="scanLoading">
-      <div class="scan-spinner"></div>
-      AI číta doklad...
-    </div>
-    <div class="scan-result" id="scanResult">
-      <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:0.75rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;">Vyčítané hodnoty</div>
-      <div class="scan-result-row"><span class="scan-result-label">Litrov</span><span class="scan-result-val" id="srLiters">–</span></div>
-      <div class="scan-result-row"><span class="scan-result-label">Cena / liter</span><span class="scan-result-val" id="srPriceL">–</span></div>
-      <div class="scan-result-row"><span class="scan-result-label">Celková suma</span><span class="scan-result-val" id="srTotal">–</span></div>
-      <div class="scan-result-row"><span class="scan-result-label">Mena</span><span class="scan-result-val" id="srCurrency">–</span></div>
-      <div class="scan-result-row"><span class="scan-result-label">Typ paliva</span><span class="scan-result-val" id="srFuelType">–</span></div>
-      <div class="scan-result-row"><span class="scan-result-label">Dátum</span><span class="scan-result-val" id="srDate">–</span></div>
-      <div class="scan-result-row"><span class="scan-result-label">Čerpacia stanica</span><span class="scan-result-val" id="srStation">–</span></div>
-    </div>
-    <div id="scanError" style="color:var(--danger);font-size:0.82rem;margin-top:10px;display:none;"></div>
-    <div style="display:flex;gap:10px;margin-top:16px;">
-      <button class="btn-primary" id="scanUseBtn" style="display:none" onclick="useScanResult()">✓ Použiť hodnoty</button>
-      <button class="btn-secondary" onclick="document.getElementById('scanModal').classList.remove('open')">Zavrieť</button>
-    </div>
-  </div>
-</div>
-
 <div id="toast"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
-
 <script>
 // ─── STATE ───
 let state = {
@@ -1678,39 +849,16 @@ function toast(msg) {
   setTimeout(() => t.classList.remove('show'), 2500);
 }
 
-// Format date yyyy-MM-dd -> dd.mm.yyyy
-function fmtDate(d) {
-  if (!d) return '';
-  const m = d.match(/^(\d{4})-(\d{2})-(\d{2})/);
-  if (m) return m[3]+'.'+m[2]+'.'+m[1];
-  return d;
-}
-
 // ─── INIT ───
 load();
+document.getElementById('fDate').valueAsDate = new Date();
+document.getElementById('cDate').valueAsDate = new Date();
+document.getElementById('iDate').valueAsDate = new Date();
 if (state.google.url) document.getElementById('gsUrl').value = state.google.url;
 if (state.google.sheetId) document.getElementById('gsId').value = state.google.sheetId;
-
-window.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('fDate').valueAsDate = new Date();
-  document.getElementById('cDate').valueAsDate = new Date();
-  document.getElementById('iDate').valueAsDate = new Date();
-  document.getElementById('fLiters').addEventListener('input', recalcFuel);
-  document.getElementById('fPriceL').addEventListener('input', recalcFuel);
-  document.getElementById('cAmount').addEventListener('input', recalcCost);
-  document.getElementById('iAmount').addEventListener('input', recalcIncome);
-  fetchRates();
-  renderCars();
-  renderStats();
-  // prednastaviť filter na aktuálny mesiac a rok
-  const _now = new Date();
-  const _curYear  = String(_now.getFullYear());
-  const _curMonth = String(_now.getMonth()+1).padStart(2,'0');
-  // year dropdown sa naplní až v renderDashboard, preto uložíme hodnotu a aplikujeme po render
-  state._dashDefaultYear  = _curYear;
-  state._dashDefaultMonth = _curMonth;
-  renderDashboard();
-});
+renderCars();
+renderStats();
+renderDashboard();
 
 // ─── TABS ───
 const panels = ['dashboard','fuel','costs','income','stats','google'];
@@ -1724,95 +872,43 @@ function switchTab(tab) {
   const idx = tabs.indexOf(tab);
   document.querySelectorAll('.nav-item')[idx]?.classList.add('active');
   if (tab === 'stats') renderCharts();
+  if (tab === 'google') renderExportCarList();
 }
 
 // ─── CARS ───
 function renderCars() {
   const list = document.getElementById('carsList');
   const modal = document.getElementById('modalCarsList');
-  const topBar = document.getElementById('carTopBar');
   list.innerHTML = '';
   modal.innerHTML = '';
-  if (topBar) topBar.innerHTML = '';
 
   if (state.cars.length === 0) {
     list.innerHTML = '<div style="font-size:0.78rem;color:var(--muted);padding:8px 12px;">Žiadne autá</div>';
     modal.innerHTML = '<div style="font-size:0.82rem;color:var(--muted);">Zatiaľ žiadne autá.</div>';
-    if (topBar) topBar.innerHTML = '<span style="font-size:0.82rem;color:var(--muted);">Žiadne autá</span>';
   }
 
   state.cars.forEach(car => {
     const sel = state.selectedCar?.id === car.id;
-    const cid = car.id;
 
-    // ── sidebar item (select only) ──
     const item = document.createElement('div');
     item.className = 'car-item' + (sel ? ' selected' : '');
     item.innerHTML = `
       <div class="car-item-left">
-        <div class="car-color" style="background:${car.color};box-shadow:0 0 6px ${car.color}44"></div>
+        <div class="car-color" style="background:${car.color}"></div>
         <div>
           <div class="car-name">${car.name}</div>
-          <div class="car-sub">${car.plate || 'bez ŠPZ'}</div>
+          <div class="car-sub">${car.plate}</div>
         </div>
       </div>
-      <button data-carid="${cid}" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:1rem;padding:4px 8px;border-radius:6px;flex-shrink:0;">🗑</button>`;
-    item.addEventListener('click', e => {
-      if (e.target.dataset.carid) { deleteCarById(e.target.dataset.carid); return; }
-      selectCar(car);
-    });
+      <button class="del-btn" onclick="deleteCar('${car.id}',event)">✕</button>`;
+    item.onclick = (e) => { if(!e.target.classList.contains('del-btn')) selectCar(car); };
     list.appendChild(item);
 
-    // ── modal item with BIG delete button ──
-    const mItem = document.createElement('div');
-    mItem.style.cssText = 'display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;gap:10px;';
-    mItem.innerHTML = `
-      <div class="mcar-sel" style="display:flex;align-items:center;gap:10px;cursor:pointer;flex:1;">
-        <div style="width:12px;height:12px;border-radius:50%;background:${car.color};box-shadow:0 0 8px ${car.color};flex-shrink:0;"></div>
-        <div>
-          <div style="font-family:'Barlow',sans-serif;font-weight:600;font-size:0.9rem;color:var(--text);">${car.name}</div>
-          <div style="font-family:'JetBrains Mono',monospace;font-size:0.72rem;color:var(--muted);">${car.plate || 'bez ŠPZ'}</div>
-        </div>
-        ${sel ? '<span style="font-size:0.7rem;background:rgba(74,222,128,0.15);color:var(--accent);padding:2px 8px;border-radius:4px;font-family:\'Barlow Condensed\',sans-serif;font-weight:600;letter-spacing:1px;">AKTÍVNE</span>' : ''}
-      </div>
-      <button class="mcar-del" style="background:rgba(248,113,113,0.12);border:1px solid rgba(248,113,113,0.3);color:#f87171;border-radius:12px;padding:8px 16px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:0.85rem;letter-spacing:0.5px;white-space:nowrap;">🗑 Vymazať</button>`;
-    
-    const selDiv = mItem.querySelector('.mcar-sel');
-    const delBtn = mItem.querySelector('.mcar-del');
-    if (selDiv) selDiv.addEventListener('click', () => {
-      selectCar(car);
-      document.getElementById('carsModal').classList.remove('open');
-    });
-    if (delBtn) delBtn.addEventListener('click', () => {
-      if (confirm('Vymazať "' + car.name + '" a všetky jeho záznamy?')) {
-        state.cars = state.cars.filter(c => c.id !== cid);
-        state.records = state.records.filter(r => r.carId !== cid);
-        if (state.selectedCar?.id === cid) state.selectedCar = state.cars[0] || null;
-        save(); renderCars(); renderStats(); renderDashboard();
-        document.getElementById('carsModal').classList.remove('open');
-        toast('Auto vymazané ✓');
-      }
-    });
+    const mItem = item.cloneNode(true);
+    mItem.onclick = (e) => { if(!e.target.classList.contains('del-btn')) { selectCar(car); document.getElementById('carsModal').classList.remove('open'); }};
+    mItem.querySelector('.del-btn').onclick = (e) => deleteCar(car.id, e);
     modal.appendChild(mItem);
-
-    // top bar tab
-    if (topBar) {
-      const tab = document.createElement('button');
-      tab.style.cssText = `display:flex;align-items:center;gap:7px;padding:6px 14px;border-radius:6px;border:1px solid ${sel?'rgba(74,222,128,0.4)':'var(--border2)'};background:${sel?'rgba(74,222,128,0.08)':'var(--surface2)'};color:${sel?'var(--accent)':'var(--muted2)'};cursor:pointer;font-family:'Barlow',sans-serif;font-size:0.84rem;font-weight:${sel?'600':'400'};transition:all 0.15s;white-space:nowrap;`;
-      tab.innerHTML = `<span style="width:8px;height:8px;border-radius:50%;background:${car.color};box-shadow:0 0 5px ${car.color};flex-shrink:0;display:inline-block;"></span>${car.name}`;
-      tab.addEventListener('click', () => selectCar(car));
-      topBar.appendChild(tab);
-    }
   });
-
-  // + add button in top bar
-  if (topBar && state.cars.length > 0) {
-    const addBtn = document.createElement('button');
-    addBtn.style.cssText = `padding:6px 12px;border-radius:6px;border:1px dashed var(--border2);background:transparent;color:var(--muted);cursor:pointer;font-family:'Barlow',sans-serif;font-size:0.82rem;white-space:nowrap;`;
-    addBtn.textContent = '+ Auto';
-    addBtn.addEventListener('click', openAddCar);
-    topBar.appendChild(addBtn);
-  }
 
   // update pill
   if (state.selectedCar) {
@@ -1849,8 +945,7 @@ function addCar() {
   const name = document.getElementById('newCarName').value.trim();
   const plate = document.getElementById('newCarPlate').value.trim();
   if (!name) { toast('Zadaj názov auta!'); return; }
-  const tankSize = parseFloat(document.getElementById('newCarTank').value) || 50;
-  const car = { id: Date.now()+'', name, plate, color: state.selectedColor, tankSize };
+  const car = { id: Date.now()+'', name, plate, color: state.selectedColor };
   state.cars.push(car);
   state.selectedCar = car;
   save();
@@ -1860,74 +955,27 @@ function addCar() {
   document.getElementById('addCarModal').classList.remove('open');
   document.getElementById('newCarName').value = '';
   document.getElementById('newCarPlate').value = '';
-  document.getElementById('newCarTank').value = '';
   toast('Auto pridané ✓');
 }
 
-function deleteCarById(id) {
+function deleteCar(id, e) {
+  e.stopPropagation();
   if (!confirm('Vymazať auto a všetky jeho záznamy?')) return;
   state.cars = state.cars.filter(c => c.id !== id);
   state.records = state.records.filter(r => r.carId !== id);
   if (state.selectedCar?.id === id) state.selectedCar = state.cars[0] || null;
   save(); renderCars(); renderStats(); renderDashboard();
-  toast('Auto vymazané ✓');
+  toast('Auto vymazané');
 }
 
-function deleteCar(id, e) {
-  if (e && e.stopPropagation) e.stopPropagation();
-  deleteCarById(id);
-}
-
-// ─── CURRENCY RATES ───
-const RATES = { EUR: 1, CZK: 25.30, PLN: 4.28 };
-
-async function fetchRates() {
-  document.getElementById('rateCZK').textContent = '…';
-  document.getElementById('ratePLN').textContent = '…';
-  try {
-    const r = await fetch('https://api.frankfurter.app/latest?from=EUR&to=CZK,PLN');
-    const d = await r.json();
-    if (d.rates) {
-      RATES.CZK = d.rates.CZK || RATES.CZK;
-      RATES.PLN = d.rates.PLN || RATES.PLN;
-    }
-  } catch(e) { /* fallback to defaults */ }
-  document.getElementById('rateCZK').textContent = RATES.CZK.toFixed(2);
-  document.getElementById('ratePLN').textContent = RATES.PLN.toFixed(2);
-}
-
-function toEUR(amount, currency) {
-  if (!amount) return 0;
-  return amount / (RATES[currency] || 1);
-}
-
-// ─── FUEL CALC ───
-function recalcFuel() {
+// ─── FUEL ───
+document.getElementById('fLiters').addEventListener('input', calcPricePerL);
+document.getElementById('fTotal').addEventListener('input', calcPricePerL);
+function calcPricePerL() {
   const l = parseFloat(document.getElementById('fLiters').value);
-  const pl = parseFloat(document.getElementById('fPriceL').value);
-  const cur = document.getElementById('fCurrencyL').value;
-  if (l && pl) {
-    const totalLocal = l * pl;
-    const totalEUR = toEUR(totalLocal, cur);
-    document.getElementById('fTotal').value = totalEUR.toFixed(2);
-  } else {
-    document.getElementById('fTotal').value = '';
-  }
-  // tank size warning
-  const tankWarn = document.getElementById('fTankWarning');
-  if (tankWarn && l && state.selectedCar?.tankSize) {
-    tankWarn.style.display = l > state.selectedCar.tankSize ? '' : 'none';
-  }
-}
-
-function recalcCost() {
-  const a = parseFloat(document.getElementById('cAmount').value);
-  const cur = document.getElementById('cCurrency').value;
-  if (a) {
-    document.getElementById('cAmountEur').value = toEUR(a, cur).toFixed(2);
-  } else {
-    document.getElementById('cAmountEur').value = '';
-  }
+  const t = parseFloat(document.getElementById('fTotal').value);
+  if (l && t) document.getElementById('fPriceL').value = (t/l).toFixed(3);
+  else document.getElementById('fPriceL').value = '';
 }
 
 function saveFuel() {
@@ -1936,26 +984,21 @@ function saveFuel() {
   const km = parseFloat(document.getElementById('fKm').value);
   const liters = parseFloat(document.getElementById('fLiters').value);
   const total = parseFloat(document.getElementById('fTotal').value);
-  const priceL = parseFloat(document.getElementById('fPriceL').value);
-  const currency = document.getElementById('fCurrencyL').value;
   if (!date || !km || !liters || !total) { toast('Vyplň povinné polia!'); return; }
-  const pricePerLEUR = priceL ? toEUR(priceL, currency).toFixed(3) : (total/liters).toFixed(3);
-  const fullTank = document.getElementById('fFullTank').value === '1';
   const rec = {
     id: Date.now()+'',
     carId: state.selectedCar.id,
     type: 'fuel',
-    date, km, liters,
-    total: total,
-    pricePerL: pricePerLEUR,
-    origPrice: priceL,
-    origCurrency: currency,
+    date, km, liters, total,
     fuelType: document.getElementById('fFuelType').value,
-    fullTank: fullTank,
-    note: document.getElementById('fNote').value
+    note: document.getElementById('fNote').value,
+    pricePerL: (total/liters).toFixed(3)
   };
   state.records.push(rec);
-  save(); renderStats(); renderDashboard(); clearFuelForm();
+  save();
+  renderStats();
+  renderDashboard();
+  clearFuelForm();
   toast('Tankovanie uložené ✓');
   if (state.google.url) pushToGoogle(rec, 'Tankovanie');
 }
@@ -1963,11 +1006,6 @@ function saveFuel() {
 function clearFuelForm() {
   ['fKm','fLiters','fTotal','fPriceL','fNote'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('fDate').valueAsDate = new Date();
-  document.getElementById('fCurrencyL').value = 'EUR';
-  const ft = document.getElementById('fFullTank');
-  if (ft) ft.value = '1';
-  const warn = document.getElementById('fTankWarning');
-  if (warn) warn.style.display = 'none';
 }
 
 // ─── COSTS ───
@@ -1975,330 +1013,30 @@ function saveCost() {
   if (!state.selectedCar) { toast('Najprv vyber auto!'); return; }
   const date = document.getElementById('cDate').value;
   const amount = parseFloat(document.getElementById('cAmount').value);
-  const currency = document.getElementById('cCurrency').value;
-  const amountEUR = parseFloat(document.getElementById('cAmountEur').value) || toEUR(amount, currency);
   if (!date || !amount) { toast('Vyplň povinné polia!'); return; }
   const rec = {
     id: Date.now()+'',
     carId: state.selectedCar.id,
     type: 'cost',
-    date,
-    amount: amountEUR,
-    origAmount: amount,
-    origCurrency: currency,
+    date, amount,
     costType: document.getElementById('cType').value,
     km: document.getElementById('cKm').value,
     desc: document.getElementById('cDesc').value,
     note: document.getElementById('cNote').value
   };
   state.records.push(rec);
-  save(); renderStats(); renderDashboard(); clearCostForm();
+  save();
+  renderStats();
+  renderDashboard();
+  clearCostForm();
   toast('Náklad uložený ✓');
   if (state.google.url) pushToGoogle(rec, 'Naklady');
 }
 
 function clearCostForm() {
-  ['cAmount','cAmountEur','cKm','cDesc','cNote'].forEach(id => document.getElementById(id).value = '');
+  ['cAmount','cKm','cDesc','cNote'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('cDate').valueAsDate = new Date();
-  document.getElementById('cCurrency').value = 'EUR';
-}
-
-// ─── INCOME ───
-function recalcIncome() {
-  const a = parseFloat(document.getElementById('iAmount').value);
-  const cur = document.getElementById('iCurrency').value;
-  if (a) document.getElementById('iAmountEur').value = toEUR(a, cur).toFixed(2);
-  else document.getElementById('iAmountEur').value = '';
-}
-
-function saveIncome() {
-  if (!state.selectedCar) { toast('Najprv vyber auto!'); return; }
-  const date = document.getElementById('iDate').value;
-  const amount = parseFloat(document.getElementById('iAmount').value);
-  const currency = document.getElementById('iCurrency').value;
-  const amountEUR = parseFloat(document.getElementById('iAmountEur').value) || toEUR(amount, currency);
-  if (!date || !amount) { toast('Vyplň povinné polia!'); return; }
-  const rec = {
-    id: Date.now()+'',
-    carId: state.selectedCar.id,
-    type: 'income',
-    date, amount: amountEUR,
-    origAmount: amount, origCurrency: currency,
-    incomeType: document.getElementById('iType').value,
-    desc: document.getElementById('iDesc').value,
-    note: document.getElementById('iNote').value
-  };
-  state.records.push(rec);
-  save(); renderStats(); renderDashboard(); clearIncomeForm();
-  toast('Príjem uložený ✓');
-  if (state.google.url) pushToGoogle(rec, 'Prijmy');
-}
-
-function clearIncomeForm() {
-  ['iAmount','iAmountEur','iDesc','iNote'].forEach(id => document.getElementById(id).value = '');
-  document.getElementById('iDate').valueAsDate = new Date();
-  document.getElementById('iCurrency').value = 'EUR';
-}
-
-// ─── ODOMETER SCAN ───
-function openOdometerScan() {
-  document.getElementById('odoResult').style.display = 'none';
-  document.getElementById('odoLoading').style.display = 'none';
-  document.getElementById('odoUseBtn').style.display = 'none';
-  document.getElementById('odoError').style.display = 'none';
-  const img = document.getElementById('odoPreviewImg');
-  img.style.display = 'none'; img.src = '';
-  document.getElementById('odoFileInput').value = '';
-  document.getElementById('odometerModal').classList.add('open');
-}
-
-async function handleOdometerScan(e) {
-  const file = e.target.files[0];
-  if (!file) return;
-
-  const reader = new FileReader();
-  reader.onload = ev => {
-    const img = document.getElementById('odoPreviewImg');
-    img.src = ev.target.result; img.style.display = 'block';
-  };
-  reader.readAsDataURL(file);
-
-  document.getElementById('odoLoading').style.display = 'block';
-  document.getElementById('odoLoading').innerHTML = '<div class="scan-spinner"></div>OCR číta tachometer...';
-  document.getElementById('odoResult').style.display = 'none';
-  document.getElementById('odoUseBtn').style.display = 'none';
-  document.getElementById('odoError').style.display = 'none';
-
-  try {
-    const result = await Tesseract.recognize(file, 'eng', {
-      logger: m => {
-        if (m.status === 'recognizing text') {
-          document.getElementById('odoLoading').innerHTML =
-            '<div class="scan-spinner"></div>OCR: ' + Math.round(m.progress*100) + '%...';
-        }
-      }
-    });
-
-    const text = result.data.text;
-
-    // Find odometer value – largest number that looks like km (4-7 digits)
-    // Škoda Octavia IV: "14191 km" in top right
-    // Older: "216918 km" at bottom, ignore "trip XXX km"
-    const allNumbers = [];
-    const kmPattern = /(\d{4,7})[.,]?\d*\s*km/gi;
-    let m;
-    while ((m = kmPattern.exec(text)) !== null) {
-      const v = parseInt(m[1].replace(/[.,]/g,''));
-      if (v >= 100 && v <= 9999999) allNumbers.push(v);
-    }
-    // Also find large standalone numbers (without km unit)
-    const numPattern = /(\d{4,7})/g;
-    while ((m = numPattern.exec(text)) !== null) {
-      const v = parseInt(m[1]);
-      if (v >= 1000 && v <= 999999) allNumbers.push(v);
-    }
-
-    // Remove trip computer values (usually small, <5000)
-    // The odometer is the largest plausible value
-    const candidates = [...new Set(allNumbers)].sort((a,b) => b - a);
-    const km = candidates[0];
-
-    if (!km || km < 100) {
-      throw new Error('Nepodarilo sa vyčítať km. Skús priblížiť displej a foť kolmo. Raw text: "' + text.replace(/\n/g,' ').substring(0,80) + '"');
-    }
-
-    document.getElementById('odoValue').textContent = km.toLocaleString('sk-SK');
-    document.getElementById('odoResult').style.display = 'block';
-    document.getElementById('odoUseBtn').style.display = '';
-    document.getElementById('odoUseBtn').dataset.km = km;
-
-  } catch(err) {
-    const el = document.getElementById('odoError');
-    el.textContent = 'Chyba: ' + err.message;
-    el.style.display = 'block';
-  }
-  document.getElementById('odoLoading').style.display = 'none';
-}
-
-function useOdometerResult() {
-  const km = document.getElementById('odoUseBtn').dataset.km;
-  if (km) document.getElementById('fKm').value = km;
-  document.getElementById('odometerModal').classList.remove('open');
-  toast('Tachometer načítaný: ' + parseInt(km).toLocaleString('sk-SK') + ' km ✓');
-}
-
-// ─── FUELIO CSV IMPORT ───
-function openImport() {
-  document.getElementById('importModal').classList.add('open');
-}
-
-function handleImportFile(e) {
-  const file = e.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = (ev) => parseFuelioCSV(ev.target.result, file.name);
-  reader.readAsText(file, 'UTF-8');
-}
-
-function parseFuelioCSV(text, filename) {
-  const preview = document.getElementById('importPreview');
-  try {
-    const lines = text.split(/\r?\n/).map(l => l.trim()).filter(l => l);
-
-    function parseRow(line) {
-      const result = [];
-      let cur = '', inQ = false;
-      for (let i = 0; i < line.length; i++) {
-        const c = line[i];
-        if (c === '"') { inQ = !inQ; }
-        else if (c === ',' && !inQ) { result.push(cur.trim()); cur = ''; }
-        else { cur += c; }
-      }
-      result.push(cur.trim());
-      return result;
-    }
-
-    function normDate(d) {
-      if (!d) return '';
-      const part = d.split(' ')[0];
-      if (/^\d{4}-\d{2}-\d{2}$/.test(part)) return part;
-      if (/^\d{2}\.\d{2}\.\d{4}$/.test(part)) {
-        const [day,mon,yr] = part.split('.');
-        return yr+'-'+mon+'-'+day;
-      }
-      return part;
-    }
-
-    let section = null;
-    let vehicleName = '', vehiclePlate = '', vehicleDesc = '';
-    const fuelRows = [], costRows = [];
-    const catMap = {};
-
-    for (const line of lines) {
-      const clean = line.replace(/^"+|"+$/g, '').trim();
-      if (clean === '## Vehicle')        { section = 'vhdr';    continue; }
-      if (clean === '## Log')            { section = 'lhdr';    continue; }
-      if (clean === '## CostCategories') { section = 'cathdr';  continue; }
-      if (clean === '## Costs')          { section = 'costhdr'; continue; }
-      if (clean.startsWith('##'))        { section = null;      continue; }
-
-      const cols = parseRow(line);
-
-      if (section === 'vhdr' && cols[0] === 'Name') { section = 'vdata'; continue; }
-      if (section === 'vdata') {
-        vehicleName = cols[0] || 'Fuelio auto';
-        vehiclePlate = cols[8] || '';
-        vehicleDesc  = cols[1] || ''; // Description often contains color
-        section = null; continue;
-      }
-      if (section === 'lhdr' && (cols[0] === 'Data' || cols[0] === 'Date')) { section = 'ldata'; continue; }
-      if (section === 'ldata') { if (cols.length > 2 && cols[0]) fuelRows.push(cols); continue; }
-      if (section === 'cathdr' && cols[0] === 'CostTypeID') { section = 'catdata'; continue; }
-      if (section === 'catdata') { if (cols[0] && cols[1]) catMap[cols[0]] = cols[1]; continue; }
-      if (section === 'costhdr' && cols[0] === 'CostTitle') { section = 'costdata'; continue; }
-      if (section === 'costdata') { if (cols.length > 5 && cols[1]) costRows.push(cols); continue; }
-    }
-
-    // Fuel – cols: Data(0),Odo(1),Fuel(2),Full(3),Price(4),l100(5),...,FuelType(12),VolumePrice(13)
-    const fuelTypeMap = {'100':'Benzín','110':'Benzín','112':'Nafta','120':'LPG','130':'CNG','200':'Elektrina'};
-    const importedFuels = fuelRows.map(r => {
-      const liters = parseFloat(r[2]) || 0;
-      const total  = parseFloat(r[4]) || 0;
-      const priceL = parseFloat(r[13]) || (liters > 0 && total > 0 ? total/liters : 0);
-      const fullTank = r[3] === '1'; // col 3 = Full (1=plna, 0=ciastocna)
-      return { date: normDate(r[0]), km: parseFloat(r[1])||0, liters, total,
-               pricePerL: priceL.toFixed(3), fuelType: fuelTypeMap[r[12]]||'Benzín',
-               fullTank, note: r[9]||'' };
-    }).filter(r => r.date && r.liters > 0);
-
-    // Costs – cols: CostTitle(0),Date(1),Odo(2),CostTypeID(3),Notes(4),Cost(5),...,isIncome(14)
-    const importedCosts = [], importedIncomes = [];
-    costRows.forEach(r => {
-      const date     = normDate(r[1]);
-      const cost     = parseFloat(r[5]) || 0;
-      const isIncome = r[14] === '1';
-      const catName  = catMap[r[3]] || 'Iné';
-      const desc     = (r[0]||'') + (r[4] ? ' – '+r[4] : '');
-      const km       = parseFloat(r[2]) || 0;
-      if (!date || cost <= 0) return;
-      if (isIncome) {
-        importedIncomes.push({ date, amount: cost, incomeType: catName, desc, note: '', origCurrency: 'EUR' });
-      } else {
-        importedCosts.push({ date, amount: cost, costType: catName, desc, note: '', km });
-      }
-    });
-
-    preview.innerHTML = '<div style="font-size:0.82rem;color:var(--muted2);margin-bottom:12px;line-height:1.9;">'
-      + '<strong style="color:var(--text)">Auto:</strong> '+vehicleName+(vehiclePlate?' ('+vehiclePlate+')':'')+'<br>'
-      + '<span style="color:var(--fuel)">⛽ Tankovaní: <strong>'+importedFuels.length+'</strong></span> &nbsp;'
-      + '<span style="color:var(--cost)">🔧 Nákladov: <strong>'+importedCosts.length+'</strong></span> &nbsp;'
-      + '<span style="color:var(--income)">💰 Príjmov: <strong>'+importedIncomes.length+'</strong></span>'
-      + '</div><div style="max-height:200px;overflow-y:auto;font-size:0.78rem;color:var(--muted);background:var(--bg);border-radius:8px;padding:10px;display:flex;flex-direction:column;gap:3px;">'
-      + importedFuels.slice(0,3).map(r=>'<div>⛽ '+r.date+' · '+r.km+'km · '+r.liters+'l · '+r.pricePerL+'€/l · '+r.total+'€</div>').join('')
-      + (importedFuels.length>3?'<div style="color:var(--accent)">...a ďalších '+(importedFuels.length-3)+' tankovaní</div>':'')
-      + importedCosts.slice(0,2).map(r=>'<div>🔧 '+r.date+' · '+r.costType+' · '+r.desc+' · '+r.amount+'€</div>').join('')
-      + importedIncomes.slice(0,3).map(r=>'<div style="color:var(--income)">💰 '+r.date+' · '+r.incomeType+' · '+r.desc+' · '+r.amount+'€</div>').join('')
-      + '</div>';
-
-    window._pendingImport = { vehicleName, vehiclePlate, vehicleDesc, importedFuels, importedCosts, importedIncomes };
-    document.getElementById('importConfirmBtn').style.display = '';
-
-  } catch(err) {
-    preview.innerHTML = '<div style="color:var(--danger);font-size:0.82rem;">Chyba: '+err.message+'</div>';
-    console.error(err);
-  }
-}
-
-function confirmImport() {
-  const data = window._pendingImport;
-  if (!data) return;
-
-  let car = state.cars.find(c => c.name.toLowerCase() === data.vehicleName.toLowerCase());
-  if (!car) {
-    // Auto-assign color based on car description (color name in Fuelio)
-    const desc = (data.vehicleDesc || '').toLowerCase();
-    const nameLC = data.vehicleName.toLowerCase();
-    let autoColor = '#8896a8'; // default silver
-    if (/čierna|čierne|black|schwarz/.test(desc+nameLC)) autoColor = '#374151';
-    else if (/biela|biele|white|weiss/.test(desc+nameLC)) autoColor = '#e2e8f0';
-    else if (/červená|červené|red|rot/.test(desc+nameLC)) autoColor = '#f87171';
-    else if (/modrá|modré|blue|blau/.test(desc+nameLC)) autoColor = '#60a5fa';
-    else if (/zelená|zelené|green|grun/.test(desc+nameLC)) autoColor = '#4ade80';
-    else if (/sivá|šedá|grey|gray|silber|silver/.test(desc+nameLC)) autoColor = '#8896a8';
-    else if (/hnedá|braun|brown/.test(desc+nameLC)) autoColor = '#92400e';
-    else if (/žltá|yellow|gelb/.test(desc+nameLC)) autoColor = '#fbbf24';
-    car = { id: Date.now()+'', name: data.vehicleName, plate: data.vehiclePlate, color: autoColor };
-    state.cars.push(car);
-  }
-  state.selectedCar = car;
-
-  let added = 0;
-  for (const r of data.importedFuels) {
-    const dup = state.records.find(x => x.type==='fuel' && x.carId===car.id && x.date===r.date && x.km===r.km);
-    if (dup) continue;
-    state.records.push({ id: (Date.now()+added)+'', carId: car.id, type:'fuel', ...r });
-    added++;
-  }
-  for (const r of data.importedCosts) {
-    const dup = state.records.find(x => x.type==='cost' && x.carId===car.id && x.date===r.date && x.amount===r.amount);
-    if (dup) continue;
-    state.records.push({ id: (Date.now()+added)+'', carId: car.id, type:'cost', ...r });
-    added++;
-  }
-  for (const r of (data.importedIncomes||[])) {
-    const dup = state.records.find(x => x.type==='income' && x.carId===car.id && x.date===r.date && x.amount===r.amount);
-    if (dup) continue;
-    state.records.push({ id: (Date.now()+added)+'', carId: car.id, type:'income', origCurrency:'EUR', ...r });
-    added++;
-  }
-
-  save(); renderCars(); renderStats(); renderDashboard();
-  document.getElementById('importModal').classList.remove('open');
-  document.getElementById('importPreview').innerHTML = '';
-  document.getElementById('importFileInput').value = '';
-  document.getElementById('importConfirmBtn').style.display = 'none';
-  window._pendingImport = null;
-  toast(`Import hotový: ${added} nových záznamov ✓`);
+document.getElementById('iDate').valueAsDate = new Date();
 }
 
 // ─── DELETE RECORD ───
@@ -2308,113 +1046,39 @@ function deleteRecord(id) {
   toast('Záznam vymazaný');
 }
 
-
-// ── Correct consumption calculation (only full tank fills) ──
-function calcConsumption(fuels) {
-  // Sort by km
-  const sorted = [...fuels].filter(r => r.km > 0).sort((a,b) => a.km - b.km);
-  if (sorted.length < 2) return null;
-  
-  let totalL = 0, totalKm = 0;
-  let pendingL = 0; // accumulate partial fills
-  let lastFullKm = null;
-  
-  for (const r of sorted) {
-    const liters = parseFloat(r.liters) || 0;
-    const isFull = r.fullTank !== false && r.fullTank !== 0 && r.fullTank !== '0';
-    
-    pendingL += liters;
-    
-    if (isFull) {
-      if (lastFullKm !== null) {
-        const kmDiff = r.km - lastFullKm;
-        if (kmDiff > 0) {
-          totalL += pendingL;
-          totalKm += kmDiff;
-        }
-      }
-      lastFullKm = r.km;
-      pendingL = 0;
-    }
-  }
-  
-  if (totalKm <= 0) {
-    // fallback: simple total liters / total km range
-    const kmRange = sorted[sorted.length-1].km - sorted[0].km;
-    const lTotal = sorted.slice(1).reduce((s,r) => s + (parseFloat(r.liters)||0), 0);
-    return kmRange > 0 ? lTotal/kmRange*100 : null;
-  }
-  return totalL / totalKm * 100;
-}
-
-// Consumption since last fill
-function calcLastConsumption(fuels) {
-  const sorted = [...fuels].filter(r => r.km > 0).sort((a,b) => a.km - b.km);
-  if (sorted.length < 2) return null;
-  const last = sorted[sorted.length-1];
-  const prev = sorted[sorted.length-2];
-  const kmDiff = last.km - prev.km;
-  if (kmDiff <= 0) return null;
-  return (parseFloat(last.liters)||0) / kmDiff * 100;
-}
-
 // ─── STATS ───
 function renderStats() {
   const carId = state.selectedCar?.id;
   const fuels = state.records.filter(r => r.type==='fuel' && (!carId || r.carId===carId));
   const costs = state.records.filter(r => r.type==='cost' && (!carId || r.carId===carId));
-  const incomes = state.records.filter(r => r.type==='income' && (!carId || r.carId===carId));
 
   const totalL = fuels.reduce((s,r) => s + (r.liters||0), 0);
   document.getElementById('statLiters').textContent = totalL.toFixed(1);
 
-  const totalC = costs.reduce((s,r) => s + (r.amount||0), 0)
-              + fuels.reduce((s,r) => s + (r.total||0), 0);
+  const totalC = costs.reduce((s,r) => s + (r.amount||0), 0);
   document.getElementById('statCosts').textContent = totalC.toFixed(2) + ' €';
-
-  const totalI = incomes.reduce((s,r) => s + (r.amount||0), 0);
-  document.getElementById('statIncome').textContent = totalI.toFixed(2) + ' €';
 
   const sorted = [...fuels].sort((a,b) => new Date(b.date)-new Date(a.date));
   document.getElementById('statKm').textContent = sorted[0]?.km || '–';
 
-  const cons = calcConsumption(fuels);
-  document.getElementById('statAvg').textContent = cons ? cons.toFixed(1) : '–';
+  // consumption
+  if (fuels.length >= 2) {
+    const s2 = [...fuels].sort((a,b) => a.km - b.km);
+    const kmDiff = s2[s2.length-1].km - s2[0].km;
+    const lTotal = s2.slice(1).reduce((s,r) => s+r.liters, 0);
+    if (kmDiff > 0) {
+      document.getElementById('statAvg').textContent = (lTotal/kmDiff*100).toFixed(1);
+    } else document.getElementById('statAvg').textContent = '–';
+  } else document.getElementById('statAvg').textContent = '–';
 }
 
 // ─── DASHBOARD TABLE ───
 function renderDashboard() {
   const carId = state.selectedCar?.id;
-
-  // populate year dropdown
-  const yearSel = document.getElementById('dashYear');
-  const monthSel = document.getElementById('dashMonth');
-  const curYear = yearSel.value;
-  const years = [...new Set(state.records.map(r => r.date?.slice(0,4)).filter(Boolean))].sort().reverse();
-  yearSel.innerHTML = '<option value="">Všetky roky</option>' + years.map(y => `<option value="${y}">${y}</option>`).join('');
-
-  // apply saved default (first render) or keep current selection
-  if (state._dashDefaultYear && !curYear) {
-    yearSel.value = years.includes(state._dashDefaultYear) ? state._dashDefaultYear : (years[0] || '');
-    monthSel.value = state._dashDefaultMonth || '';
-    delete state._dashDefaultYear;
-    delete state._dashDefaultMonth;
-  } else if (curYear && years.includes(curYear)) {
-    yearSel.value = curYear;
-  }
-
-  const selYear = yearSel.value;
-  const selMonth = document.getElementById('dashMonth').value;
-
-  let recs = [...state.records]
+  const recs = [...state.records]
     .filter(r => !carId || r.carId === carId)
-    .filter(r => !selYear  || r.date?.startsWith(selYear))
-    .filter(r => !selMonth || (selYear ? r.date?.startsWith(selYear + '-' + selMonth) : r.date?.slice(5,7) === selMonth))
-    .sort((a,b) => new Date(b.date) - new Date(a.date));
-
-  // show count
-  const countEl = document.getElementById('dashCount');
-  if (countEl) countEl.textContent = recs.length ? recs.length + ' záznamov' : '';
+    .sort((a,b) => new Date(b.date)-new Date(a.date))
+    .slice(0, 30);
 
   const tbody = document.getElementById('dashboardTable');
   const empty = document.getElementById('dashboardEmpty');
@@ -2428,28 +1092,20 @@ function renderDashboard() {
     const tr = document.createElement('tr');
     if (r.type === 'fuel') {
       tr.innerHTML = `
-        <td>${fmtDate(r.date)}</td>
+        <td>${r.date}</td>
         <td><span style="color:${car?.color||'#aaa'}">${car?.name||'?'}</span></td>
         <td><span class="badge fuel">⛽ Palivo</span></td>
-        <td>${r.liters} l · ${r.fuelType} · ${r.km} km${r.fullTank===false||r.fullTank===0||r.fullTank==='0'?' · ⚡čiast.':''} ${r.note?' · '+r.note:''}</td>
-        <td style="color:var(--fuel);font-weight:600;">${(+r.total).toFixed(2)} €</td>
-        <td><button class="del-btn" onclick="deleteRecord('${r.id}')">✕</button></td>`;
-    } else if (r.type === 'income') {
-      tr.innerHTML = `
-        <td>${fmtDate(r.date)}</td>
-        <td><span style="color:${car?.color||'#aaa'}">${car?.name||'?'}</span></td>
-        <td><span class="badge income">💰 ${r.incomeType}</span></td>
-        <td>${r.desc||''}${r.note?' · '+r.note:''}</td>
-        <td style="color:var(--income);font-weight:600;">+${(+r.amount).toFixed(2)} €</td>
+        <td>${r.liters} l · ${r.fuelType} · ${r.km} km${r.note?' · '+r.note:''}</td>
+        <td style="color:var(--fuel);font-weight:600;">${r.total.toFixed(2)} €</td>
         <td><button class="del-btn" onclick="deleteRecord('${r.id}')">✕</button></td>`;
     } else {
       const badgeClass = r.costType==='Oprava'?'repair':r.costType==='Poistenie'?'insurance':'other';
       tr.innerHTML = `
-        <td>${fmtDate(r.date)}</td>
+        <td>${r.date}</td>
         <td><span style="color:${car?.color||'#aaa'}">${car?.name||'?'}</span></td>
-        <td><span class="badge ${badgeClass}">🔧 ${r.costType}</span></td>
+        <td><span class="badge ${badgeClass}">?? ${r.costType}</span></td>
         <td>${r.desc||''}${r.note?' · '+r.note:''}</td>
-        <td style="color:var(--cost);font-weight:600;">${(+r.amount).toFixed(2)} €</td>
+        <td style="color:var(--cost);font-weight:600;">${r.amount.toFixed(2)} €</td>
         <td><button class="del-btn" onclick="deleteRecord('${r.id}')">✕</button></td>`;
     }
     tbody.appendChild(tr);
@@ -2458,765 +1114,296 @@ function renderDashboard() {
 
 // ─── CHARTS ───
 let chartInstances = {};
-let statPeriod = 'all';
-let axisMode = 'month'; // 'month' or 'year'
-
-function setAxisMode(mode, btn) {
-  axisMode = mode;
-  document.getElementById('axisMonthBtn').classList.toggle('active', mode==='month');
-  document.getElementById('axisYearBtn').classList.toggle('active', mode==='year');
-  renderCharts();
-}
-
-function setStatPeriod(period, btn) {
-  statPeriod = period;
-  document.querySelectorAll('#statFilterBtns .currency-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  const yearSel = document.getElementById('statYear');
-  const monthSel = document.getElementById('statMonth');
-  if (period === 'all') { yearSel.style.display = 'none'; monthSel.style.display = 'none'; }
-  if (period === 'year') { yearSel.style.display = ''; monthSel.style.display = 'none'; }
-  if (period === 'month') { yearSel.style.display = ''; monthSel.style.display = ''; }
-  renderCharts();
-}
-
-function populateYearSelect() {
-  const sel = document.getElementById('statYear');
-  const years = [...new Set(state.records.map(r => r.date?.slice(0,4)).filter(Boolean))].sort().reverse();
-  const cur = sel.value;
-  sel.innerHTML = years.map(y => `<option value="${y}">${y}</option>`).join('');
-  if (cur && years.includes(cur)) sel.value = cur;
-  const now = new Date();
-  document.getElementById('statMonth').value = String(now.getMonth()+1).padStart(2,'0');
-}
-
-function filterRecordsByPeriod(records) {
-  if (statPeriod === 'all') return records;
-  const year = document.getElementById('statYear').value;
-  if (!year) return records;
-  if (statPeriod === 'year') return records.filter(r => r.date?.startsWith(year));
-  const month = document.getElementById('statMonth').value;
-  return records.filter(r => r.date?.startsWith(year + '-' + month));
-}
-
-// group records by month or year key
-function groupByAxis(records, valFn) {
-  const map = {};
-  records.forEach(r => {
-    const key = axisMode === 'year' ? r.date?.slice(0,4) : r.date?.slice(0,7);
-    if (key) map[key] = (map[key]||0) + valFn(r);
-  });
-  return map;
-}
-
-// show drilldown table
-function showDrilldown(title, headers, rows) {
-  document.getElementById('drilldownTitle').textContent = title;
-  document.getElementById('drilldownHead').innerHTML = headers.map(h=>`<th style="padding:8px 14px;text-align:left;font-size:0.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-family:'Barlow Condensed',sans-serif;font-weight:600;">${h}</th>`).join('');
-  document.getElementById('drilldownBody').innerHTML = rows.map(r =>
-    `<tr style="border-bottom:1px solid var(--border);">${r.map(c=>`<td style="padding:8px 14px;font-size:0.82rem;font-family:'Barlow',sans-serif;">${c}</td>`).join('')}</tr>`
-  ).join('');
-  document.getElementById('chartDrilldown').style.display = '';
-  document.getElementById('chartDrilldown').scrollIntoView({behavior:'smooth', block:'nearest'});
-}
-
 function renderCharts() {
-  populateYearSelect();
   const carId = state.selectedCar?.id;
-  const allFuels = [...state.records.filter(r => r.type==='fuel' && (!carId || r.carId===carId))].sort((a,b)=>new Date(a.date)-new Date(b.date));
-  const allCosts = state.records.filter(r => r.type==='cost' && (!carId || r.carId===carId));
+  const fuels = [...state.records.filter(r => r.type==='fuel' && (!carId || r.carId===carId))].sort((a,b)=>new Date(a.date)-new Date(b.date));
+  const costs = state.records.filter(r => r.type==='cost' && (!carId || r.carId===carId));
 
-  const fuels = filterRecordsByPeriod(allFuels);
-  const costs = filterRecordsByPeriod(allCosts);
+  const co = { color: 'white', font: { family: "'DM Mono'" } };
+  const gridColor = '#2a2d38';
 
-  const co = { color: '#8896a8', font: { family: "'Barlow', sans-serif", size: 11 } };
-  const grid = '#1e2630';
+  // Fuel chart
+  const lastFuels = fuels.slice(-10);
+  renderChart('chartFuel', 'bar', {
+    labels: lastFuels.map(r => r.date.slice(5)),
+    datasets: [{ label: 'Suma €', data: lastFuels.map(r => r.total), backgroundColor: '#f9a82555', borderColor: '#f9a825', borderWidth: 2, borderRadius: 4 }]
+  }, co, gridColor);
 
-  // ── Summary row ──
-  const sortedByKm = [...fuels].sort((a,b)=>a.km-b.km);
-  const kmRange = sortedByKm.length >= 2 ? sortedByKm[sortedByKm.length-1].km - sortedByKm[0].km : 0;
-  const totalL = fuels.reduce((s,r)=>s+(r.liters||0),0);
-  const consVal = calcConsumption(fuels);
-  const avgCons = consVal ? consVal.toFixed(1) : '–';
-  const totalFuelCost = fuels.reduce((s,r)=>s+(r.total||0),0);
-  const costPerKm = kmRange > 0 ? (totalFuelCost/kmRange).toFixed(2) : '–';
-  const totalOtherCost = costs.reduce((s,r)=>s+(r.amount||0),0);
-  const totalAllCost = totalFuelCost + totalOtherCost;
-  const totalIncome = filterRecordsByPeriod(state.records.filter(r=>r.type==='income'&&(!carId||r.carId===carId))).reduce((s,r)=>s+(r.amount||0),0);
-  const profit = totalIncome - totalAllCost;
+  // Costs by category
+  const catMap = {};
+  costs.forEach(r => catMap[r.costType] = (catMap[r.costType]||0) + r.amount);
+  const cats = Object.keys(catMap);
+  const colors = ['#47c3ff','#b47fff','#f9a825','#ff5e5e','#4caf50','#e8ff47','#ff9800','#aaa'];
+  renderChart('chartCosts', 'doughnut', {
+    labels: cats.length ? cats : ['Žiadne dáta'],
+    datasets: [{ data: cats.length ? cats.map(c=>catMap[c]) : [1], backgroundColor: cats.length ? colors.slice(0,cats.length) : ['#2a2d38'], borderWidth: 0 }]
+  }, co, gridColor, true);
 
-  document.getElementById('ssFillups').textContent = fuels.length;
-  document.getElementById('ssFillupsSub').textContent = fuels.length > 1 && kmRange > 0 ? `každých ~${Math.round(kmRange/(fuels.length-1))} km` : 'tankovaní';
-  const kmEl = document.getElementById('ssTotalKm');
-  if (kmEl) kmEl.textContent = kmRange > 0 ? kmRange.toLocaleString('sk-SK') : '–';
-  document.getElementById('ssConsumption').textContent = avgCons === '–' ? '–' : avgCons + ' l';
-  document.getElementById('ssFuelCost').textContent = costPerKm !== '–' ? costPerKm + ' €' : '–';
-  document.getElementById('ssFuelCostSub').textContent = costPerKm !== '–' ? costPerKm + ' €/km' : '€/km palivo';
-  document.getElementById('ssTotalCost').textContent = totalAllCost > 0 ? totalAllCost.toFixed(2) + ' €' : '0 €';
-  document.getElementById('ssTotalCostSub').textContent = kmRange > 0 ? (totalAllCost/kmRange).toFixed(2) + ' €/km' : 'palivo + opravy';
-  document.getElementById('ssTotalIncome').textContent = totalIncome > 0 ? totalIncome.toFixed(2) + ' €' : '0 €';
-  const profitEl = document.getElementById('ssProfit');
-  profitEl.textContent = (profit >= 0 ? '+' : '') + profit.toFixed(2) + ' €';
-  profitEl.style.color = profit >= 0 ? 'var(--income)' : '#f87171';
+  // Consumption
+  const consData = [];
+  const sorted = [...fuels].sort((a,b)=>a.km-b.km);
+  for (let i = 1; i < sorted.length; i++) {
+    const kmD = sorted[i].km - sorted[i-1].km;
+    if (kmD > 0) consData.push({ x: sorted[i].date.slice(5), y: (sorted[i].liters/kmD*100).toFixed(2) });
+  }
+  renderChart('chartConsumption', 'line', {
+    labels: consData.map(d=>d.x),
+    datasets: [{ label: 'l/100km', data: consData.map(d=>d.y), borderColor: '#e8ff47', backgroundColor: '#e8ff4715', tension: 0.3, fill: true, pointRadius: 4, pointBackgroundColor: '#e8ff47' }]
+  }, co, gridColor);
 
-  // ── Consumption l/100km ──
-  // Consumption chart – use full-tank method per period
-  const consMap = {};
-  // group fuels by period
-  const fuelsByPeriod = {};
-  fuels.forEach(r => {
-    const key = axisMode==='year' ? r.date?.slice(0,4) : r.date?.slice(0,7);
-    if (!fuelsByPeriod[key]) fuelsByPeriod[key] = [];
-    fuelsByPeriod[key].push(r);
+  // Monthly total
+  const monthMap = {};
+  [...fuels.map(r=>({date:r.date,val:r.total})), ...costs.map(r=>({date:r.date,val:r.amount}))].forEach(r => {
+    const m = r.date.slice(0,7);
+    monthMap[m] = (monthMap[m]||0) + r.val;
   });
-  Object.entries(fuelsByPeriod).forEach(([key, recs]) => {
-    // for per-period, use simple total/km if not enough full fills
-    const sorted = [...recs].sort((a,b)=>a.km-b.km);
-    if (sorted.length >= 2) {
-      const kmD = sorted[sorted.length-1].km - sorted[0].km;
-      const lSum = sorted.slice(1).reduce((s,r)=>s+(parseFloat(r.liters)||0),0);
-      if (kmD > 0) consMap[key] = [+(lSum/kmD*100).toFixed(1)];
-    }
-  });
-  const consKeys = Object.keys(consMap).sort();
-  renderChart('chartConsumption','line',{
-    labels: consKeys,
-    datasets:[{label:'l/100km', data:consKeys.map(k=>+(consMap[k].reduce((a,b)=>a+b,0)/consMap[k].length).toFixed(2)),
-      borderColor:'#4ade80', backgroundColor:'rgba(74,222,128,0.08)', tension:0.3, fill:true, pointRadius:4, pointBackgroundColor:'#4ade80'}]
-  }, co, grid, false, (idx)=>{
-    const key = consKeys[idx];
-    const recs = fuels.filter(r=>(axisMode==='year'?r.date?.slice(0,4):r.date?.slice(0,7))===key);
-    showDrilldown(`Spotreba – ${key}`,['Dátum','Km','Litrov','l/100km'],
-      recs.map((r,i,a)=>{ const prev=a[i-1]; const kmD=prev?r.km-prev.km:0; return [fmtDate(r.date), r.km, r.liters+'l', kmD>0?(r.liters/kmD*100).toFixed(1):'–']; }));
-  }, 'l');
-
-  // ── Fuel price €/l ──
-  const priceMap = groupByAxis(fuels, r=>parseFloat(r.pricePerL)||0);
-  const priceKeys = Object.keys(priceMap).sort();
-  const priceCounts = {};
-  fuels.forEach(r=>{const k=axisMode==='year'?r.date?.slice(0,4):r.date?.slice(0,7); priceCounts[k]=(priceCounts[k]||0)+1;});
-  renderChart('chartFuelPrice','line',{
-    labels: priceKeys,
-    datasets:[{label:'€/l', data:priceKeys.map(k=>priceCounts[k]?+(priceMap[k]/priceCounts[k]).toFixed(3):0),
-      borderColor:'#fbbf24', backgroundColor:'rgba(251,191,36,0.08)', tension:0.3, fill:true, pointRadius:4, pointBackgroundColor:'#fbbf24'}]
-  }, co, grid, false, (idx)=>{
-    const key = priceKeys[idx];
-    const recs = fuels.filter(r=>(axisMode==='year'?r.date?.slice(0,4):r.date?.slice(0,7))===key);
-    showDrilldown(`Cena paliva – ${key}`,['Dátum','€/l','Litrov','Celkom'],
-      recs.map(r=>[fmtDate(r.date), r.pricePerL+'€', r.liters+'l', r.total?.toFixed(2)+'€']));
-  });
-
-  // ── Monthly costs (fuel + other) ──
-  const allRecs = [...allFuels.map(r=>({date:r.date,val:r.total,t:'fuel'})),...allCosts.map(r=>({date:r.date,val:r.amount,t:'cost'}))];
-  const fuelByM={}, costByM={};
-  allRecs.forEach(r=>{
-    const k=axisMode==='year'?r.date?.slice(0,4):r.date?.slice(0,7);
-    if(!k)return;
-    if(r.t==='fuel') fuelByM[k]=(fuelByM[k]||0)+r.val;
-    else costByM[k]=(costByM[k]||0)+r.val;
-  });
-  const mKeys=[...new Set([...Object.keys(fuelByM),...Object.keys(costByM)])].sort().slice(-24);
-  renderChart('chartMonthly','bar',{
-    labels:mKeys,
-    datasets:[
-      {label:'Palivo €', data:mKeys.map(k=>+(fuelByM[k]||0).toFixed(2)), backgroundColor:'rgba(251,191,36,0.3)', borderColor:'#fbbf24', borderWidth:2, borderRadius:3},
-      {label:'Ostatné €', data:mKeys.map(k=>+(costByM[k]||0).toFixed(2)), backgroundColor:'rgba(96,165,250,0.3)', borderColor:'#60a5fa', borderWidth:2, borderRadius:3}
-    ]
-  }, co, grid, false, (idx)=>{
-    const key=mKeys[idx];
-    const fRecs=allFuels.filter(r=>(axisMode==='year'?r.date?.slice(0,4):r.date?.slice(0,7))===key);
-    const cRecs=allCosts.filter(r=>(axisMode==='year'?r.date?.slice(0,4):r.date?.slice(0,7))===key);
-    const rows=[
-      ...fRecs.map(r=>[r.date,'⛽ Palivo',r.liters+'l',r.total?.toFixed(2)+'€']),
-      ...cRecs.map(r=>[r.date,'🔧 '+r.costType,r.desc||'–',r.amount?.toFixed(2)+'€'])
-    ].sort((a,b)=>a[0]>b[0]?1:-1);
-    showDrilldown(`📅 ${key}`,['Dátum','Typ','Detail','Suma'],rows);
-  });
-
-  // ── Cost categories doughnut ──
-  const catMap={};
-  costs.forEach(r=>catMap[r.costType]=(catMap[r.costType]||0)+r.amount);
-  const fuelTot=fuels.reduce((s,r)=>s+(r.total||0),0);
-  if(fuelTot>0) catMap['Palivo']=(catMap['Palivo']||0)+fuelTot;
-  const cats=Object.keys(catMap);
-  const pal=['#fbbf24','#60a5fa','#c084fc','#f87171','#4ade80','#86efac','#fb923c','#8896a8'];
-  renderChart('chartCosts','doughnut',{
-    labels:cats.length?cats:['Žiadne dáta'],
-    datasets:[{data:cats.length?cats.map(c=>+catMap[c].toFixed(2)):[1], backgroundColor:cats.length?pal.slice(0,cats.length):['#1e2630'], borderWidth:0}]
-  }, co, grid, true, (idx)=>{
-    const cat=cats[idx];
-    if(cat==='Palivo'){
-      showDrilldown('⛽ Palivo',['Dátum','Litrov','Celkom €','Typ'],fuels.map(r=>[r.date,r.liters+'l',r.total?.toFixed(2)+'€',r.fuelType||'']));
-    } else {
-      const recs=costs.filter(r=>r.costType===cat);
-      showDrilldown('🔧 '+cat,['Dátum','Popis','Suma €'],recs.map(r=>[r.date,r.desc||'–',r.amount?.toFixed(2)+'€']));
-    }
-  });
-
-  // ── Fuel costs bar (wide) ──
-  const fuelMap=groupByAxis(fuels,r=>r.total||0);
-  const fuelKeys=Object.keys(fuelMap).sort();
-  renderChart('chartFuel','bar',{
-    labels:fuelKeys,
-    datasets:[{label:'Palivo €', data:fuelKeys.map(k=>+fuelMap[k].toFixed(2)), backgroundColor:'rgba(251,191,36,0.2)', borderColor:'#fbbf24', borderWidth:2, borderRadius:4}]
-  }, co, grid, false, (idx)=>{
-    const key=fuelKeys[idx];
-    const recs=fuels.filter(r=>(axisMode==='year'?r.date?.slice(0,4):r.date?.slice(0,7))===key);
-    showDrilldown(`⛽ Palivo – ${key}`,['Dátum','Km','Litrov','€/l','Celkom'],
-      recs.map(r=>[r.date,r.km,r.liters+'l',r.pricePerL+'€',r.total?.toFixed(2)+'€']));
-  });
-
-  // ── Stacked overview: fuel + other costs + income categories ──
-  const allIncomes = filterRecordsByPeriod(state.records.filter(r=>r.type==='income'&&(!carId||r.carId===carId)));
-  // group income by category per period
-  const incCats = [...new Set(allIncomes.map(r=>r.incomeType||'Príjem'))];
-  const fuelByP={}, otherByP={};
-  const incByCatP = {};
-  incCats.forEach(c => incByCatP[c]={});
-
-  allFuels.forEach(r=>{
-    const k=axisMode==='year'?r.date?.slice(0,4):r.date?.slice(0,7);
-    if(k) fuelByP[k]=(fuelByP[k]||0)+(r.total||0);
-  });
-  allCosts.forEach(r=>{
-    const k=axisMode==='year'?r.date?.slice(0,4):r.date?.slice(0,7);
-    if(k) otherByP[k]=(otherByP[k]||0)+(r.amount||0);
-  });
-  allIncomes.forEach(r=>{
-    const k=axisMode==='year'?r.date?.slice(0,4):r.date?.slice(0,7);
-    const cat=r.incomeType||'Príjem';
-    if(k && incByCatP[cat]) incByCatP[cat][k]=(incByCatP[cat][k]||0)+(r.amount||0);
-  });
-
-  const pKeys=[...new Set([...Object.keys(fuelByP),...Object.keys(otherByP),...Object.keys(incByCatP[incCats[0]]||{})])].sort().slice(-24);
-
-  const incomeColors = ['#4ade80','#86efac','#6ee7b7','#34d399','#10b981','#059669'];
-  const datasets = [
-    {label:'Palivo €', data:pKeys.map(k=>+(fuelByP[k]||0).toFixed(2)), backgroundColor:'rgba(251,191,36,0.7)', borderColor:'#fbbf24', borderWidth:1, borderRadius:4, stack:'costs'},
-    {label:'Ostatné náklady €', data:pKeys.map(k=>+(otherByP[k]||0).toFixed(2)), backgroundColor:'rgba(96,165,250,0.7)', borderColor:'#60a5fa', borderWidth:1, borderRadius:4, stack:'costs'},
-    ...incCats.map((cat,i) => ({
-      label: cat+' €',
-      data: pKeys.map(k=>+(incByCatP[cat][k]||0).toFixed(2)),
-      backgroundColor: (incomeColors[i%incomeColors.length]).replace('#','rgba(').replace(/^rgba\(([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})\)$/, (_,r,g,b)=>`rgba(${parseInt(r,16)},${parseInt(g,16)},${parseInt(b,16)},0.75)`)||'rgba(74,222,128,0.7)',
-      borderColor: incomeColors[i%incomeColors.length],
-      borderWidth:1, borderRadius:4, stack:'income'
-    }))
-  ];
-  // fix color parsing – simpler approach
-  const stackedData = {
-    labels: pKeys,
-    datasets: [
-      {label:'⛽ Palivo €', data:pKeys.map(k=>+(fuelByP[k]||0).toFixed(2)), backgroundColor:'rgba(251,191,36,0.75)', borderColor:'#fbbf24', borderWidth:1, stack:'costs'},
-      {label:'🔧 Ostatné náklady €', data:pKeys.map(k=>+(otherByP[k]||0).toFixed(2)), backgroundColor:'rgba(96,165,250,0.75)', borderColor:'#60a5fa', borderWidth:1, stack:'costs'},
-      ...incCats.map((cat,i) => ({
-        label: (i===0?'💰 ':'🟢 ')+cat+' €',
-        data: pKeys.map(k=>+(incByCatP[cat][k]||0).toFixed(2)),
-        backgroundColor: ['rgba(74,222,128,0.75)','rgba(134,239,172,0.75)','rgba(110,231,183,0.75)','rgba(52,211,153,0.75)'][i%4],
-        borderColor: ['#4ade80','#86efac','#6ee7b7','#34d399'][i%4],
-        borderWidth:1, stack:'income'
-      }))
-    ]
-  };
-
-  if (chartInstances['chartProfit']) chartInstances['chartProfit'].destroy();
-  const ctx = document.getElementById('chartProfit').getContext('2d');
-  chartInstances['chartProfit'] = new Chart(ctx, {
-    type:'bar', data: stackedData,
-
-    options:{
-      responsive:true,
-      onClick:(evt,els)=>{
-        if(!els.length) return;
-        const key=pKeys[els[0].index];
-        const iRecs=allIncomes.filter(r=>(axisMode==='year'?r.date?.slice(0,4):r.date?.slice(0,7))===key);
-        const fRecs=allFuels.filter(r=>(axisMode==='year'?r.date?.slice(0,4):r.date?.slice(0,7))===key);
-        const cRecs=allCosts.filter(r=>(axisMode==='year'?r.date?.slice(0,4):r.date?.slice(0,7))===key);
-        const rows=[
-          ...fRecs.map(r=>[fmtDate(r.date),'⛽ Palivo',r.liters+'l',r.total?.toFixed(2)+'€']),
-          ...cRecs.map(r=>[fmtDate(r.date),'🔧 '+r.costType,r.desc||'–',r.amount?.toFixed(2)+'€']),
-          ...iRecs.map(r=>[fmtDate(r.date),'💰 '+r.incomeType,r.desc||'–','+'+r.amount?.toFixed(2)+'€'])
-        ].sort((a,b)=>a[0]>b[0]?1:-1);
-        showDrilldown('📊 '+key+' – prehľad',['Dátum','Typ','Detail','Suma'],rows);
-      },
-      plugins:{
-        legend:{labels:{color:'#8896a8',font:{family:"'Barlow',sans-serif",size:11}}},
-        tooltip:{callbacks:{label:ctx=>' '+ctx.formattedValue+' €'}},
-
-      },
-      scales:{
-        x:{stacked:true, ticks:{color:'#6b6f80',font:{family:"'Barlow',sans-serif",size:11},maxRotation:45}, grid:{color:'#1e2630'}},
-        y:{stacked:true, ticks:{color:'#6b6f80',font:{family:"'Barlow',sans-serif",size:11},callback:v=>v+'€'}, grid:{color:'#1e2630'}}
-      }
-    }
-  });
-  ctx.canvas.style.cursor='pointer';
-
-  // ── Income by period table ──
-  const allIncomesAll = state.records.filter(r=>r.type==='income'&&(!carId||r.carId===carId));
-  const allIncomesF = filterRecordsByPeriod(allIncomesAll);
-  // collect all income categories
-  const iCats = [...new Set(allIncomesAll.map(r=>r.incomeType||'Príjem'))].sort();
-  // collect all periods
-  const iPeriods = [...new Set(allIncomesAll.map(r=>axisMode==='year'?r.date?.slice(0,4):r.date?.slice(0,7)).filter(Boolean))].sort().reverse().slice(0,18);
-  // build matrix
-  const iMatrix = {};
-  iCats.forEach(c=>{ iMatrix[c]={}; iPeriods.forEach(p=>iMatrix[c][p]=0); });
-  const iTotals = {};
-  iPeriods.forEach(p=>iTotals[p]=0);
-  allIncomesAll.forEach(r=>{
-    const p=axisMode==='year'?r.date?.slice(0,4):r.date?.slice(0,7);
-    const c=r.incomeType||'Príjem';
-    if(p&&iMatrix[c]) { iMatrix[c][p]=(iMatrix[c][p]||0)+(r.amount||0); iTotals[p]=(iTotals[p]||0)+(r.amount||0); }
-  });
-  const catTotals={};
-  iCats.forEach(c=>catTotals[c]=iPeriods.reduce((s,p)=>s+(iMatrix[c][p]||0),0));
-  const grandTotal=iPeriods.reduce((s,p)=>s+(iTotals[p]||0),0);
-
-  const thStyle=`padding:7px 10px;font-family:'Barlow Condensed',sans-serif;font-size:0.62rem;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);text-align:right;background:var(--surface2);white-space:nowrap;border-bottom:1px solid var(--border);`;
-  const thStyleL=`padding:7px 10px;font-family:'Barlow Condensed',sans-serif;font-size:0.62rem;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);text-align:left;background:var(--surface2);white-space:nowrap;border-bottom:1px solid var(--border);`;
-  const tdStyle=`padding:6px 10px;text-align:right;font-family:'JetBrains Mono',monospace;font-size:0.78rem;color:var(--muted2);border-bottom:1px solid var(--border);white-space:nowrap;`;
-  const tdStyleL=`padding:6px 10px;text-align:left;font-family:'Barlow',sans-serif;font-size:0.82rem;color:var(--text);border-bottom:1px solid var(--border);white-space:nowrap;`;
-  const tdGreen=`padding:6px 10px;text-align:right;font-family:'JetBrains Mono',monospace;font-size:0.78rem;color:var(--income);font-weight:600;border-bottom:1px solid var(--border);white-space:nowrap;`;
-
-  let headHtml='<tr><th style="'+thStyleL+'">Kategória</th>';
-  iPeriods.forEach(p=>headHtml+='<th style="'+thStyle+'">'+p+'</th>');
-  headHtml+='<th style="'+thStyle+'">Spolu</th></tr>';
-  document.getElementById('incomeByPeriodHead').innerHTML=headHtml;
-
-  let bodyHtml='';
-  // ── Súhrn NAVRCHU ──
-  const tdGreenBold=`padding:8px 10px;text-align:right;font-family:'JetBrains Mono',monospace;font-size:0.82rem;color:var(--income);font-weight:700;border-bottom:2px solid var(--border2);white-space:nowrap;background:rgba(74,222,128,0.06);`;
-  const tdLBold=`padding:8px 10px;text-align:left;font-family:'Barlow Condensed',sans-serif;font-size:0.82rem;font-weight:700;color:var(--accent);letter-spacing:0.5px;text-transform:uppercase;border-bottom:2px solid var(--border2);white-space:nowrap;background:rgba(74,222,128,0.06);`;
-  bodyHtml+='<tr><td style="'+tdLBold+'">∑ Celkom</td>';
-  iPeriods.forEach(p=>bodyHtml+='<td style="'+tdGreenBold+'">'+( iTotals[p]>0?iTotals[p].toFixed(0)+' €':'–')+'</td>');
-  bodyHtml+='<td style="'+tdGreenBold+'">'+grandTotal.toFixed(0)+' €</td></tr>';
-  // ── Kategórie ──
-  iCats.forEach(c=>{
-    if(catTotals[c]===0) return;
-    bodyHtml+='<tr><td style="'+tdStyleL+'"><span style="color:var(--income);margin-right:5px;">💰</span>'+c+'</td>';
-    iPeriods.forEach(p=>{
-      const v=iMatrix[c][p]||0;
-      bodyHtml+='<td style="'+(v>0?tdGreen:tdStyle)+'">'+( v>0?v.toFixed(0)+' €':'–')+'</td>';
-    });
-    bodyHtml+='<td style="'+tdGreen+'">'+catTotals[c].toFixed(0)+' €</td></tr>';
-  });
-  document.getElementById('incomeByPeriodBody').innerHTML=bodyHtml;
-  document.getElementById('incomeByPeriodWrap').style.display = iCats.length>0&&grandTotal>0?'':'none';
+  const months = Object.keys(monthMap).sort();
+  renderChart('chartMonthly', 'bar', {
+    labels: months,
+    datasets: [{ label: 'Výdaje €', data: months.map(m=>monthMap[m].toFixed(2)), backgroundColor: '#47c3ff44', borderColor: '#47c3ff', borderWidth: 2, borderRadius: 4 }]
+  }, co, gridColor);
 }
 
-function renderChart(id, type, data, co, gridColor, isDoughnut, onClickFn, unit) {
+function renderChart(id, type, data, co, gridColor, isDoughnut) {
   if (chartInstances[id]) chartInstances[id].destroy();
   const ctx = document.getElementById(id).getContext('2d');
-  const u = unit || '€';
   chartInstances[id] = new Chart(ctx, {
     type,
     data,
     options: {
       responsive: true,
-      onClick: onClickFn ? (evt, els) => { if (els.length) onClickFn(els[0].index); } : undefined,
       plugins: {
-        legend: { labels: { color: co.color, font: co.font, boxWidth: isDoughnut ? 12 : undefined } },
-        tooltip: { callbacks: { label: c => ' ' + c.formattedValue + ' ' + u } }
+        legend: { labels: { color: co.color, font: co.font, boxWidth: isDoughnut ? 12 : undefined } }
       },
       scales: isDoughnut ? {} : {
-        x: { ticks: { color: '#6b6f80', font: co.font, maxRotation: 45 }, grid: { color: gridColor } },
-        y: {
-          ticks: { color: '#6b6f80', font: co.font, callback: v => v + ' ' + u },
-          grid: { color: gridColor }
-        }
+        x: { ticks: { color: '#6b6f80', font: co.font }, grid: { color: gridColor } },
+        y: { ticks: { color: '#6b6f80', font: co.font }, grid: { color: gridColor } }
       }
     }
   });
-  if (onClickFn) ctx.canvas.style.cursor = 'pointer';
 }
 
-// ─── GOOGLE ───
-function saveGoogleConfig() {
-  state.google.url = document.getElementById('gsUrl').value.trim();
-  state.google.sheetId = document.getElementById('gsId').value.trim();
-  const ak = document.getElementById('anthropicKey')?.value.trim();
-  if (ak) state.anthropicKey = ak;
-  save();
-  document.getElementById('gBtn').className = 'btn-google connected';
-  document.getElementById('gBtn').innerHTML = '<span>✓</span> Prepojené';
-  toast('Nastavenia uložené ✓');
+// ─── INCOME ───
+function saveIncome() {
+  if (!state.selectedCar) { toast('Najprv vyber auto!'); return; }
+  var date = document.getElementById('iDate').value;
+  var amount = parseFloat(document.getElementById('iAmount').value);
+  if (!date || !amount) { toast('Vyplň povinné polia!'); return; }
+  var rec = { id: Date.now()+'', carId: state.selectedCar.id, type:'income',
+    date: date, amount: amount,
+    incomeType: document.getElementById('iType').value,
+    desc: document.getElementById('iDesc').value, note: '' };
+  state.records.push(rec);
+  save(); renderStats(); renderDashboard(); clearIncomeForm();
+  toast('Príjem uložený ✓');
+}
+function clearIncomeForm() {
+  ['iAmount','iDesc'].forEach(function(id) { document.getElementById(id).value = ''; });
+  document.getElementById('iDate').valueAsDate = new Date();
 }
 
-function toggleGoogleSetup() {
-  switchTab('google');
-}
+// ─── EXPORT / IMPORT ───
 
-async function testGoogle() {
-  const url = document.getElementById('gsUrl').value.trim();
-  const id = document.getElementById('gsId').value.trim();
-  if (!url || !id) { toast('Vyplň URL a Sheet ID!'); return; }
-  document.getElementById('googleStatus').textContent = 'Testujem spojenie...';
-  try {
-    const res = await fetch(`${url}?sheetId=${id}&sheetName=Test`);
-    const json = await res.json();
-    document.getElementById('googleStatus').textContent = '✓ Spojenie funguje!';
-    document.getElementById('googleStatus').style.color = '#4caf50';
-    toast('Spojenie OK ✓');
-  } catch(e) {
-    document.getElementById('googleStatus').textContent = '✗ Chyba: ' + e.message;
-    document.getElementById('googleStatus').style.color = 'var(--danger)';
-  }
-}
-
-async function pushToGoogle(rec, sheetName) {
-  if (!state.google.url || !state.google.sheetId) return;
-  const car = state.cars.find(c=>c.id===rec.carId);
-  const d = fmtDate(rec.date); // dd.mm.yyyy
-  let headers, row;
-  if (rec.type === 'fuel') {
-    headers = ['ID','Auto','ŠPZ','Dátum','Km','Litrov','Suma €','Cena/L (EUR)','Pôvodná cena/L','Mena','Typ paliva','Poznámka'];
-    row = [rec.id, car?.name||'', car?.plate||'', d, rec.km, rec.liters,
-           (+rec.total||0).toFixed(2), (+rec.pricePerL||0).toFixed(3),
-           rec.origPrice||'', rec.origCurrency||'EUR', rec.fuelType||'', rec.note||''];
-  } else if (rec.type === 'income') {
-    headers = ['ID','Auto','ŠPZ','Dátum','Typ príjmu','Suma €','Pôvodná suma','Mena','Popis','Poznámka'];
-    row = [rec.id, car?.name||'', car?.plate||'', d, rec.incomeType||'',
-           (+rec.amount||0).toFixed(2), rec.origAmount||'', rec.origCurrency||'EUR',
-           rec.desc||'', rec.note||''];
-  } else {
-    headers = ['ID','Auto','ŠPZ','Dátum','Typ nákladu','Suma €','Pôvodná suma','Mena','Km','Popis','Poznámka'];
-    row = [rec.id, car?.name||'', car?.plate||'', d, rec.costType||'',
-           (+rec.amount||0).toFixed(2), rec.origAmount||'', rec.origCurrency||'EUR',
-           rec.km||'', rec.desc||'', rec.note||''];
-  }
-  await fetch(state.google.url, {
-    method: 'POST',
-    body: JSON.stringify({ sheetId: state.google.sheetId, sheetName, headers, row })
-  });
-}
-
-async function syncToGoogle() {
-  if (!state.google.url || !state.google.sheetId) { toast('Nastav Google Sheets!'); return; }
-  const statusEl = document.getElementById('googleStatus');
-  statusEl.style.color = 'var(--muted2)';
-  statusEl.textContent = 'Synchronizujem...';
-
-  let ok = 0, errors = 0;
-
-  // 1. Export sheet Auta
-  try {
-    const carsHeaders = ['ID','Názov','ŠPZ','Farba'];
-    // clear + rewrite whole sheet by sending all cars
-    for (const car of state.cars) {
-      await fetch(state.google.url, {
-        method: 'POST',
-        body: JSON.stringify({
-          sheetId: state.google.sheetId,
-          sheetName: 'Auta',
-          headers: carsHeaders,
-          row: [car.id, car.name, car.plate||'', car.color||'']
-        })
-      });
-      ok++;
-    }
-    statusEl.textContent = `Autá (${state.cars.length})... `;
-  } catch(e) { errors++; console.warn('Cars sync failed', e); }
-
-  // 2. Export all records grouped by type
-  const total = state.records.length;
-  let i = 0;
-  for (const rec of state.records) {
-    i++;
-    if (i % 10 === 0) statusEl.textContent = `Záznamy ${i}/${total}...`;
-    try {
-      await pushToGoogle(rec, rec.type==='fuel'?'Tankovanie':rec.type==='income'?'Prijmy':'Naklady');
-      ok++;
-    } catch(e) { errors++; console.warn('Record sync failed', rec.id, e); }
-  }
-
-  const msg = errors > 0
-    ? `Hotovo: ${ok} exportovaných, ${errors} chýb`
-    : `✓ Exportovaných ${ok} záznamov + ${state.cars.length} áut`;
-  statusEl.textContent = msg;
-  statusEl.style.color = errors > 0 ? 'var(--danger)' : 'var(--income)';
-  toast(errors > 0 ? `⚠ ${errors} chýb pri exporte` : `✓ Sync hotový: ${ok} záznamov`);
-}
-
-// ─── SCAN RECEIPT ───
-let scanData = null;
-
-function openScanModal() {
-  scanData = null;
-  document.getElementById('scanResult').style.display = 'none';
-  document.getElementById('scanLoading').style.display = 'none';
-  document.getElementById('scanUseBtn').style.display = 'none';
-  document.getElementById('scanError').style.display = 'none';
-  const img = document.getElementById('scanPreviewImg');
-  img.style.display = 'none'; img.src = '';
-  document.getElementById('scanFileInput').value = '';
-  document.getElementById('scanModal').classList.add('open');
-}
-
-async function handleScanFile(e) {
-  const file = e.target.files[0];
-  if (!file) return;
-
-  // Show preview
-  const reader = new FileReader();
-  reader.onload = ev => {
-    const img = document.getElementById('scanPreviewImg');
-    img.src = ev.target.result;
-    img.style.display = 'block';
-  };
-  reader.readAsDataURL(file);
-
-  document.getElementById('scanLoading').style.display = 'block';
-  document.getElementById('scanLoading').innerHTML = '<div class="scan-spinner"></div>OCR číta doklad (zadarmo, bez API)...';
-  document.getElementById('scanResult').style.display = 'none';
-  document.getElementById('scanUseBtn').style.display = 'none';
-  document.getElementById('scanError').style.display = 'none';
-
-  try {
-    // Use Tesseract.js – free, runs locally in browser
-    const result = await Tesseract.recognize(file, 'ces+slk+eng', {
-      logger: m => {
-        if (m.status === 'recognizing text') {
-          document.getElementById('scanLoading').innerHTML =
-            '<div class="scan-spinner"></div>OCR: ' + Math.round(m.progress*100) + '%...';
-        }
-      }
-    });
-
-    const text = result.data.text;
-
-    // Parse the OCR text
-    scanData = parseReceiptText(text);
-
-    document.getElementById('srLiters').textContent    = scanData.liters != null ? scanData.liters + ' l' : '–';
-    document.getElementById('srPriceL').textContent    = scanData.pricePerLiter != null ? scanData.pricePerLiter + ' ' + (scanData.currency||'') : '–';
-    document.getElementById('srTotal').textContent     = scanData.totalAmount != null ? scanData.totalAmount + ' ' + (scanData.currency||'') : '–';
-    document.getElementById('srCurrency').textContent  = scanData.currency || '–';
-    document.getElementById('srFuelType').textContent  = scanData.fuelType || '–';
-    document.getElementById('srDate').textContent      = scanData.date || '–';
-    document.getElementById('srStation').textContent   = scanData.station || '–';
-
-    document.getElementById('scanLoading').style.display = 'none';
-    document.getElementById('scanResult').style.display = 'block';
-    document.getElementById('scanUseBtn').style.display = '';
-
-  } catch(err) {
-    document.getElementById('scanLoading').style.display = 'none';
-    const el = document.getElementById('scanError');
-    el.textContent = 'Chyba pri čítaní dokladu: ' + err.message;
-    el.style.display = 'block';
-  }
-}
-
-// Parse OCR text from receipt
-function parseReceiptText(text) {
-  const lines = text.split('\n').map(l => l.trim()).filter(l => l);
-  const result = { liters: null, pricePerLiter: null, totalAmount: null,
-                   currency: 'EUR', fuelType: 'Benzín', date: null, station: null };
-
-  // Detect station
-  if (/slovnaft/i.test(text)) result.station = 'Slovnaft';
-  else if (/MOL/i.test(text)) result.station = 'MOL';
-  else if (/OMV/i.test(text)) result.station = 'OMV';
-  else if (/shell/i.test(text)) result.station = 'Shell';
-  else if (/benzina|benzína/i.test(text)) result.station = 'Benzina';
-
-  // Detect currency
-  if (/Kč|CZK|korun/i.test(text)) result.currency = 'CZK';
-  else if (/PLN|zł/i.test(text)) result.currency = 'PLN';
-  else result.currency = 'EUR';
-
-  // Detect fuel type
-  if (/diesel|nafta|EVO\s*D/i.test(text)) result.fuelType = 'Nafta';
-  else if (/LPG/i.test(text)) result.fuelType = 'LPG';
-  else result.fuelType = 'Benzín';
-
-  // Parse liters – look for patterns like "10.510 L" "16.160 L" "20.200 l"
-  const literPatterns = [
-    /(\d+[.,]\d+)\s*[Ll](?:\s|$)/,
-    /(\d+[.,]\d+)\s*litr/i,
-    /\*\d+\s+(\d+[.,]\d+)\s*[Ll]/,
-  ];
-  for (const pat of literPatterns) {
-    const m = text.match(pat);
-    if (m) { result.liters = parseFloat(m[1].replace(',','.')); break; }
-  }
-
-  // Parse price per liter – "1.539 EUR/L" "39.900 Kč/l" "1,296 €/l"
-  const pricePerLPatterns = [
-    /(\d+[.,]\d+)\s*(?:EUR|€)\s*\/\s*[Ll]/i,
-    /(\d+[.,]\d+)\s*Kč\s*\/\s*[Ll]/i,
-    /(\d+[.,]\d+)\s*\/\s*[Ll]/i,
-    /[Ll]itr[ae]?\s+(\d+[.,]\d+)/i,
-    /(\d+[.,]\d{3})\s+(?:EUR|€|Kč)/,
-  ];
-  for (const pat of pricePerLPatterns) {
-    const m = text.match(pat);
-    if (m) {
-      const v = parseFloat(m[1].replace(',','.'));
-      if (v > 0.5 && v < 5) { result.pricePerLiter = v; break; } // sanity check
-    }
-  }
-
-  // Parse total – SUMA / CELKEM / SUM lines
-  const totalPatterns = [
-    /(?:SUMA|Suma|CELKEM|Celkem|SUM)[:\s]+(\d+[.,]\d+)/i,
-    /UHRADENÉ[:\s]+(\d+[.,]\d+)/i,
-    /ZAPLACENO[:\s]+(\d+[.,]\d+)/i,
-    /Total[:\s]+(\d+[.,]\d+)/i,
-  ];
-  for (const pat of totalPatterns) {
-    const m = text.match(pat);
-    if (m) { result.totalAmount = parseFloat(m[1].replace(',','.')); break; }
-  }
-
-  // Parse date – "16.03.2026" "19.03.2026 17:01"
-  const dateMatch = text.match(/(\d{1,2})[.\/-](\d{2})[.\/-](\d{4})/);
-  if (dateMatch) {
-    result.date = dateMatch[3] + '-' + dateMatch[2].padStart(2,'0') + '-' + dateMatch[1].padStart(2,'0');
-  }
-
-  return result;
-}
-
-function useScanResult() {
-  if (!scanData) return;
-  if (scanData.liters)        document.getElementById('fLiters').value = scanData.liters;
-  if (scanData.pricePerLiter) document.getElementById('fPriceL').value = scanData.pricePerLiter;
-  if (scanData.currency) {
-    const cur = ['EUR','CZK','PLN'].includes(scanData.currency) ? scanData.currency : 'EUR';
-    document.getElementById('fCurrencyL').value = cur;
-  }
-  if (scanData.fuelType) {
-    const sel = document.getElementById('fFuelType');
-    for (let o of sel.options) {
-      if (o.value === scanData.fuelType || o.text.includes(scanData.fuelType)) {
-        sel.value = o.value; break;
-      }
-    }
-  }
-  if (scanData.date) document.getElementById('fDate').value = scanData.date;
-  // if total is available, use it directly
-  if (scanData.totalAmount) {
-    // temporarily set total directly if both liters and pricePerLiter missing
-    if (!scanData.liters || !scanData.pricePerLiter) {
-      document.getElementById('fTotal').removeAttribute('readonly');
-      document.getElementById('fTotal').value = scanData.totalAmount;
-      document.getElementById('fTotal').setAttribute('readonly','');
-    }
-  }
-  recalcFuel();
-  document.getElementById('scanModal').classList.remove('open');
-  switchTab('fuel');
-  toast('Hodnoty z dokladu načítané ✓');
-}
-
-// ─── SAMPLE CSV ───
-function downloadSampleCSV() {
-  const csv = `"## Vehicle"\n"Name","Description","DistUnit","FuelUnit","ConsumptionUnit","ImportCSVDateFormat","VIN","Insurance","Plate","Make","Model","Year","TankCount","Tank1Type","Tank2Type","Active","Tank1Capacity","Tank2Capacity","FuelUnitTank2","FuelConsumptionTank2"\n"Škoda Octavia IV","Čierna","0","0","0","yyyy-MM-dd","","","BA123AB","Škoda","Octavia","2025","1","110","0","1","45.0","0.0","0","0"\n"## Log"\n"Data","Odo (km)","Fuel (litres)","Full","Price (optional)","l/100km (optional)","latitude (optional)","longitude (optional)","City (optional)","Notes (optional)","Missed","TankNumber","FuelType","VolumePrice","StationID (optional)","ExcludeDistance","UniqueId","TankCalc","Weather"\n"2026-01-15 10:00","85000.0","48.5","1","76.95","5.7","0.0","0.0","","","0","1","110","1.587","0","0.0","1","0.0",\n"## CostCategories"\n"CostTypeID","Name","priority","color"\n"1","Služba","0",""\n"35","Spolujazda","0","#B71C1C"\n"36","Firemne jazdy","0","#FF5722"\n"## Costs"\n"CostTitle","Date","Odo","CostTypeID","Notes","Cost","flag","idR","read","RemindOdo","RemindDate","isTemplate","RepeatOdo","RepeatMonths","isIncome","UniqueId"\n"Spolujazda","2026-01-20 10:00","0","35","","50.0","0","0","1","0","2011-01-01","0","0","0","1","1"\n"Oprava","2026-01-25 10:00","85100","1","Výmena oleja","120.0","0","0","1","0","2011-01-01","0","0","0","0","2"\n`;
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-  const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
-  a.download = 'fuelio-vzor-export.csv'; a.click();
-  toast('Vzorový CSV stiahnutý ✓');
+function renderExportCarList() {
+  var wrap = document.getElementById('exportCarList');
+  if (!wrap) return;
+  wrap.innerHTML = state.cars.map(function(car) {
+    return '<label style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:6px;background:var(--surface2);border-radius:8px;font-size:0.82rem;">' +
+      '<input type="checkbox" data-carid="' + car.id + '" checked style="accent-color:var(--accent);width:16px;height:16px;">' +
+      '<span style="width:10px;height:10px;border-radius:50%;background:' + car.color + ';display:inline-block;"></span>' +
+      car.name + ' <span style="color:var(--muted);">' + (car.plate||'') + '</span></label>';
+  }).join('');
 }
 
 function exportFuelioCSV() {
-  if (state.cars.length === 0) { toast('Žiadne autá na export!'); return; }
+  if (state.cars.length === 0) { toast('Ziadne auta!'); return; }
+  renderExportCarList();
+  var checks = document.querySelectorAll('#exportCarList input:checked');
+  var ids = Array.from(checks).map(function(c) { return c.dataset.carid; });
+  if (!ids.length) ids = state.cars.map(function(c) { return c.id; });
 
-  // Cost category mapping (Fuelio IDs)
-  const costCatMap = {
-    'Oprava':'1','Servis':'9','Poistenie':'31','STK / EK':'33','STK+EK':'33',
-    'Pneumatiky':'8','Olej / filtre':'9','Diaľničná známka':'7','Parkovanie':'5',
-    'Umytie':'6','Materiál':'32','AdBlue':'34','Registrácia':'4','Cena vozidla':'2','Iné':'1'
-  };
-  const incomeCatMap = {
-    'Spolujazda':'35','Firemne jazdy':'36','Firemná jazda':'36',
-    'Náhrada za cestu':'36','Predaj dielu':'32','Iné':'35'
-  };
-  const fuelTypeMap = { 'Benzín':'110','Nafta':'112','LPG':'120','CNG':'130','Elektrina':'200' };
+  var ftMap = {'Benzin':'110','Benzín':'110','Diesel':'112','LPG':'120','CNG':'130','Elektrina (kWh)':'200'};
+  var catMap = {'Oprava':'9','Poistenie':'31','STK / EK':'33','Pneumatiky':'8','Olej / filtre':'9','Dialnicna znamka':'7','Diaľničná známka':'7','Parkovanie':'5','Ine':'1','Iné':'1','Spolujazda':'35','Firemne jazdy':'36','Firemné jazdy':'36','Prenajom auta':'36','Prenájom auta':'36','Nahrada za cestu':'36','Náhrada za cestu':'36','Predaj dielu':'32'};
 
-  // Build combined category list
-  const usedCats = {};
-  state.records.forEach(r => {
-    if (r.type === 'cost')   { const id = costCatMap[r.costType]||'1';   usedCats[id] = r.costType; }
-    if (r.type === 'income') { const id = incomeCatMap[r.incomeType]||'35'; usedCats[id] = r.incomeType; }
-  });
-  const defaultCats = {'1':'Služba','2':'Cena vozidla','4':'Registrácia','5':'Parkovanie',
-    '6':'Umytie','7':'Mýto','8':'Pneumatiky','9':'Servis','31':'Poistenie',
-    '32':'Materiál','33':'STK+EK','34':'AdBlue','35':'Spolujazda','36':'Firemne jazdy'};
-  const allCats = {...defaultCats, ...usedCats};
+  ids.forEach(function(cid) {
+    var car = state.cars.find(function(c) { return c.id === cid; });
+    if (!car) return;
+    var fuels = state.records.filter(function(r) { return r.type==='fuel' && r.carId===cid; }).sort(function(a,b){return new Date(a.date)-new Date(b.date);});
+    var costs = state.records.filter(function(r) { return (r.type==='cost'||r.type==='income') && r.carId===cid; }).sort(function(a,b){return new Date(a.date)-new Date(b.date);});
 
-  let uid = 1;
-
-  state.cars.forEach(car => {
-    const carFuels = state.records.filter(r => r.type==='fuel' && r.carId===car.id)
-      .sort((a,b)=>new Date(a.date)-new Date(b.date));
-    const carCosts = state.records.filter(r => (r.type==='cost'||r.type==='income') && r.carId===car.id)
-      .sort((a,b)=>new Date(a.date)-new Date(b.date));
-
-    // ── Vehicle section ──
-    let csv = '"## Vehicle"\n';
-    csv += '"Name","Description","DistUnit","FuelUnit","ConsumptionUnit","ImportCSVDateFormat","VIN","Insurance","Plate","Make","Model","Year","TankCount","Tank1Type","Tank2Type","Active","Tank1Capacity","Tank2Capacity","FuelUnitTank2","FuelConsumptionTank2"\n';
-    const tankSize = car.tankSize || 50;
-    const model = car.name.includes('Octavia') ? 'Octavia' : car.name.split(' ').pop();
-    const make  = car.name.split(' ')[0];
-    csv += `"${car.name}","${car.color||''}","0","0","0","yyyy-MM-dd","","","${car.plate||''}","${make}","${model}","2025","1","110","0","1","${tankSize}.0","0.0","0","0"\n`;
-
-    // ── Log section ──
-    csv += '"## Log"\n';
-    csv += '"Data","Odo (km)","Fuel (litres)","Full","Price (optional)","l/100km (optional)","latitude (optional)","longitude (optional)","City (optional)","Notes (optional)","Missed","TankNumber","FuelType","VolumePrice","StationID (optional)","ExcludeDistance","UniqueId","TankCalc","Weather"\n';
-    carFuels.forEach(r => {
-      const dt = r.date + ' 10:00';
-      const full = (r.fullTank===true||r.fullTank===1||r.fullTank==='1') ? '1' : '0';
-      const ft = fuelTypeMap[r.fuelType] || '110';
-      const priceL = parseFloat(r.pricePerL)||0;
-      const l100 = r.liters && r.km ? '' : '';
-      csv += `"${dt}","${r.km}.0","${r.liters}","${full}","${(+r.total||0).toFixed(2)}","","0.0","0.0","","${r.note||''}","0","1","${ft}","${priceL.toFixed(3)}","0","0.0","${uid++}","0.0",\n`;
+    var rows = [];
+    rows.push('"## Vehicle"');
+    rows.push('"Name","Description","DistUnit","FuelUnit","ConsumptionUnit","ImportCSVDateFormat","VIN","Insurance","Plate","Make","Model","Year","TankCount","Tank1Type","Tank2Type","Active","Tank1Capacity","Tank2Capacity","FuelUnitTank2","FuelConsumptionTank2"');
+    rows.push('"' + car.name + '","' + (car.color||'') + '","0","0","0","yyyy-MM-dd","","","' + (car.plate||'') + '","Skoda","Octavia","2025","1","110","0","1","' + (car.tankSize||50) + '.0","0.0","0","0"');
+    rows.push('"## Log"');
+    rows.push('"Data","Odo (km)","Fuel (litres)","Full","Price (optional)","l/100km (optional)","latitude (optional)","longitude (optional)","City (optional)","Notes (optional)","Missed","TankNumber","FuelType","VolumePrice","StationID (optional)","ExcludeDistance","UniqueId","TankCalc","Weather"');
+    var uid = 100;
+    fuels.forEach(function(r) {
+      var ft = ftMap[r.fuelType] || '110';
+      var full = (r.fullTank === false || r.fullTank === 0 || r.fullTank === '0') ? '0' : '1';
+      rows.push('"' + r.date + ' 10:00","' + (r.km||0) + '.0","' + (r.liters||0) + '","' + full + '","' + (parseFloat(r.total)||0).toFixed(2) + '","","0.0","0.0","","' + (r.note||'') + '","0","1","' + ft + '","' + (parseFloat(r.pricePerL)||0).toFixed(3) + '","0","0.0","' + (uid++) + '","0.0",');
     });
-
-    // ── CostCategories section ──
-    csv += '"## CostCategories"\n';
-    csv += '"CostTypeID","Name","priority","color"\n';
-    Object.entries(allCats).forEach(([id,name]) => {
-      csv += `"${id}","${name}","0",""\n`;
+    rows.push('"## CostCategories"');
+    rows.push('"CostTypeID","Name","priority","color"');
+    rows.push('"1","Sluzba","0",""');
+    rows.push('"9","Servis","0",""');
+    rows.push('"31","Poistenie","0","#3F51B5"');
+    rows.push('"8","Pneumatiky","0","#FF9800"');
+    rows.push('"33","STK+EK","0",""');
+    rows.push('"7","Myto","0",""');
+    rows.push('"5","Parkovanie","0",""');
+    rows.push('"35","Spolujazda","0","#B71C1C"');
+    rows.push('"36","Firemne jazdy","0","#FF5722"');
+    rows.push('"32","Material","0",""');
+    rows.push('"## Costs"');
+    rows.push('"CostTitle","Date","Odo","CostTypeID","Notes","Cost","flag","idR","read","RemindOdo","RemindDate","isTemplate","RepeatOdo","RepeatMonths","isIncome","UniqueId"');
+    costs.forEach(function(r) {
+      var isIncome = r.type === 'income' ? '1' : '0';
+      var catId = r.type === 'income' ? (catMap[r.incomeType]||'35') : (catMap[r.costType]||'1');
+      var title = r.type === 'income' ? (r.desc||r.incomeType||'Prijem') : (r.desc||r.costType||'Naklad');
+      var amt = (parseFloat(r.amount)||0).toFixed(2);
+      rows.push('"' + title + '","' + r.date + ' 10:00","0","' + catId + '","' + (r.note||'') + '","' + amt + '","0","0","1","0","2011-01-01","0","0","0","' + isIncome + '","' + (uid++) + '"');
     });
+    rows.push('"## Category"');
+    rows.push('"IdCategory","Name"');
+    rows.push('"1","Sukromne"');
+    rows.push('"2","Praca"');
 
-    // ── Costs section ──
-    csv += '"## Costs"\n';
-    csv += '"CostTitle","Date","Odo","CostTypeID","Notes","Cost","flag","idR","read","RemindOdo","RemindDate","isTemplate","RepeatOdo","RepeatMonths","isIncome","UniqueId"\n';
-    carCosts.forEach(r => {
-      const dt = r.date + ' 10:00';
-      const isIncome = r.type === 'income' ? '1' : '0';
-      const catId = r.type==='income'
-        ? (incomeCatMap[r.incomeType]||'35')
-        : (costCatMap[r.costType]||'1');
-      const title = r.type==='income' ? (r.desc||r.incomeType||'Príjem') : (r.desc||r.costType||'Náklad');
-      const amt = (+r.amount||0).toFixed(2);
-      csv += `"${title}","${dt}","${r.km||0}","${catId}","${r.note||''}","${amt}","0","0","1","0","2011-01-01","0","0","0","${isIncome}","${uid++}"\n`;
-    });
-
-    // ── Category section ──
-    csv += '"## Category"\n"IdCategory","Name"\n"1","Súkromné"\n"2","Práca"\n';
-
-    // Download
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const a = document.createElement('a');
+    var csv = rows.join('\n');
+    var blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+    var a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    const safeName = car.name.replace(/[^a-zA-Z0-9]/g,'_');
-    a.download = `fuelio_${safeName}_export.csv`;
+    a.download = 'fuelio_' + car.name.replace(/[^a-zA-Z0-9]/g,'_') + '.csv';
     a.click();
   });
+  toast('Export hotovy!');
+}
 
-  toast(`Export hotový: ${state.cars.length} auto(a) ✓`);
+function toggleGoogleSetup() { switchTab('google'); }
+function saveGoogleConfig() {}
+function testGoogle() {}
+function pushToGoogle() {}
+function syncToGoogle() {}
+
+// ─── FUELIO CSV IMPORT ───
+function handleImportFile(e) {
+  var file = e.target.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(ev) { parseFuelioCSV(ev.target.result); };
+  reader.readAsText(file, 'UTF-8');
 }
-function setMobileNav(btn) {
-  document.querySelectorAll('.nav-mobile-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
+
+function parseFuelioCSV(text) {
+  var preview = document.getElementById('importPreview');
+  try {
+    var lines = text.replace(/\r/g,'').split('\n').map(function(l){return l.trim();}).filter(function(l){return l;});
+
+    function parseRow(line) {
+      var result = [], cur = '', inQ = false;
+      for (var i = 0; i < line.length; i++) {
+        var c = line[i];
+        if (c === '"') { inQ = !inQ; }
+        else if (c === ',' && !inQ) { result.push(cur.trim()); cur = ''; }
+        else { cur += c; }
+      }
+      result.push(cur.trim());
+      return result;
+    }
+
+    function normDate(d) {
+      if (!d) return '';
+      var part = d.split(' ')[0];
+      if (/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(part)) return part;
+      var m = part.match(/(\d{1,2})\.(\d{2})\.(\d{4})/);
+      if (m) return m[3]+'-'+m[2]+'-'+m[1].padStart(2,'0');
+      return part;
+    }
+
+    var section = null, vehicleName = '', vehiclePlate = '', vehicleDesc = '';
+    var fuelRows = [], costRows = [], catMap = {};
+    var fuelTypeMap = {'100':'Benzín','110':'Benzín','112':'Diesel','120':'LPG','130':'CNG','200':'Elektrina (kWh)'};
+
+    lines.forEach(function(line) {
+      var clean = line.replace(/^"+|"+$/g,'').trim();
+      if (clean === '## Vehicle') { section = 'vhdr'; return; }
+      if (clean === '## Log') { section = 'lhdr'; return; }
+      if (clean === '## CostCategories') { section = 'cathdr'; return; }
+      if (clean === '## Costs') { section = 'costhdr'; return; }
+      if (clean.startsWith('##')) { section = null; return; }
+
+      var cols = parseRow(line);
+      if (section === 'vhdr' && cols[0] === 'Name') { section = 'vdata'; return; }
+      if (section === 'vdata') { vehicleName = cols[0]||'Auto'; vehiclePlate = cols[8]||''; vehicleDesc = cols[1]||''; section = null; return; }
+      if (section === 'lhdr' && (cols[0] === 'Data' || cols[0] === 'Date')) { section = 'ldata'; return; }
+      if (section === 'ldata' && cols.length > 2 && cols[0]) fuelRows.push(cols);
+      if (section === 'cathdr' && cols[0] === 'CostTypeID') { section = 'catdata'; return; }
+      if (section === 'catdata' && cols[0] && cols[1]) catMap[cols[0]] = cols[1];
+      if (section === 'costhdr' && cols[0] === 'CostTitle') { section = 'costdata'; return; }
+      if (section === 'costdata' && cols.length > 5 && cols[1]) costRows.push(cols);
+    });
+
+    var importedFuels = fuelRows.map(function(r) {
+      var liters = parseFloat(r[2])||0, total = parseFloat(r[4])||0;
+      var priceL = parseFloat(r[13])||(liters>0&&total>0?total/liters:0);
+      return { date: normDate(r[0]), km: parseFloat(r[1])||0, liters: liters, total: total,
+               pricePerL: priceL.toFixed(3), fuelType: fuelTypeMap[r[12]]||'Benzín', fullTank: r[3]==='1', note: r[9]||'' };
+    }).filter(function(r) { return r.date && r.liters > 0; });
+
+    var importedCosts = [], importedIncomes = [];
+    costRows.forEach(function(r) {
+      var date = normDate(r[1]), cost = parseFloat(r[5])||0, isIncome = r[14]==='1';
+      var catName = catMap[r[3]]||'Iné';
+      var desc = (r[0]||'') + (r[4]?' - '+r[4]:'');
+      if (!date || cost <= 0) return;
+      if (isIncome) importedIncomes.push({ date:date, amount:cost, incomeType:catName, desc:desc, note:'' });
+      else importedCosts.push({ date:date, amount:cost, costType:catName, desc:desc, note:'', km:parseFloat(r[2])||0 });
+    });
+
+    preview.innerHTML = '<strong>' + vehicleName + '</strong><br>⛽ ' + importedFuels.length + ' tankovaní, 🔧 ' + importedCosts.length + ' nákladov, 💰 ' + importedIncomes.length + ' príjmov';
+    window._pendingImport = { vehicleName:vehicleName, vehiclePlate:vehiclePlate, vehicleDesc:vehicleDesc, importedFuels:importedFuels, importedCosts:importedCosts, importedIncomes:importedIncomes };
+    document.getElementById('importConfirmBtn').style.display = '';
+  } catch(err) {
+    preview.innerHTML = 'Chyba: ' + err.message;
+  }
 }
+
+function confirmImport() {
+  var data = window._pendingImport;
+  if (!data) return;
+  var desc = (data.vehicleDesc||'').toLowerCase(), nameLC = (data.vehicleName||'').toLowerCase();
+  var autoColor = '#47c3ff';
+  if (/cier|black/.test(desc+nameLC)) autoColor = '#374151';
+  else if (/biel|white/.test(desc+nameLC)) autoColor = '#e2e8f0';
+  else if (/cerv|red/.test(desc+nameLC)) autoColor = '#ff5e5e';
+  else if (/modr|blue/.test(desc+nameLC)) autoColor = '#47c3ff';
+  else if (/zelen|green/.test(desc+nameLC)) autoColor = '#4caf50';
+
+  var car = state.cars.find(function(c) { return c.name.toLowerCase() === data.vehicleName.toLowerCase(); });
+  if (!car) {
+    car = { id: Date.now()+'', name: data.vehicleName, plate: data.vehiclePlate, color: autoColor };
+    state.cars.push(car);
+  }
+  state.selectedCar = car;
+
+  var now = Date.now();
+  data.importedFuels.forEach(function(r) {
+    state.records.push({ id: (now++)+'', carId: car.id, type:'fuel', date:r.date, km:r.km, liters:r.liters, total:r.total, pricePerL:r.pricePerL, fuelType:r.fuelType, fullTank:r.fullTank, note:r.note });
+  });
+  data.importedCosts.forEach(function(r) {
+    state.records.push({ id: (now++)+'', carId: car.id, type:'cost', date:r.date, amount:r.amount, costType:r.costType, desc:r.desc, note:r.note, km:r.km });
+  });
+  data.importedIncomes.forEach(function(r) {
+    state.records.push({ id: (now++)+'', carId: car.id, type:'income', date:r.date, amount:r.amount, incomeType:r.incomeType, desc:r.desc, note:r.note });
+  });
+
+  save(); renderCars(); renderStats(); renderDashboard();
+  document.getElementById('importPreview').innerHTML = '';
+  document.getElementById('importConfirmBtn').style.display = 'none';
+  window._pendingImport = null;
+  toast('Import hotový! ' + (data.importedFuels.length + data.importedCosts.length + data.importedIncomes.length) + ' záznamov');
+}
+
 </script>
-
-<!-- MOBILE BOTTOM NAV -->
-
-
-<div id="toast"></div>
 </body>
 </html>
