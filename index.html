@@ -2,1408 +2,2022 @@
 <html lang="sk">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AutoBook – Kniha jázd</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Fuelio</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg: #0e0f13;
-    --surface: #16181f;
-    --surface2: #1e2029;
-    --border: #2a2d38;
-    --accent: #e8ff47;
-    --accent2: #47c3ff;
-    --danger: #ff5e5e;
-    --text: #f0f1f5;
-    --muted: #6b6f80;
-    --fuel: #f9a825;
-    --cost: #47c3ff;
-    --radius: 12px;
-  }
+/* ─── RESET ─── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{font-family:'Outfit',sans-serif;background:#0c0f14;color:#e8eaf0;min-height:100vh;overflow-x:hidden;padding-top:env(safe-area-inset-top)}
 
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+/* ─── TOKENS ─── */
+:root{
+  --bg:#0c0f14;
+  --bg2:#131720;
+  --bg3:#1a2030;
+  --card:#181d28;
+  --border:rgba(255,255,255,0.06);
+  --border2:rgba(255,255,255,0.12);
+  --accent:#38bdf8;
+  --green:#34d399;
+  --amber:#fbbf24;
+  --red:#f87171;
+  --purple:#c084fc;
+  --text:#e8eaf0;
+  --t2:#8892a4;
+  --t3:#4a5568;
+  --mono:'JetBrains Mono',monospace;
+  --nav-h:60px;
+  --nav-pb:env(safe-area-inset-bottom,0px);
+}
 
-  body {
-    font-family: 'DM Mono', monospace;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
+/* ─── SCROLLBAR ─── */
+::-webkit-scrollbar{width:3px;height:3px}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
 
-  /* ─── HEADER ─── */
-  header {
-    padding: 24px 32px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    border-bottom: 1px solid var(--border);
-    position: sticky;
-    top: 0;
-    background: rgba(14,15,19,0.92);
-    backdrop-filter: blur(12px);
-    z-index: 100;
-  }
+/* ─── LAYOUT ─── */
+.page{
+  max-width:720px;
+  margin:0 auto;
+  padding:16px 16px calc(var(--nav-h) + var(--nav-pb) + 24px);
+  min-height:100vh;
+}
 
-  .logo {
-    font-family: 'Syne', sans-serif;
-    font-weight: 800;
-    font-size: 1.4rem;
-    letter-spacing: -0.5px;
-    color: var(--accent);
-  }
-  .logo span { color: var(--text); }
+/* ─── BOTTOM NAV ─── */
+.bnav{
+  position:fixed;
+  bottom:0;left:0;right:0;
+  z-index:900;
+  background:#131720;
+  border-top:1px solid var(--border2);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  display:flex;
+  align-items:stretch;
+}
+.bnav-btn{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:3px;
+  padding:10px 4px;
+  background:none;
+  border:none;
+  color:var(--t3);
+  font-family:'Outfit',sans-serif;
+  font-size:10px;
+  font-weight:500;
+  letter-spacing:0.3px;
+  cursor:pointer;
+  min-height:var(--nav-h);
+  /* iOS touch fix */
+  -webkit-appearance:none;
+  appearance:none;
+  touch-action:manipulation;
+  user-select:none;
+  -webkit-user-select:none;
+}
+.bnav-btn svg{width:22px;height:22px;flex-shrink:0;transition:transform 0.15s}
+.bnav-btn.active{color:var(--accent)}
+.bnav-btn.active svg{transform:translateY(-1px)}
+.bnav-btn span{display:block;white-space:nowrap}
 
-  .header-right {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
+/* ─── HEADER ─── */
+.hdr{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:16px;
+  padding-top:4px;
+}
+.hdr-left{display:flex;align-items:center;gap:10px}
+.hdr-logo{font-size:22px;font-weight:800;letter-spacing:-0.5px;color:var(--text)}
+.hdr-logo span{color:var(--accent)}
+.hdr-car{
+  display:flex;align-items:center;gap:7px;
+  padding:7px 13px;
+  background:var(--bg3);
+  border:1px solid var(--border2);
+  border-radius:50px;
+  cursor:pointer;
+  font-size:13px;font-weight:500;color:var(--t2);
+  /* iOS fix */
+  -webkit-appearance:none;appearance:none;touch-action:manipulation;
+  -webkit-user-select:none;user-select:none;
+  min-height:40px;
+}
+.hdr-car-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);flex-shrink:0}
+.hdr-right{display:flex;gap:8px}
 
-  /* ─── CAR SELECTOR ─── */
-  .car-pill {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 30px;
-    padding: 6px 14px;
-    cursor: pointer;
-    transition: border-color 0.2s;
-    font-size: 0.82rem;
-  }
-  .car-pill:hover { border-color: var(--accent); }
-  .car-dot {
-    width: 8px; height: 8px;
-    border-radius: 50%;
-    background: var(--accent);
-  }
+/* ─── PANELS ─── */
+.panel{display:none}
+.panel.active{display:block}
 
-  /* ─── GOOGLE BTN ─── */
-  .btn-google {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 16px;
-    border-radius: 8px;
-    border: 1px solid var(--border);
-    background: var(--surface2);
-    color: var(--text);
-    cursor: pointer;
-    font-family: 'DM Mono', monospace;
-    font-size: 0.8rem;
-    transition: all 0.2s;
-  }
-  .btn-google:hover { border-color: var(--accent2); color: var(--accent2); }
-  .btn-google.connected { border-color: #4caf50; color: #4caf50; }
+/* ─── STAT CARDS ─── */
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.stat{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:14px;padding:14px 16px;position:relative;overflow:hidden;
+}
+.stat-label{font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--t3);font-family:var(--mono);margin-bottom:8px}
+.stat-val{font-size:24px;font-weight:800;letter-spacing:-0.5px;line-height:1}
+.stat-sub{font-size:10px;color:var(--t3);margin-top:5px}
+.stat-bar{position:absolute;bottom:0;left:0;right:0;height:2px}
+.s-amber .stat-val{color:var(--amber)} .s-amber .stat-bar{background:var(--amber)}
+.s-red   .stat-val{color:var(--red)}   .s-red   .stat-bar{background:var(--red)}
+.s-blue  .stat-val{color:var(--accent)}.s-blue  .stat-bar{background:var(--accent)}
+.s-purple.stat-val{color:var(--purple)}.s-purple .stat-bar{background:var(--purple)}
+.s-green .stat-val{color:var(--green)} .s-green .stat-bar{background:var(--green)}
+.s-purple .stat-val{color:var(--purple)}
 
-  /* ─── MAIN LAYOUT ─── */
-  main {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 32px 24px;
-    display: grid;
-    grid-template-columns: 260px 1fr;
-    gap: 24px;
-  }
+/* ─── CARD ─── */
+.card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:16px;overflow:hidden;margin-bottom:14px;
+}
+.card-head{
+  padding:14px 18px;
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;gap:8px;
+  flex-wrap:wrap;
+  background:linear-gradient(90deg,rgba(56,189,248,0.04) 0%,transparent 60%);
+}
+.card-title{font-size:15px;font-weight:700;color:var(--text)}
+.card-title-accent{color:var(--accent);margin-right:5px}
 
-  /* ─── SIDEBAR ─── */
-  .sidebar {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-  }
+/* ─── FORM ─── */
+.form-body{padding:16px 18px}
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:480px){.fg{grid-template-columns:1fr}}
+.span2{grid-column:span 2}
+@media(max-width:480px){.span2{grid-column:span 1}}
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--t3);font-family:var(--mono)}
+.field input,.field select,.field textarea{
+  background:var(--bg3);border:1px solid var(--border2);
+  border-radius:10px;color:var(--text);
+  padding:10px 13px;
+  font-family:var(--mono);font-size:13px;
+  outline:none;width:100%;
+  transition:border-color 0.15s;
+  -webkit-appearance:none;appearance:none;
+  min-height:44px;
+}
+.field input:focus,.field select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(56,189,248,0.1)}
+.field select option{background:var(--bg3)}
+.frow{display:flex;gap:8px}
+.frow input{flex:1}
+.frow select{width:80px;flex-shrink:0}
+.hint{font-size:10px;color:var(--accent);opacity:0.7;font-family:var(--mono);min-height:13px}
 
-  .nav-group { display: flex; flex-direction: column; gap: 4px; }
-  .nav-label {
-    font-size: 0.68rem;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 1.5px;
-    padding: 0 12px 6px;
-  }
+.form-actions{padding:0 18px 18px;display:flex;gap:10px;flex-wrap:wrap}
 
-  .nav-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 10px 12px;
-    border-radius: var(--radius);
-    cursor: pointer;
-    color: var(--muted);
-    font-size: 0.88rem;
-    transition: all 0.15s;
-    border: 1px solid transparent;
-  }
-  .nav-item:hover { background: var(--surface2); color: var(--text); }
-  .nav-item.active {
-    background: var(--surface2);
-    color: var(--accent);
-    border-color: var(--border);
-  }
-  .nav-icon { font-size: 1rem; width: 20px; text-align: center; }
+/* ─── BUTTONS ─── */
+.btn-p{
+  background:var(--accent);color:#03111a;border:none;
+  border-radius:50px;padding:12px 24px;
+  font-family:'Outfit',sans-serif;font-weight:700;font-size:14px;
+  cursor:pointer;touch-action:manipulation;
+  -webkit-appearance:none;appearance:none;
+  min-height:44px;
+  transition:opacity 0.15s;
+}
+.btn-p:active{opacity:0.85}
+.btn-g{
+  background:transparent;color:var(--t2);
+  border:1px solid var(--border2);border-radius:50px;
+  padding:11px 20px;
+  font-family:'Outfit',sans-serif;font-size:14px;
+  cursor:pointer;touch-action:manipulation;
+  -webkit-appearance:none;appearance:none;
+  min-height:44px;
+  transition:all 0.15s;
+}
+.btn-g:hover,.btn-g:active{border-color:var(--border2);color:var(--text)}
+.btn-sm{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:8px 14px;border-radius:8px;
+  border:1px solid rgba(56,189,248,0.25);
+  background:rgba(56,189,248,0.06);
+  color:var(--accent);
+  font-family:'Outfit',sans-serif;font-size:12px;font-weight:600;
+  cursor:pointer;touch-action:manipulation;
+  -webkit-appearance:none;appearance:none;
+  min-height:40px;white-space:nowrap;
+}
+.btn-sm:active{opacity:0.8}
+.btn-icon{
+  display:inline-flex;align-items:center;gap:7px;
+  padding:8px 14px;border-radius:10px;
+  border:1px solid var(--border2);
+  background:var(--bg3);color:var(--t2);
+  font-family:'Outfit',sans-serif;font-size:12px;font-weight:500;
+  cursor:pointer;touch-action:manipulation;
+  -webkit-appearance:none;appearance:none;
+  min-height:40px;white-space:nowrap;
+}
+.btn-icon:active{opacity:0.8}
 
-  /* ─── CARS LIST ─── */
-  .cars-list { display: flex; flex-direction: column; gap: 6px; }
+/* ─── TABLE ─── */
+.tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{width:100%;border-collapse:collapse;min-width:420px}
+thead{background:var(--bg3)}
+th{padding:8px 14px;text-align:left;font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--t3);font-family:var(--mono);white-space:nowrap}
+td{padding:11px 14px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:middle;font-size:13px}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(255,255,255,0.015)}
+.del-btn{
+  background:none;border:none;color:var(--t3);
+  cursor:pointer;padding:6px 8px;border-radius:6px;
+  font-size:13px;touch-action:manipulation;
+  -webkit-appearance:none;appearance:none;
+  min-height:36px;min-width:36px;
+}
+.del-btn:active{background:rgba(248,113,113,0.15);color:var(--red)}
 
-  .car-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 10px 12px;
-    border-radius: var(--radius);
-    cursor: pointer;
-    border: 1px solid transparent;
-    transition: all 0.15s;
-    font-size: 0.85rem;
-  }
-  .car-item:hover { background: var(--surface2); }
-  .car-item.selected { background: var(--surface2); border-color: var(--accent); }
-  .car-item-left { display: flex; align-items: center; gap: 10px; }
-  .car-color { width: 10px; height: 10px; border-radius: 50%; }
-  .car-name { font-weight: 500; }
-  .car-sub { font-size: 0.72rem; color: var(--muted); }
+/* ─── BADGE ─── */
+.badge{display:inline-flex;align-items:center;gap:3px;padding:3px 9px;border-radius:50px;font-size:10px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;font-family:var(--mono)}
+.b-fuel{background:rgba(251,191,36,0.1);color:var(--amber);border:1px solid rgba(251,191,36,0.2)}
+.b-cost{background:rgba(192,132,252,0.1);color:var(--purple);border:1px solid rgba(192,132,252,0.2)}
+.b-income{background:rgba(52,211,153,0.1);color:var(--green);border:1px solid rgba(52,211,153,0.2)}
 
-  .btn-add-car {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 10px 12px;
-    border-radius: var(--radius);
-    border: 1px dashed var(--border);
-    background: transparent;
-    color: var(--muted);
-    cursor: pointer;
-    font-family: 'DM Mono', monospace;
-    font-size: 0.82rem;
-    transition: all 0.2s;
-    width: 100%;
-  }
-  .btn-add-car:hover { border-color: var(--accent); color: var(--accent); }
+/* ─── WARNING ─── */
+.warn-box{background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.25);border-radius:10px;padding:9px 13px;font-size:12px;color:var(--amber);display:none}
 
-  /* ─── CONTENT ─── */
-  .content { display: flex; flex-direction: column; gap: 24px; }
+/* ─── EMPTY ─── */
+.empty{padding:44px 20px;text-align:center;color:var(--t3);font-size:13px}
+.empty svg{display:block;margin:0 auto 12px;opacity:0.25}
 
-  /* ─── STATS ROW ─── */
-  .stats-row {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 12px;
-  }
+/* ─── MODAL / OVERLAY ─── */
+.overlay{
+  position:fixed;inset:0;
+  background:rgba(0,0,0,0.75);
+  backdrop-filter:blur(6px);
+  -webkit-backdrop-filter:blur(6px);
+  z-index:1000;
+  display:none;
+  /* iOS: use flex to center */
+  align-items:flex-end;
+  justify-content:center;
+  padding:0;
+}
+.overlay.open{display:flex}
+.modal{
+  background:var(--bg2);
+  border:1px solid var(--border2);
+  border-radius:20px 20px 0 0;
+  padding:20px;
+  width:100%;
+  max-width:600px;
+  max-height:90vh;
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+  animation:slideUp 0.22s cubic-bezier(0.34,1.4,0.64,1);
+}
+@keyframes slideUp{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}
+.modal-drag{width:36px;height:4px;background:var(--border2);border-radius:2px;margin:0 auto 16px}
+.modal h3{font-size:18px;font-weight:800;color:var(--accent);margin-bottom:16px}
+.modal-foot{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap}
 
-  .stat-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 18px;
-    transition: border-color 0.2s;
-    position: relative;
-    overflow: hidden;
-  }
-  .stat-card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 2px;
-  }
-  .stat-card.fuel::before { background: var(--fuel); }
-  .stat-card.cost::before { background: var(--cost); }
-  .stat-card.km::before { background: var(--accent); }
-  .stat-card.avg::before { background: #b47fff; }
+/* ─── SCAN DROP ─── */
+.drop-zone{
+  border:2px dashed var(--border2);border-radius:12px;
+  padding:24px;text-align:center;
+  position:relative;cursor:pointer;
+  background:var(--bg3);
+  transition:border-color 0.15s;
+}
+.drop-zone:active,.drop-zone.over{border-color:var(--accent);background:rgba(56,189,248,0.04)}
+.drop-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.drop-text{font-size:12px;color:var(--t3);margin-top:6px}
+.scan-prev{max-width:100%;max-height:160px;border-radius:8px;margin-top:10px;border:1px solid var(--border);display:none}
+.scan-res{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:12px;margin-top:12px;display:none}
+.sr-row{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);font-family:var(--mono);font-size:11px}
+.sr-row:last-child{border-bottom:none}
+.sr-lbl{color:var(--t3)}
+.sr-val{color:var(--accent);font-weight:500}
+.spinner-wrap{display:none;text-align:center;padding:16px}
+.spinner{width:24px;height:24px;border:2px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin 0.7s linear infinite;margin:0 auto 8px}
+@keyframes spin{to{transform:rotate(360deg)}}
 
-  .stat-card:hover { border-color: var(--accent); }
-  .stat-label { font-size: 0.72rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
-  .stat-value { font-family: 'Syne', sans-serif; font-size: 1.8rem; font-weight: 700; line-height: 1; }
-  .stat-unit { font-size: 0.75rem; color: var(--muted); margin-top: 4px; }
-  .stat-card.fuel .stat-value { color: var(--fuel); }
-  .stat-card.cost .stat-value { color: var(--cost); }
-  .stat-card.km .stat-value { color: var(--accent); }
-  .stat-card.avg .stat-value { color: #b47fff; }
+/* ─── TOAST ─── */
+#toast{
+  position:fixed;bottom:calc(var(--nav-h) + var(--nav-pb) + 10px);left:50%;
+  transform:translateX(-50%) translateY(60px);
+  background:var(--bg2);border:1px solid rgba(56,189,248,0.3);
+  border-radius:10px;padding:10px 18px;
+  font-size:13px;color:var(--accent);
+  z-index:2000;opacity:0;
+  transition:all 0.3s cubic-bezier(0.34,1.4,0.64,1);
+  pointer-events:none;white-space:nowrap;max-width:90vw;
+  box-shadow:0 4px 20px rgba(0,0,0,0.4);
+}
+#toast.show{transform:translateX(-50%) translateY(0);opacity:1}
 
-  /* ─── PANEL ─── */
-  .panel {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    overflow: hidden;
-    display: none;
-  }
-  .panel.active { display: block; }
+/* ─── FILTERS ─── */
+.filter-row{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.fsel{background:var(--bg3);border:1px solid var(--border2);border-radius:50px;color:var(--text);padding:6px 12px;font-family:var(--mono);font-size:11px;outline:none;cursor:pointer;min-height:36px;-webkit-appearance:none;appearance:none}
+.fbtn{padding:6px 12px;border-radius:50px;border:1px solid var(--border2);background:var(--bg3);color:var(--t3);font-family:var(--mono);font-size:11px;cursor:pointer;touch-action:manipulation;-webkit-appearance:none;min-height:36px;transition:all 0.15s}
+.fbtn.active{background:rgba(56,189,248,0.1);border-color:rgba(56,189,248,0.3);color:var(--accent)}
+.cnt-badge{font-size:11px;color:var(--t3);font-family:var(--mono)}
 
-  .panel-header {
-    padding: 16px 20px;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-  .panel-title {
-    font-family: 'Syne', sans-serif;
-    font-weight: 700;
-    font-size: 1rem;
-  }
+/* ─── STATS PANEL CELLS ─── */
+.ss-row{display:grid;gap:1px;background:var(--border);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.ss-row.c4{grid-template-columns:repeat(4,1fr)}
+.ss-row.c3{grid-template-columns:repeat(3,1fr)}
+@media(max-width:480px){.ss-row.c4{grid-template-columns:1fr 1fr}.ss-row.c3{grid-template-columns:1fr}}
+.ss-cell{background:var(--card);padding:12px 10px;text-align:center}
+.ss-lbl{font-size:9px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--t3);font-family:var(--mono);margin-bottom:4px}
+.ss-val{font-size:20px;font-weight:800;line-height:1}
+.ss-sub{font-size:9px;color:var(--t3);margin-top:2px}
 
-  /* ─── FORM ─── */
-  .form-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 14px;
-    padding: 20px;
-  }
+/* ─── CHARTS ─── */
+.chart-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:14px}
+@media(max-width:480px){.chart-grid{grid-template-columns:1fr}}
+.chart-box{background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:12px}
+.chart-wide{grid-column:span 2}
+@media(max-width:480px){.chart-wide{grid-column:span 1}}
+.chart-lbl{font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--t3);font-family:var(--mono);margin-bottom:10px}
 
-  .field { display: flex; flex-direction: column; gap: 6px; }
-  .field label {
-    font-size: 0.72rem;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-  }
+/* ─── DRILLDOWN ─── */
+.drilldown{display:none;margin:0 14px 12px;background:var(--bg3);border:1px solid var(--border2);border-radius:12px;overflow:hidden}
+.dd-head{padding:8px 14px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.dd-title{font-size:13px;font-weight:700;color:var(--accent)}
+.dd-close{background:none;border:none;color:var(--t3);cursor:pointer;font-size:18px;padding:4px;touch-action:manipulation;min-width:36px;min-height:36px;display:flex;align-items:center;justify-content:center}
+.dd-body{max-height:200px;overflow-y:auto;-webkit-overflow-scrolling:touch}
 
-  .field input, .field select, .field textarea {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    color: var(--text);
-    padding: 10px 12px;
-    font-family: 'DM Mono', monospace;
-    font-size: 0.85rem;
-    outline: none;
-    transition: border-color 0.2s;
-    width: 100%;
-  }
-  .field input:focus, .field select:focus, .field textarea:focus {
-    border-color: var(--accent);
-  }
-  .field select option { background: var(--surface2); }
-  .field.span2 { grid-column: span 2; }
-  .field.span3 { grid-column: span 3; }
+/* ─── COLOR PICKER ─── */
+.cpick{display:flex;gap:8px;flex-wrap:wrap}
+.cswatch{width:30px;height:30px;border-radius:50%;cursor:pointer;border:2px solid transparent;touch-action:manipulation;transition:border-color 0.15s}
+.cswatch.sel{border-color:white}
 
-  .form-actions {
-    padding: 0 20px 20px;
-    display: flex;
-    gap: 10px;
-  }
+/* ─── EXPORT LIST ─── */
+.exp-item{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;margin-bottom:8px}
+.exp-item.sel{border-color:rgba(56,189,248,0.3);background:rgba(56,189,248,0.04)}
 
-  .btn-primary {
-    background: var(--accent);
-    color: #0e0f13;
-    border: none;
-    border-radius: 8px;
-    padding: 10px 24px;
-    font-family: 'Syne', sans-serif;
-    font-weight: 700;
-    font-size: 0.88rem;
-    cursor: pointer;
-    transition: opacity 0.2s, transform 0.1s;
-  }
-  .btn-primary:hover { opacity: 0.88; }
-  .btn-primary:active { transform: scale(0.97); }
+/* ─── SETUP BOX ─── */
+.setup-box{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:12px}
+.setup-box p{font-size:12px;color:var(--t2);line-height:1.7;margin-bottom:10px}
+.step{display:flex;gap:10px;align-items:flex-start;margin-bottom:8px;font-size:12px;color:var(--t2)}
+.step-n{background:var(--accent);color:#03111a;font-family:var(--mono);font-weight:700;font-size:10px;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+pre.code{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:12px;font-size:11px;overflow-x:auto;color:#93c5fd;line-height:1.6;font-family:var(--mono);white-space:pre-wrap;word-break:break-all}
 
-  .btn-secondary {
-    background: transparent;
-    color: var(--muted);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 10px 20px;
-    font-family: 'DM Mono', monospace;
-    font-size: 0.85rem;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-  .btn-secondary:hover { border-color: var(--text); color: var(--text); }
+/* ─── PERIOD TABLE ─── */
+.ptbl{width:100%;border-collapse:collapse}
+.ptbl th{padding:7px 10px;font-size:9px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--t3);font-family:var(--mono);background:var(--bg3);border-bottom:1px solid var(--border);text-align:right;white-space:nowrap}
+.ptbl th:first-child{text-align:left}
+.ptbl td{padding:6px 10px;font-family:var(--mono);font-size:11px;color:var(--t3);border-bottom:1px solid var(--border);text-align:right;white-space:nowrap}
+.ptbl td:first-child{text-align:left;font-family:'Outfit',sans-serif;color:var(--text)}
+.ptbl .vg{color:var(--green);font-weight:600}
+.ptbl .tot td{background:rgba(52,211,153,0.04);color:var(--green);font-weight:700;border-bottom:2px solid var(--border2)}
+.ptbl .tot td:first-child{color:var(--accent);font-family:var(--mono);font-size:10px;letter-spacing:1px}
 
-  /* ─── TABLE ─── */
-  .table-wrap { overflow-x: auto; }
-
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.85rem;
-  }
-  thead { background: var(--surface2); }
-  th {
-    padding: 10px 16px;
-    text-align: left;
-    font-size: 0.7rem;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    font-weight: 400;
-    white-space: nowrap;
-  }
-  td {
-    padding: 12px 16px;
-    border-bottom: 1px solid var(--border);
-    color: var(--text);
-  }
-  tr:hover td { background: var(--surface2); }
-  tr:last-child td { border-bottom: none; }
-
-  .badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    padding: 3px 10px;
-    border-radius: 30px;
-    font-size: 0.72rem;
-    font-weight: 500;
-  }
-  .badge.fuel { background: rgba(249,168,37,0.12); color: var(--fuel); }
-  .badge.repair { background: rgba(71,195,255,0.1); color: var(--cost); }
-  .badge.insurance { background: rgba(180,127,255,0.1); color: #b47fff; }
-  .badge.other { background: rgba(107,111,128,0.15); color: var(--muted); }
-
-  .del-btn {
-    background: none;
-    border: none;
-    color: var(--muted);
-    cursor: pointer;
-    font-size: 0.9rem;
-    padding: 4px 8px;
-    border-radius: 6px;
-    transition: all 0.15s;
-  }
-  .del-btn:hover { background: rgba(255,94,94,0.1); color: var(--danger); }
-
-  /* ─── CHART SECTION ─── */
-  .charts-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
-    padding: 20px;
-  }
-  .chart-box {
-    background: var(--surface2);
-    border-radius: var(--radius);
-    padding: 16px;
-  }
-  .chart-title {
-    font-size: 0.78rem;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-bottom: 14px;
-  }
-  canvas { width: 100% !important; }
-
-  /* ─── MODAL ─── */
-  .modal-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.7);
-    backdrop-filter: blur(4px);
-    z-index: 200;
-    display: none;
-    align-items: center;
-    justify-content: center;
-  }
-  .modal-overlay.open { display: flex; }
-  .modal {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 28px;
-    width: 360px;
-    animation: slideUp 0.25s ease;
-  }
-  @keyframes slideUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  .modal h3 {
-    font-family: 'Syne', sans-serif;
-    font-size: 1.1rem;
-    margin-bottom: 20px;
-    color: var(--accent);
-  }
-
-  /* ─── GOOGLE SETUP ─── */
-  .setup-box {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 20px;
-  }
-  .setup-box p {
-    font-size: 0.82rem;
-    color: var(--muted);
-    line-height: 1.6;
-    margin-bottom: 14px;
-  }
-  .setup-box a { color: var(--accent2); text-decoration: none; }
-  .setup-box a:hover { text-decoration: underline; }
-  .setup-step {
-    display: flex;
-    gap: 10px;
-    align-items: flex-start;
-    margin-bottom: 10px;
-    font-size: 0.82rem;
-    color: var(--muted);
-  }
-  .step-num {
-    background: var(--accent);
-    color: #0e0f13;
-    font-family: 'Syne', sans-serif;
-    font-weight: 700;
-    font-size: 0.72rem;
-    width: 20px; height: 20px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    margin-top: 1px;
-  }
-
-  /* ─── TOAST ─── */
-  #toast {
-    position: fixed;
-    bottom: 24px;
-    right: 24px;
-    background: var(--surface2);
-    border: 1px solid var(--accent);
-    border-radius: 10px;
-    padding: 12px 20px;
-    font-size: 0.85rem;
-    color: var(--accent);
-    z-index: 300;
-    transform: translateY(60px);
-    opacity: 0;
-    transition: all 0.3s;
-    pointer-events: none;
-  }
-  #toast.show { transform: translateY(0); opacity: 1; }
-
-  /* ─── EMPTY STATE ─── */
-  .empty {
-    padding: 48px 20px;
-    text-align: center;
-    color: var(--muted);
-    font-size: 0.85rem;
-  }
-  .empty-icon { font-size: 2.5rem; margin-bottom: 10px; }
-
-  /* ─── RESPONSIVE ─── */
-  @media (max-width: 900px) {
-    main { grid-template-columns: 1fr; }
-    .stats-row { grid-template-columns: repeat(2, 1fr); }
-    .charts-grid { grid-template-columns: 1fr; }
-    .form-grid { grid-template-columns: 1fr 1fr; }
-  }
-  @media (max-width: 600px) {
-    header { padding: 16px; }
-    main { padding: 16px; }
-    .stats-row { grid-template-columns: 1fr 1fr; }
-    .form-grid { grid-template-columns: 1fr; }
-    .field.span2, .field.span3 { grid-column: span 1; }
-  }
+/* iOS: overlays need high z-index */
 </style>
 </head>
 <body>
 
-<!-- HEADER -->
-<header>
-  <div class="logo">Auto<span>Book</span></div>
-  <div class="header-right">
-    <div id="carPill" class="car-pill" onclick="document.getElementById('carsModal').classList.add('open')">
-      <div class="car-dot" id="pillDot"></div>
-      <span id="pillName">Vyber auto</span>
-      <span style="color:var(--muted)">▾</span>
-    </div>
-    <button class="btn-google" id="gBtn" onclick="toggleGoogleSetup()">
-      <span>💾</span> Export / Import
-    </button>
-  </div>
-</header>
-
-<!-- MAIN -->
-<main>
-  <!-- SIDEBAR -->
-  <aside class="sidebar">
-    <div class="nav-group">
-      <div class="nav-label">Menu</div>
-      <div class="nav-item active" onclick="switchTab('dashboard')">
-        <span class="nav-icon">◈</span> Prehľad
-      </div>
-      <div class="nav-item" onclick="switchTab('fuel')">
-        <span class="nav-icon">⛽</span> Tankovanie
-      </div>
-      <div class="nav-item" onclick="switchTab('costs')">
-        <span class="nav-icon">??</span> Náklady
-      </div>
-      <div class="nav-item" onclick="switchTab('stats')">
-        <span class="nav-icon">◎</span> Štatistiky
-      </div>
-      <div class="nav-item" onclick="switchTab('google')">
-        <span class="nav-icon">💾</span> Export / Import
-      </div>
-    </div>
-
-    <div class="nav-group">
-      <div class="nav-label">Autá</div>
-      <div class="cars-list" id="carsList"></div>
-      <button class="btn-add-car" onclick="openAddCar()">+ Pridať auto</button>
-    </div>
-  </aside>
-
-  <!-- CONTENT -->
-  <div class="content">
-
-    <!-- STATS -->
-    <div class="stats-row" id="statsRow">
-      <div class="stat-card fuel">
-        <div class="stat-label">Celkom litrov</div>
-        <div class="stat-value" id="statLiters">0</div>
-        <div class="stat-unit">litrov natankovaných</div>
-      </div>
-      <div class="stat-card cost">
-        <div class="stat-label">Celkové náklady</div>
-        <div class="stat-value" id="statCosts">0 €</div>
-        <div class="stat-unit">opravy + iné</div>
-      </div>
-      <div class="stat-card km">
-        <div class="stat-label">Najazdené km</div>
-        <div class="stat-value" id="statKm">0</div>
-        <div class="stat-unit">posledné tankovanie</div>
-      </div>
-      <div class="stat-card avg">
-        <div class="stat-label">Spotreba</div>
-        <div class="stat-value" id="statAvg">–</div>
-        <div class="stat-unit">l / 100 km priemer</div>
-      </div>
-    </div>
-
-    <!-- DASHBOARD -->
-    <div class="panel active" id="dashboardPanel">
-      <div class="panel-header">
-        <div class="panel-title">Posledné záznamy</div>
-      </div>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Dátum</th><th>Auto</th><th>Typ</th><th>Detail</th><th>Suma</th><th></th>
-            </tr>
-          </thead>
-          <tbody id="dashboardTable"></tbody>
-        </table>
-        <div class="empty" id="dashboardEmpty">
-          <div class="empty-icon">??</div>
-          <div>Zatiaľ žiadne záznamy.<br>Pridaj prvé tankovanie alebo náklad!</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- FUEL FORM -->
-    <div class="panel" id="fuelPanel">
-      <div class="panel-header">
-        <div class="panel-title">⛽ Nové tankovanie</div>
-      </div>
-      <div class="form-grid">
-        <div class="field">
-          <label>Dátum</label>
-          <input type="date" id="fDate" />
-        </div>
-        <div class="field">
-          <label>Stav tachometra (km)</label>
-          <input type="number" id="fKm" placeholder="napr. 85420" />
-        </div>
-        <div class="field">
-          <label>Litrov</label>
-          <input type="number" step="0.01" id="fLiters" placeholder="napr. 45.5" />
-        </div>
-        <div class="field">
-          <label>Cena celkom (€)</label>
-          <input type="number" step="0.01" id="fTotal" placeholder="napr. 72.80" />
-        </div>
-        <div class="field">
-          <label>Cena / liter (€)</label>
-          <input type="number" step="0.001" id="fPriceL" placeholder="auto-výpočet" readonly />
-        </div>
-        <div class="field">
-          <label>Typ paliva</label>
-          <select id="fFuelType">
-            <option>Benzín</option>
-            <option>Diesel</option>
-            <option>LPG</option>
-            <option>CNG</option>
-            <option>Elektrina (kWh)</option>
-          </select>
-        </div>
-        <div class="field span3">
-          <label>Poznámka</label>
-          <input type="text" id="fNote" placeholder="nepovinné" />
-        </div>
-      </div>
-      <div class="form-actions">
-        <button class="btn-primary" onclick="saveFuel()">Uložiť tankovanie</button>
-        <button class="btn-secondary" onclick="clearFuelForm()">Vymazať</button>
-      </div>
-    </div>
-
-    <!-- COSTS FORM -->
-    <div class="panel" id="costsPanel">
-      <div class="panel-header">
-        <div class="panel-title">?? Nový náklad</div>
-      </div>
-      <div class="form-grid">
-        <div class="field">
-          <label>Dátum</label>
-          <input type="date" id="cDate" />
-        </div>
-        <div class="field">
-          <label>Typ nákladu</label>
-          <select id="cType">
-            <option>Oprava</option>
-            <option>Poistenie</option>
-            <option>STK / EK</option>
-            <option>Pneumatiky</option>
-            <option>Olej / filtre</option>
-            <option>Diaľničná známka</option>
-            <option>Parkovanie</option>
-            <option>Iné</option>
-          </select>
-        </div>
-        <div class="field">
-          <label>Suma (€)</label>
-          <input type="number" step="0.01" id="cAmount" placeholder="napr. 120.00" />
-        </div>
-        <div class="field">
-          <label>Stav tachometra (km)</label>
-          <input type="number" id="cKm" placeholder="nepovinné" />
-        </div>
-        <div class="field span2">
-          <label>Popis</label>
-          <input type="text" id="cDesc" placeholder="napr. Výmena bŕzd vpredu" />
-        </div>
-        <div class="field span3">
-          <label>Poznámka</label>
-          <input type="text" id="cNote" placeholder="nepovinné" />
-        </div>
-      </div>
-      <div class="form-actions">
-        <button class="btn-primary" onclick="saveCost()">Uložiť náklad</button>
-        <button class="btn-secondary" onclick="clearCostForm()">Vymazať</button>
-      </div>
-    </div>
-
-    <!-- INCOME PANEL -->
-    <div class="panel" id="incomePanel">
-      <div class="panel-header">
-        <div class="panel-title">💰 Nový príjem</div>
-      </div>
-      <div class="form-grid">
-        <div class="field">
-          <label>Dátum</label>
-          <input type="date" id="iDate" />
-        </div>
-        <div class="field">
-          <label>Typ príjmu</label>
-          <select id="iType">
-            <option>Spolujazda</option>
-            <option>Firemné jazdy</option>
-            <option>Prenájom auta</option>
-            <option>Náhrada za cestu</option>
-            <option>Predaj dielu</option>
-            <option>Iné</option>
-          </select>
-        </div>
-        <div class="field">
-          <label>Suma (€)</label>
-          <input type="number" step="0.01" id="iAmount" placeholder="napr. 25.00" />
-        </div>
-        <div class="field span3">
-          <label>Popis</label>
-          <input type="text" id="iDesc" placeholder="napr. Spolujazda BA-KE" />
-        </div>
-      </div>
-      <div class="form-actions">
-        <button class="btn-primary" onclick="saveIncome()">Uložiť príjem</button>
-        <button class="btn-secondary" onclick="clearIncomeForm()">Vymazať</button>
-      </div>
-    </div>
-
-    <!-- STATS PANEL -->
-    <div class="panel" id="statsPanel">
-      <div class="panel-header">
-        <div class="panel-title">◎ Štatistiky</div>
-      </div>
-      <div class="charts-grid">
-        <div class="chart-box">
-          <div class="chart-title">Výdaje na palivo (posledné záznamy)</div>
-          <canvas id="chartFuel" height="180"></canvas>
-        </div>
-        <div class="chart-box">
-          <div class="chart-title">Náklady podľa kategórie</div>
-          <canvas id="chartCosts" height="180"></canvas>
-        </div>
-        <div class="chart-box">
-          <div class="chart-title">Spotreba l/100km</div>
-          <canvas id="chartConsumption" height="180"></canvas>
-        </div>
-        <div class="chart-box">
-          <div class="chart-title">Mesačné výdaje celkovo (€)</div>
-          <canvas id="chartMonthly" height="180"></canvas>
-        </div>
-      </div>
-    </div>
-
-    <!-- EXPORT PANEL -->
-    <div class="panel" id="googlePanel">
-      <div class="panel-header">
-        <div class="panel-title">💾 Export &amp; Záloha</div>
-      </div>
-      <div style="padding:20px;display:flex;flex-direction:column;gap:16px;">
-
-        <div class="setup-box">
-          <p><strong>Export do CSV</strong> – kompatibilný s Fuelio. Každé auto = jeden súbor.</p>
-          <div id="exportCarList" style="margin:12px 0;display:flex;flex-direction:column;gap:6px;"></div>
-          <button class="btn-primary" onclick="exportFuelioCSV()">📥 Exportovať CSV</button>
-        </div>
-
-        <div class="setup-box">
-          <p><strong>Import z CSV</strong> – nahraj zálohu alebo export z Fuelio.</p>
-          <input type="file" id="importFileInput" accept=".csv" onchange="handleImportFile(event)" style="display:none" />
-          <button class="btn-primary" onclick="document.getElementById('importFileInput').click()">📤 Importovať CSV</button>
-          <div id="importPreview" style="margin-top:12px;font-size:0.8rem;color:var(--muted);"></div>
-          <button id="importConfirmBtn" class="btn-secondary" onclick="confirmImport()" style="display:none;margin-top:8px;">✓ Potvrdiť import</button>
-        </div>
-
-        <div class="setup-box">
-          <p><strong>Záloha na Google Disk</strong></p>
-          <div class="setup-step"><span class="step-num">1</span><span>Exportuj CSV vyššie</span></div>
-          <div class="setup-step"><span class="step-num">2</span><span>iPhone: Súbory → Stiahnuté → drž súbor → Zdieľať</span></div>
-          <div class="setup-step"><span class="step-num">3</span><span>Vyber <strong>Uložiť do Drive</strong></span></div>
-          <a href="https://drive.google.com" target="_blank" class="btn-secondary" style="display:inline-block;margin-top:8px;text-decoration:none;text-align:center;">☁ Otvoriť Google Disk</a>
-        </div>
-
-      </div>
-    </div>
-
-  </div>
-</main>
-
-<!-- CARS MODAL -->
-<div class="modal-overlay" id="carsModal" onclick="if(event.target===this)this.classList.remove('open')">
-  <div class="modal">
-    <h3>Vyber auto</h3>
-    <div id="modalCarsList" style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px;"></div>
-    <button class="btn-primary" onclick="openAddCar();document.getElementById('carsModal').classList.remove('open')">+ Nové auto</button>
-    <button class="btn-secondary" style="margin-left:8px;" onclick="document.getElementById('carsModal').classList.remove('open')">Zavrieť</button>
-  </div>
-</div>
-
-<!-- ADD CAR MODAL -->
-<div class="modal-overlay" id="addCarModal" onclick="if(event.target===this)this.classList.remove('open')">
-  <div class="modal">
-    <h3>Pridať auto</h3>
-    <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:20px;">
-      <div class="field"><label>Názov auta</label><input type="text" id="newCarName" placeholder="napr. Škoda Octavia" /></div>
-      <div class="field"><label>ŠPZ</label><input type="text" id="newCarPlate" placeholder="napr. BA123AB" /></div>
-      <div class="field">
-        <label>Farba</label>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;" id="colorPicker">
-          <div onclick="selectColor(this,'#e8ff47')" style="width:28px;height:28px;border-radius:50%;background:#e8ff47;cursor:pointer;border:2px solid transparent;" data-color="#e8ff47"></div>
-          <div onclick="selectColor(this,'#47c3ff')" style="width:28px;height:28px;border-radius:50%;background:#47c3ff;cursor:pointer;border:2px solid transparent;" data-color="#47c3ff"></div>
-          <div onclick="selectColor(this,'#ff5e5e')" style="width:28px;height:28px;border-radius:50%;background:#ff5e5e;cursor:pointer;border:2px solid transparent;" data-color="#ff5e5e"></div>
-          <div onclick="selectColor(this,'#b47fff')" style="width:28px;height:28px;border-radius:50%;background:#b47fff;cursor:pointer;border:2px solid transparent;" data-color="#b47fff"></div>
-          <div onclick="selectColor(this,'#4caf50')" style="width:28px;height:28px;border-radius:50%;background:#4caf50;cursor:pointer;border:2px solid transparent;" data-color="#4caf50"></div>
-          <div onclick="selectColor(this,'#f9a825')" style="width:28px;height:28px;border-radius:50%;background:#f9a825;cursor:pointer;border:2px solid transparent;" data-color="#f9a825"></div>
-        </div>
-      </div>
-    </div>
-    <button class="btn-primary" onclick="addCar()">Pridať</button>
-    <button class="btn-secondary" style="margin-left:8px;" onclick="document.getElementById('addCarModal').classList.remove('open')">Zrušiť</button>
-  </div>
-</div>
-
+<!-- TOAST -->
 <div id="toast"></div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-<script>
-// ─── STATE ───
-let state = {
-  cars: [],
-  records: [],   // {id, carId, type:'fuel'|'cost', ...}
-  selectedCar: null,
-  google: { url: '', sheetId: '' },
-  selectedColor: '#e8ff47'
-};
+<!-- BOTTOM NAV -->
+<nav class="bnav" id="bnav">
+  <button class="bnav-btn active" id="nb-dashboard" onclick="switchTab('dashboard')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+    <span>Prehľad</span>
+  </button>
+  <button class="bnav-btn" id="nb-fuel" onclick="switchTab('fuel')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 22V7l7-4 7 4v15"/><rect x="7" y="14" width="6" height="8"/><path d="M17 7v7a2 2 0 0 0 4 0V9l-2-2-2 2"/></svg>
+    <span>Tankuj</span>
+  </button>
+  <button class="bnav-btn" id="nb-costs" onclick="switchTab('costs')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+    <span>Náklady</span>
+  </button>
+  <button class="bnav-btn" id="nb-income" onclick="switchTab('income')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 6v2m0 8v2"/></svg>
+    <span>Príjmy</span>
+  </button>
+  <button class="bnav-btn" id="nb-stats" onclick="switchTab('stats')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+    <span>Štat.</span>
+  </button>
+  <button class="bnav-btn" id="nb-export" onclick="switchTab('export')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+    <span>Export</span>
+  </button>
+</nav>
 
-function load() {
-  try {
-    const s = localStorage.getItem('autobook');
-    if (s) state = { ...state, ...JSON.parse(s) };
-  } catch(e) {}
-}
+<!-- PAGE CONTENT -->
+<div class="page">
 
-function save() {
-  localStorage.setItem('autobook', JSON.stringify(state));
-}
+  <!-- HEADER -->
+  <div class="hdr">
+    <div class="hdr-left">
+      <div class="hdr-logo">Fue<span>lio</span></div>
+    </div>
+    <div class="hdr-right">
+      <button class="hdr-car" id="carPillBtn" onclick="openOverlay('carsOvl')">
+        <div class="hdr-car-dot" id="pillDot"></div>
+        <span id="pillName">Vyber auto</span>
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+      <button class="btn-icon" onclick="openOverlay('importOvl')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 5 17 10"/><line x1="12" y1="5" x2="12" y2="17"/></svg>
+        Import
+      </button>
+    </div>
+  </div>
 
-function toast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2500);
-}
+  <!-- STAT CARDS (always visible) -->
+  <div class="stats" id="statsRow">
+    <div class="stat s-amber"><div class="stat-label">Litrov</div><div class="stat-val" id="sL">0</div><div class="stat-sub">celkovo</div><div class="stat-bar"></div></div>
+    <div class="stat s-red"><div class="stat-label">Náklady</div><div class="stat-val" id="sC">0 €</div><div class="stat-sub">palivo+opravy</div><div class="stat-bar"></div></div>
+    <div class="stat s-blue"><div class="stat-label">Odometer</div><div class="stat-val" id="sK">–</div><div class="stat-sub">posledný km</div><div class="stat-bar"></div></div>
+    <div class="stat s-purple"><div class="stat-val" id="sA" style="color:var(--purple)">–</div><div class="stat-label">l/100km</div><div class="stat-sub">priemer</div><div class="stat-bar" style="background:var(--purple)"></div></div>
+    <div class="stat s-green"><div class="stat-label">Príjmy</div><div class="stat-val" id="sI">0 €</div><div class="stat-sub">celkovo</div><div class="stat-bar"></div></div>
+  </div>
 
-// ─── INIT ───
-load();
-document.getElementById('fDate').valueAsDate = new Date();
-document.getElementById('cDate').valueAsDate = new Date();
-document.getElementById('iDate').valueAsDate = new Date();
-if (state.google.url) document.getElementById('gsUrl').value = state.google.url;
-if (state.google.sheetId) document.getElementById('gsId').value = state.google.sheetId;
-renderCars();
-renderStats();
-renderDashboard();
-
-// ─── TABS ───
-const panels = ['dashboard','fuel','costs','income','stats','google'];
-function switchTab(tab) {
-  panels.forEach(p => {
-    document.getElementById(p+'Panel').classList.remove('active');
-  });
-  document.getElementById(tab+'Panel').classList.add('active');
-  document.querySelectorAll('.nav-item').forEach((el,i) => el.classList.remove('active'));
-  const tabs = ['dashboard','fuel','costs','income','stats','google'];
-  const idx = tabs.indexOf(tab);
-  document.querySelectorAll('.nav-item')[idx]?.classList.add('active');
-  if (tab === 'stats') renderCharts();
-  if (tab === 'google') renderExportCarList();
-}
-
-// ─── CARS ───
-function renderCars() {
-  const list = document.getElementById('carsList');
-  const modal = document.getElementById('modalCarsList');
-  list.innerHTML = '';
-  modal.innerHTML = '';
-
-  if (state.cars.length === 0) {
-    list.innerHTML = '<div style="font-size:0.78rem;color:var(--muted);padding:8px 12px;">Žiadne autá</div>';
-    modal.innerHTML = '<div style="font-size:0.82rem;color:var(--muted);">Zatiaľ žiadne autá.</div>';
-  }
-
-  state.cars.forEach(car => {
-    const sel = state.selectedCar?.id === car.id;
-
-    const item = document.createElement('div');
-    item.className = 'car-item' + (sel ? ' selected' : '');
-    item.innerHTML = `
-      <div class="car-item-left">
-        <div class="car-color" style="background:${car.color}"></div>
-        <div>
-          <div class="car-name">${car.name}</div>
-          <div class="car-sub">${car.plate}</div>
+  <!-- ══ DASHBOARD ══ -->
+  <div class="panel active" id="dashboardPanel">
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title"><span class="card-title-accent">◈</span>Záznamy</div>
+        <div class="filter-row">
+          <select class="fsel" id="dashYear" onchange="renderDash()">
+            <option value="">Všetky roky</option>
+          </select>
+          <select class="fsel" id="dashMonth" onchange="renderDash()">
+            <option value="">Všetky mesiace</option>
+            <option value="01">Január</option><option value="02">Február</option>
+            <option value="03">Marec</option><option value="04">Apríl</option>
+            <option value="05">Máj</option><option value="06">Jún</option>
+            <option value="07">Júl</option><option value="08">August</option>
+            <option value="09">September</option><option value="10">Október</option>
+            <option value="11">November</option><option value="12">December</option>
+          </select>
+          <span class="cnt-badge" id="dashCount"></span>
         </div>
       </div>
-      <button class="del-btn" onclick="deleteCar('${car.id}',event)">✕</button>`;
-    item.onclick = (e) => { if(!e.target.classList.contains('del-btn')) selectCar(car); };
-    list.appendChild(item);
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Dátum</th><th>Auto</th><th>Typ</th><th>Detail</th><th>Suma</th><th></th></tr></thead>
+          <tbody id="dashboardTable"></tbody>
+        </table>
+        <div class="empty" id="dashboardEmpty" style="display:none">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 17H3a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v3"/><rect x="9" y="11" width="14" height="10" rx="2"/></svg>
+          Žiadne záznamy pre zvolené obdobie.
+        </div>
+      </div>
+    </div>
+  </div>
 
-    const mItem = item.cloneNode(true);
-    mItem.onclick = (e) => { if(!e.target.classList.contains('del-btn')) { selectCar(car); document.getElementById('carsModal').classList.remove('open'); }};
-    mItem.querySelector('.del-btn').onclick = (e) => deleteCar(car.id, e);
-    modal.appendChild(mItem);
-  });
+  <!-- ══ FUEL ══ -->
+  <div class="panel" id="fuelPanel">
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">Nové tankovanie</div>
+        <button class="btn-sm" onclick="openOverlay('scanOvl')">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg>
+          Skenovať doklad
+        </button>
+      </div>
+      <div class="form-body">
+        <div class="fg">
+          <div class="field"><label>Dátum</label><input type="date" id="fDate"></div>
+          <div class="field"><label>Odometer (km)</label>
+            <div class="frow">
+              <input type="number" id="fKm" placeholder="napr. 85420">
+              <button class="btn-sm" onclick="openOverlay('odoOvl')" style="width:auto;padding:8px 10px">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+              </button>
+            </div>
+          </div>
+          <div class="field"><label>Typ paliva</label>
+            <select id="fFuelType">
+              <option value="Benzín">Benzín</option>
+              <option value="Nafta">Nafta (Diesel)</option>
+              <option value="LPG">LPG</option>
+              <option value="CNG">CNG</option>
+              <option value="Elektrina">Elektrina (kWh)</option>
+            </select>
+          </div>
+          <div class="field"><label>Typ tankovania</label>
+            <select id="fFullTank">
+              <option value="1">Plná nádrž</option>
+              <option value="0">Čiastočné</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Litrov</label>
+            <input type="number" step="0.01" id="fLiters" placeholder="napr. 45.5">
+            <div class="hint" id="hL"></div>
+          </div>
+          <div class="field">
+            <label>Cena / liter</label>
+            <div class="frow">
+              <input type="number" step="0.001" id="fPriceL" placeholder="napr. 1.589">
+              <select id="fCurL" onchange="recalcFuel('cur')">
+                <option value="EUR">EUR</option>
+                <option value="CZK">CZK</option>
+                <option value="PLN">PLN</option>
+              </select>
+            </div>
+            <div class="hint" id="hP"></div>
+          </div>
+          <div class="field">
+            <label>Celková suma (EUR)</label>
+            <input type="number" step="0.01" id="fTotal" placeholder="napr. 72.50">
+            <div class="hint" id="hT"></div>
+          </div>
+          <div class="field span2">
+            <div class="warn-box" id="tankWarn">⚠ Zadané litre prekračujú kapacitu nádrže. Skontroluj hodnoty.</div>
+          </div>
+          <div class="field span2"><label>Poznámka</label><input type="text" id="fNote" placeholder="nepovinné"></div>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn-p" onclick="saveFuel()">Uložiť tankovanie</button>
+        <button class="btn-g" onclick="clearFuelForm()">Vymazať</button>
+      </div>
+    </div>
+  </div>
 
-  // update pill
-  if (state.selectedCar) {
-    document.getElementById('pillName').textContent = state.selectedCar.name;
-    document.getElementById('pillDot').style.background = state.selectedCar.color;
-  } else {
-    document.getElementById('pillName').textContent = 'Vyber auto';
-    document.getElementById('pillDot').style.background = 'var(--accent)';
+  <!-- ══ COSTS ══ -->
+  <div class="panel" id="costsPanel">
+    <div class="card">
+      <div class="card-head"><div class="card-title">Nový náklad</div></div>
+      <div class="form-body">
+        <div class="fg">
+          <div class="field"><label>Dátum</label><input type="date" id="cDate"></div>
+          <div class="field"><label>Typ nákladu</label>
+            <select id="cType">
+              <option>Oprava</option><option>Poistenie</option><option>STK / EK</option>
+              <option>Pneumatiky</option><option>Olej / filtre</option>
+              <option>Diaľničná známka</option><option>Parkovanie</option><option>Iné</option>
+            </select>
+          </div>
+          <div class="field"><label>Suma</label>
+            <div class="frow">
+              <input type="number" step="0.01" id="cAmount" placeholder="120.00">
+              <select id="cCur" onchange="recalcCost()">
+                <option value="EUR">EUR</option><option value="CZK">CZK</option><option value="PLN">PLN</option>
+              </select>
+            </div>
+          </div>
+          <div class="field"><label>Suma v EUR</label><input type="number" id="cAmtEUR" readonly placeholder="auto-prepočet" style="color:var(--accent)"></div>
+          <div class="field"><label>Odometer (km)</label><input type="number" id="cKm" placeholder="nepovinné"></div>
+          <div class="field"><label>Popis</label><input type="text" id="cDesc" placeholder="napr. Výmena bŕzd"></div>
+          <div class="field span2"><label>Poznámka</label><input type="text" id="cNote" placeholder="nepovinné"></div>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn-p" onclick="saveCost()">Uložiť náklad</button>
+        <button class="btn-g" onclick="clearCostForm()">Vymazať</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ INCOME ══ -->
+  <div class="panel" id="incomePanel">
+    <div class="card">
+      <div class="card-head"><div class="card-title">Nový príjem</div></div>
+      <div class="form-body">
+        <div class="fg">
+          <div class="field"><label>Dátum</label><input type="date" id="iDate"></div>
+          <div class="field"><label>Typ príjmu</label>
+            <select id="iType">
+              <option>Spolujazda</option><option>Firemná jazda</option>
+              <option>Náhrada za cestu</option><option>Predaj dielu</option><option>Iné</option>
+            </select>
+          </div>
+          <div class="field"><label>Suma</label>
+            <div class="frow">
+              <input type="number" step="0.01" id="iAmount" placeholder="15.00">
+              <select id="iCur" onchange="recalcIncome()">
+                <option value="EUR">EUR</option><option value="CZK">CZK</option><option value="PLN">PLN</option>
+              </select>
+            </div>
+          </div>
+          <div class="field"><label>Suma v EUR</label><input type="number" id="iAmtEUR" readonly placeholder="auto-prepočet" style="color:var(--green)"></div>
+          <div class="field span2"><label>Popis</label><input type="text" id="iDesc" placeholder="napr. Spolujazda BA–KE"></div>
+          <div class="field span2"><label>Poznámka</label><input type="text" id="iNote" placeholder="nepovinné"></div>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn-p" onclick="saveIncome()">Uložiť príjem</button>
+        <button class="btn-g" onclick="clearIncomeForm()">Vymazať</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ STATS ══ -->
+  <div class="panel" id="statsPanel">
+    <div class="card" style="margin-bottom:14px">
+      <div class="card-head">
+        <div class="card-title">Štatistiky</div>
+        <div class="filter-row">
+          <button class="fbtn active" id="spAll" onclick="setStatPeriod('all',this)">Všetko</button>
+          <button class="fbtn" id="spYear" onclick="setStatPeriod('year',this)">Rok</button>
+          <button class="fbtn" id="spMonth" onclick="setStatPeriod('month',this)">Mesiac</button>
+          <select class="fsel" id="statYear" onchange="renderCharts()" style="display:none"></select>
+          <select class="fsel" id="statMonth" onchange="renderCharts()" style="display:none">
+            <option value="01">Január</option><option value="02">Február</option>
+            <option value="03">Marec</option><option value="04">Apríl</option>
+            <option value="05">Máj</option><option value="06">Jún</option>
+            <option value="07">Júl</option><option value="08">August</option>
+            <option value="09">September</option><option value="10">Október</option>
+            <option value="11">November</option><option value="12">December</option>
+          </select>
+          <div style="border-left:1px solid var(--border);padding-left:6px;display:flex;gap:4px">
+            <button class="fbtn active" id="axM" onclick="setAxis('month',this)">Mes.</button>
+            <button class="fbtn" id="axY" onclick="setAxis('year',this)">Rok</button>
+          </div>
+        </div>
+      </div>
+      <!-- Summary cells -->
+      <div class="ss-row c4">
+        <div class="ss-cell"><div class="ss-lbl">Tankovaní</div><div class="ss-val" id="ssF" style="color:var(--amber)">–</div><div class="ss-sub" id="ssFsub">–</div></div>
+        <div class="ss-cell"><div class="ss-lbl">Najazdené</div><div class="ss-val" id="ssKm" style="color:var(--accent)">–</div><div class="ss-sub">km</div></div>
+        <div class="ss-cell"><div class="ss-lbl">Spotreba</div><div class="ss-val" id="ssCons" style="color:var(--accent)">–</div><div class="ss-sub">l/100km</div></div>
+        <div class="ss-cell"><div class="ss-lbl">€/km</div><div class="ss-val" id="ssCpk" style="color:var(--red)">–</div><div class="ss-sub" id="ssCpkSub">palivo</div></div>
+      </div>
+      <div class="ss-row c3">
+        <div class="ss-cell"><div class="ss-lbl">Celk. náklady</div><div class="ss-val" id="ssTC" style="color:var(--red)">–</div><div class="ss-sub" id="ssTCsub">€/km</div></div>
+        <div class="ss-cell"><div class="ss-lbl">Celk. príjmy</div><div class="ss-val" id="ssTI" style="color:var(--green)">–</div><div class="ss-sub">–</div></div>
+        <div class="ss-cell"><div class="ss-lbl">Zisk/Strata</div><div class="ss-val" id="ssProfit">–</div><div class="ss-sub">príjmy−náklady</div></div>
+      </div>
+      <!-- Income by period table -->
+      <div id="incPeriodWrap" style="display:none;overflow-x:auto;border-bottom:1px solid var(--border)">
+        <div style="padding:10px 14px 0"><span style="font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--t3);font-family:var(--mono)">Príjmy po obdobiach</span></div>
+        <table class="ptbl" id="incPeriodTable">
+          <thead id="incPeriodHead"></thead>
+          <tbody id="incPeriodBody"></tbody>
+        </table>
+      </div>
+      <!-- Drilldown -->
+      <div class="drilldown" id="drilldown">
+        <div class="dd-head">
+          <div class="dd-title" id="ddTitle"></div>
+          <button class="dd-close" onclick="hideDrilldown()">×</button>
+        </div>
+        <div class="dd-body">
+          <table style="width:100%;border-collapse:collapse;font-size:12px">
+            <thead><tr id="ddHead" style="background:var(--bg3)"></tr></thead>
+            <tbody id="ddBody"></tbody>
+          </table>
+        </div>
+      </div>
+      <!-- Charts -->
+      <div class="chart-grid">
+        <div class="chart-box"><div class="chart-lbl">Spotreba l/100km</div><canvas id="chCons" height="150"></canvas></div>
+        <div class="chart-box"><div class="chart-lbl">Cena paliva €/l</div><canvas id="chPrice" height="150"></canvas></div>
+        <div class="chart-box"><div class="chart-lbl">Mesačné náklady</div><canvas id="chMonthly" height="150"></canvas></div>
+        <div class="chart-box"><div class="chart-lbl">Kategórie nákladov</div><canvas id="chCats" height="150"></canvas></div>
+        <div class="chart-box chart-wide"><div class="chart-lbl">Výdaje na palivo €</div><canvas id="chFuel" height="110"></canvas></div>
+        <div class="chart-box chart-wide"><div class="chart-lbl">Príjmy vs Náklady</div><canvas id="chProfit" height="110"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ EXPORT ══ -->
+  <div class="panel" id="exportPanel">
+    <div class="card" style="margin-bottom:14px">
+      <div class="card-head"><div class="card-title">Export CSV — Fuelio formát</div></div>
+      <div class="form-body">
+        <p style="font-size:12px;color:var(--t2);margin-bottom:14px">Exportuj dáta pre každé vozidlo zvlášť ako CSV kompatibilný s aplikáciou Fuelio.</p>
+        <div id="expCarList"></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
+          <button class="btn-p" onclick="exportAll()">Exportovať všetky vozidlá</button>
+          <button class="btn-g" onclick="exportSel()">Exportovať vybrané</button>
+          <button class="btn-g" onclick="dlSampleCSV()">Stiahnuť vzorový CSV</button>
+        </div>
+      </div>
+    </div>
+    <!-- Kurzy -->
+    <div class="card" style="margin-bottom:14px">
+      <div class="card-head">
+        <div class="card-title">Výmenné kurzy (1 EUR)</div>
+        <button class="btn-icon" onclick="fetchRates()">↻ Aktualizovať</button>
+      </div>
+      <div class="form-body" style="display:flex;gap:20px;font-family:var(--mono);font-size:13px">
+        <span>CZK = <span id="rateCZK" style="color:var(--accent);font-weight:600">…</span></span>
+        <span>PLN = <span id="ratePLN" style="color:var(--accent);font-weight:600">…</span></span>
+      </div>
+    </div>
+    <!-- Google Sheets -->
+    <div class="card">
+      <div class="card-head"><div class="card-title">Google Sheets prepojenie</div></div>
+      <div class="form-body" style="display:flex;flex-direction:column;gap:14px">
+        <div class="setup-box">
+          <p>Pre prepojenie potrebuješ <strong style="color:var(--text)">Google Apps Script</strong>. Dáta sa uložia priamo do tvojho Google Sheetu.</p>
+          <div class="step"><span class="step-n">1</span><span>Otvor script.google.com a vytvor nový projekt.</span></div>
+          <div class="step"><span class="step-n">2</span><span>Vlož kód nižšie → Nasadiť → Web App → prístup: Ktokoľvek.</span></div>
+          <div class="step"><span class="step-n">3</span><span>Skopíruj URL a vlož ju do poľa nižšie.</span></div>
+        </div>
+        <pre class="code">function doPost(e){
+  try{
+    var d=JSON.parse(e.postData.contents);
+    var ss=SpreadsheetApp.openById(d.sheetId);
+    var sh=ss.getSheetByName(d.sheetName)||ss.insertSheet(d.sheetName);
+    if(sh.getLastRow()===0){sh.appendRow(d.headers);sh.setFrozenRows(1);}
+    var ids=sh.getRange('A:A').getValues().flat();
+    var row=ids.indexOf(d.row[0]);
+    if(row>0)sh.getRange(row+1,1,1,d.row.length).setValues([d.row]);
+    else sh.appendRow(d.row);
+    return ContentService.createTextOutput(JSON.stringify({ok:true})).setMimeType(ContentService.MimeType.JSON);
+  }catch(e){return ContentService.createTextOutput(JSON.stringify({ok:false,error:e.toString()})).setMimeType(ContentService.MimeType.JSON);}
+}
+function doGet(e){
+  try{
+    var ss=SpreadsheetApp.openById(e.parameter.sheetId);
+    var sh=ss.getSheetByName(e.parameter.sheetName);
+    if(!sh)return ContentService.createTextOutput(JSON.stringify({rows:[]})).setMimeType(ContentService.MimeType.JSON);
+    return ContentService.createTextOutput(JSON.stringify({rows:sh.getDataRange().getValues()})).setMimeType(ContentService.MimeType.JSON);
+  }catch(e){return ContentService.createTextOutput(JSON.stringify({rows:[],error:e.toString()})).setMimeType(ContentService.MimeType.JSON);}
+}</pre>
+        <div class="setup-box">
+          <div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent);font-family:var(--mono);margin-bottom:8px">Anthropic API kľúč (pre skenovanie dokladov)</div>
+          <p>Získaš ho na console.anthropic.com → API Keys. Ukladá sa len lokálne.</p>
+          <div class="field"><label>Anthropic API Key</label><input type="password" id="anthropicKey" placeholder="sk-ant-..."></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div class="field"><label>Apps Script URL</label><input type="text" id="gsUrl" placeholder="https://script.google.com/macros/s/..."></div>
+          <div class="field"><label>Google Sheet ID</label><input type="text" id="gsId" placeholder="z URL Sheetu"></div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn-p" onclick="saveGsConfig()">Uložiť prepojenie</button>
+          <button class="btn-g" onclick="testGs()">Otestovať</button>
+          <button class="btn-g" onclick="syncGs()">Sync do Sheets</button>
+        </div>
+        <div id="gsStatus" style="font-size:12px;color:var(--t3)"></div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /page -->
+
+<!-- ════════════════════════
+     OVERLAYS / MODALS
+════════════════════════ -->
+
+<!-- Cars overlay -->
+<div class="overlay" id="carsOvl">
+  <div class="modal">
+    <div class="modal-drag"></div>
+    <h3>Moje vozidlá</h3>
+    <div id="modalCarList" style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px"></div>
+    <div class="modal-foot">
+      <button class="btn-p" onclick="closeOverlay('carsOvl');openOverlay('addCarOvl')">+ Pridať vozidlo</button>
+      <button class="btn-g" onclick="closeOverlay('carsOvl')">Zavrieť</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add car overlay -->
+<div class="overlay" id="addCarOvl">
+  <div class="modal">
+    <div class="modal-drag"></div>
+    <h3>Pridať vozidlo</h3>
+    <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:16px">
+      <div class="field"><label>Názov vozidla</label><input type="text" id="ncName" placeholder="napr. Škoda Octavia"></div>
+      <div class="field"><label>ŠPZ</label><input type="text" id="ncPlate" placeholder="napr. BA123AB"></div>
+      <div class="field"><label>Veľkosť nádrže (litrov)</label><input type="number" id="ncTank" placeholder="napr. 45" min="5" max="300"></div>
+      <div class="field"><label>Farba</label>
+        <div class="cpick" id="cpick">
+          <div class="cswatch sel" style="background:#38bdf8" data-c="#38bdf8" onclick="pickColor(this,'#38bdf8')"></div>
+          <div class="cswatch" style="background:#34d399" data-c="#34d399" onclick="pickColor(this,'#34d399')"></div>
+          <div class="cswatch" style="background:#fbbf24" data-c="#fbbf24" onclick="pickColor(this,'#fbbf24')"></div>
+          <div class="cswatch" style="background:#f87171" data-c="#f87171" onclick="pickColor(this,'#f87171')"></div>
+          <div class="cswatch" style="background:#c084fc" data-c="#c084fc" onclick="pickColor(this,'#c084fc')"></div>
+          <div class="cswatch" style="background:#fb923c" data-c="#fb923c" onclick="pickColor(this,'#fb923c')"></div>
+          <div class="cswatch" style="background:#94a3b8" data-c="#94a3b8" onclick="pickColor(this,'#94a3b8')"></div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-p" onclick="addCar()">Pridať</button>
+      <button class="btn-g" onclick="closeOverlay('addCarOvl')">Zrušiť</button>
+    </div>
+  </div>
+</div>
+
+<!-- Import overlay -->
+<div class="overlay" id="importOvl">
+  <div class="modal">
+    <div class="modal-drag"></div>
+    <h3>Import z Fuelio CSV</h3>
+    <p style="font-size:12px;color:var(--t2);margin-bottom:12px;line-height:1.7">
+      V aplikácii Fuelio: <strong style="color:var(--text)">Nastavenia → Záloha → Exportovať CSV</strong>.<br>
+      Súbor je v Google Drive / <strong style="color:var(--accent)">Android/Fuelio/backup-csv/</strong>
+    </p>
+    <div class="field" style="margin-bottom:12px">
+      <label>Vyber CSV súbor</label>
+      <input type="file" id="importFile" accept=".csv,.txt" onchange="handleImport(event)"
+        style="background:var(--bg3);border:1px solid var(--border2);border-radius:10px;color:var(--text);padding:10px 12px;font-family:'Outfit',sans-serif;font-size:13px;width:100%;cursor:pointer;min-height:44px">
+    </div>
+    <div id="importPreview" style="margin-bottom:12px"></div>
+    <div class="modal-foot">
+      <button class="btn-p" id="importConfBtn" style="display:none" onclick="confirmImport()">Importovať</button>
+      <button class="btn-g" onclick="dlSampleCSV()">Stiahnuť vzor</button>
+      <button class="btn-g" onclick="closeOverlay('importOvl')">Zavrieť</button>
+    </div>
+  </div>
+</div>
+
+<!-- Scan receipt overlay -->
+<div class="overlay" id="scanOvl">
+  <div class="modal">
+    <div class="modal-drag"></div>
+    <h3>Skenovanie dokladu</h3>
+    <p style="font-size:12px;color:var(--t2);margin-bottom:12px">Odfotte alebo nahrajte účtenku z čerpacky. OCR vyčíta hodnoty automaticky.</p>
+    <div class="drop-zone">
+      <input type="file" id="scanFile" accept="image/*" capture="environment" onchange="handleScan(event)">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="display:block;margin:0 auto 8px;opacity:0.3"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg>
+      <div style="font-size:13px;font-weight:600;color:var(--t2)">Kliknite alebo odfotte doklad</div>
+      <div class="drop-text">JPG, PNG, HEIC · max 10 MB</div>
+      <img id="scanPrev" class="scan-prev">
+    </div>
+    <div class="spinner-wrap" id="scanSpinner"><div class="spinner"></div><div style="font-size:12px;color:var(--t3)">OCR číta doklad…</div></div>
+    <div class="scan-res" id="scanRes">
+      <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--t3);font-family:var(--mono);margin-bottom:8px">Vyčítané hodnoty</div>
+      <div class="sr-row"><span class="sr-lbl">Litrov</span><span class="sr-val" id="srL">–</span></div>
+      <div class="sr-row"><span class="sr-lbl">Cena / liter</span><span class="sr-val" id="srP">–</span></div>
+      <div class="sr-row"><span class="sr-lbl">Celková suma</span><span class="sr-val" id="srT">–</span></div>
+      <div class="sr-row"><span class="sr-lbl">Mena</span><span class="sr-val" id="srC">–</span></div>
+      <div class="sr-row"><span class="sr-lbl">Typ paliva</span><span class="sr-val" id="srF">–</span></div>
+      <div class="sr-row"><span class="sr-lbl">Dátum</span><span class="sr-val" id="srD">–</span></div>
+      <div class="sr-row"><span class="sr-lbl">Stanica</span><span class="sr-val" id="srS">–</span></div>
+    </div>
+    <div id="scanErr" style="color:var(--red);font-size:12px;margin-top:10px;display:none"></div>
+    <div class="modal-foot">
+      <button class="btn-p" id="scanUseBtn" style="display:none" onclick="useScan()">Použiť hodnoty</button>
+      <button class="btn-g" onclick="closeOverlay('scanOvl')">Zavrieť</button>
+    </div>
+  </div>
+</div>
+
+<!-- Odometer overlay -->
+<div class="overlay" id="odoOvl">
+  <div class="modal">
+    <div class="modal-drag"></div>
+    <h3>Odfotiť tachometer</h3>
+    <p style="font-size:12px;color:var(--t2);margin-bottom:12px">OCR vyčíta počet kilometrov z displeja.</p>
+    <div class="drop-zone">
+      <input type="file" id="odoFile" accept="image/*" capture="environment" onchange="handleOdo(event)">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="display:block;margin:0 auto 8px;opacity:0.3"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+      <div style="font-size:13px;font-weight:600;color:var(--t2)">Kliknite alebo odfotte tachometer</div>
+      <img id="odoPrev" class="scan-prev">
+    </div>
+    <div class="spinner-wrap" id="odoSpinner"><div class="spinner"></div><div style="font-size:12px;color:var(--t3)">OCR číta…</div></div>
+    <div id="odoRes" style="display:none;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:14px;margin-top:12px">
+      <div style="font-size:10px;color:var(--t3);font-family:var(--mono);margin-bottom:4px">Vyčítaný stav</div>
+      <div style="font-size:28px;font-weight:800;color:var(--accent)" id="odoVal">–</div>
+      <div style="font-size:10px;color:var(--t3)">km</div>
+    </div>
+    <div id="odoErr" style="color:var(--red);font-size:12px;margin-top:10px;display:none"></div>
+    <div class="modal-foot">
+      <button class="btn-p" id="odoUseBtn" style="display:none" onclick="useOdo()">Použiť</button>
+      <button class="btn-g" onclick="closeOverlay('odoOvl')">Zavrieť</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+<script>
+'use strict';
+// ══════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════
+var S = {
+  cars: [],
+  records: [],
+  selectedCar: null,
+  google: { url: '', sheetId: '' },
+  anthropicKey: '',
+  selColor: '#38bdf8'
+};
+
+function loadS() {
+  try { var raw = localStorage.getItem('fuelio3'); if (raw) S = Object.assign({}, S, JSON.parse(raw)); } catch(e) {}
+}
+function saveS() { try { localStorage.setItem('fuelio3', JSON.stringify(S)); } catch(e) {} }
+
+// ══════════════════════════════════════════════
+// TOAST
+// ══════════════════════════════════════════════
+var _toastTimer;
+function toast(msg) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(function() { t.classList.remove('show'); }, 2500);
+}
+
+// ══════════════════════════════════════════════
+// FORMAT
+// ══════════════════════════════════════════════
+function fmtD(d) {
+  if (!d) return '';
+  var m = d.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  return m ? m[3]+'.'+m[2]+'.'+m[1] : d;
+}
+function ge(id) { return document.getElementById(id); }
+function elV(id) { var e = ge(id); return e ? e.value : ''; }
+function setV(id, v) { var e = ge(id); if (e) e.value = v; }
+
+// ══════════════════════════════════════════════
+// OVERLAY
+// ══════════════════════════════════════════════
+function openOverlay(id) {
+  var el = ge(id);
+  if (!el) return;
+  el.classList.add('open');
+  // prevent body scroll on iOS
+  document.body.style.overflow = 'hidden';
+}
+function closeOverlay(id) {
+  var el = ge(id);
+  if (!el) return;
+  el.classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+// Close overlay when clicking backdrop
+document.addEventListener('click', function(e) {
+  if (e.target && e.target.classList && e.target.classList.contains('overlay')) {
+    e.target.classList.remove('open');
+    document.body.style.overflow = '';
   }
+});
+
+// ══════════════════════════════════════════════
+// TABS
+// ══════════════════════════════════════════════
+var TABS = ['dashboard','fuel','costs','income','stats','export'];
+
+function switchTab(tab) {
+  TABS.forEach(function(t) {
+    var p = ge(t + 'Panel');
+    if (p) p.classList.remove('active');
+    var b = ge('nb-' + t);
+    if (b) b.classList.remove('active');
+  });
+  var panel = ge(tab + 'Panel');
+  if (panel) panel.classList.add('active');
+  var btn = ge('nb-' + tab);
+  if (btn) btn.classList.add('active');
+  if (tab === 'stats') setTimeout(renderCharts, 80);
+  if (tab === 'export') renderExpList();
+}
+
+// ══════════════════════════════════════════════
+// CARS
+// ══════════════════════════════════════════════
+function renderCars() {
+  var list = ge('carsList') || { innerHTML: '' };
+  var mlist = ge('modalCarList');
+  if (mlist) mlist.innerHTML = '';
+
+  // pill
+  if (S.selectedCar) {
+    setV('pillName', S.selectedCar.name);
+    var dot = ge('pillDot');
+    if (dot) { dot.style.background = S.selectedCar.color; dot.style.boxShadow = '0 0 5px ' + S.selectedCar.color; }
+  } else {
+    setV('pillName', 'Vyber auto');
+    var dot2 = ge('pillDot');
+    if (dot2) { dot2.style.background = 'var(--accent)'; dot2.style.boxShadow = 'none'; }
+  }
+
+  if (!mlist) return;
+
+  if (S.cars.length === 0) {
+    mlist.innerHTML = '<div style="font-size:12px;color:var(--t3)">Zatiaľ žiadne vozidlá.</div>';
+    return;
+  }
+
+  S.cars.forEach(function(car) {
+    var isSel = S.selectedCar && S.selectedCar.id === car.id;
+    var nF = S.records.filter(function(r){ return r.type==='fuel' && r.carId===car.id; }).length;
+    var nC = S.records.filter(function(r){ return r.type==='cost' && r.carId===car.id; }).length;
+    var nI = S.records.filter(function(r){ return r.type==='income' && r.carId===car.id; }).length;
+    var div = document.createElement('div');
+    div.style.cssText = 'display:flex;align-items:center;gap:10px;padding:12px;background:var(--bg3);border:1px solid '+(isSel?'rgba(56,189,248,0.3)':'var(--border)')+';border-radius:10px;';
+    div.innerHTML = '<div style="width:12px;height:12px;border-radius:50%;background:'+car.color+';flex-shrink:0;box-shadow:0 0 6px '+car.color+'55"></div>'
+      + '<div style="flex:1;cursor:pointer" id="sel_'+car.id+'">'
+      + '<div style="font-weight:600;font-size:14px;color:var(--text)">'+car.name+(isSel?' <span style="font-size:10px;color:var(--accent);font-family:var(--mono)">● aktívne</span>':'')+'</div>'
+      + '<div style="font-size:11px;color:var(--t3);font-family:var(--mono)">'+(car.plate||'–')+' · ⛽'+nF+' 🔧'+nC+' 💰'+nI+'</div></div>'
+      + '<button id="del_'+car.id+'" style="background:rgba(248,113,113,0.1);border:1px solid rgba(248,113,113,0.25);color:var(--red);border-radius:8px;padding:8px 14px;cursor:pointer;font-family:Outfit,sans-serif;font-weight:600;font-size:12px;min-height:40px;touch-action:manipulation;-webkit-appearance:none">Vymazať</button>';
+    mlist.appendChild(div);
+
+    // attach events after append
+    var selEl = ge('sel_' + car.id);
+    if (selEl) selEl.addEventListener('click', (function(c) {
+      return function() { selectCar(c); closeOverlay('carsOvl'); };
+    })(car));
+
+    var delEl = ge('del_' + car.id);
+    if (delEl) delEl.addEventListener('click', (function(c) {
+      return function() {
+        if (!confirm('Vymazať "' + c.name + '" a všetky záznamy?')) return;
+        S.cars = S.cars.filter(function(x){ return x.id !== c.id; });
+        S.records = S.records.filter(function(r){ return r.carId !== c.id; });
+        if (S.selectedCar && S.selectedCar.id === c.id) S.selectedCar = S.cars[0] || null;
+        saveS(); renderCars(); renderStats(); renderDash(); renderExpList();
+        closeOverlay('carsOvl');
+        toast('Vozidlo vymazané');
+      };
+    })(car));
+  });
 }
 
 function selectCar(car) {
-  state.selectedCar = car;
-  save();
+  S.selectedCar = car;
+  saveS();
   renderCars();
   renderStats();
-  renderDashboard();
+  renderDash();
 }
 
-function selectColor(el, color) {
-  state.selectedColor = color;
-  document.querySelectorAll('#colorPicker div').forEach(d => d.style.border = '2px solid transparent');
-  el.style.border = '2px solid white';
-}
-
-function openAddCar() {
-  document.getElementById('addCarModal').classList.add('open');
-  // default select first color
-  const first = document.querySelector('#colorPicker div');
-  if (first) selectColor(first, first.dataset.color);
+function pickColor(el, color) {
+  S.selColor = color;
+  var swatches = document.querySelectorAll('.cswatch');
+  swatches.forEach(function(s) { s.classList.remove('sel'); });
+  el.classList.add('sel');
 }
 
 function addCar() {
-  const name = document.getElementById('newCarName').value.trim();
-  const plate = document.getElementById('newCarPlate').value.trim();
-  if (!name) { toast('Zadaj názov auta!'); return; }
-  const car = { id: Date.now()+'', name, plate, color: state.selectedColor };
-  state.cars.push(car);
-  state.selectedCar = car;
-  save();
-  renderCars();
-  renderStats();
-  renderDashboard();
-  document.getElementById('addCarModal').classList.remove('open');
-  document.getElementById('newCarName').value = '';
-  document.getElementById('newCarPlate').value = '';
-  toast('Auto pridané ✓');
+  var name = (elV('ncName') || '').trim();
+  if (!name) { toast('Zadaj názov vozidla!'); return; }
+  var plate = (elV('ncPlate') || '').trim();
+  var tankSize = parseFloat(elV('ncTank')) || 50;
+  var car = { id: Date.now() + '', name: name, plate: plate, color: S.selColor, tankSize: tankSize };
+  S.cars.push(car);
+  S.selectedCar = car;
+  saveS();
+  renderCars(); renderStats(); renderDash(); renderExpList();
+  closeOverlay('addCarOvl');
+  setV('ncName', ''); setV('ncPlate', ''); setV('ncTank', '');
+  toast('Vozidlo pridané ✓');
 }
 
-function deleteCar(id, e) {
-  e.stopPropagation();
-  if (!confirm('Vymazať auto a všetky jeho záznamy?')) return;
-  state.cars = state.cars.filter(c => c.id !== id);
-  state.records = state.records.filter(r => r.carId !== id);
-  if (state.selectedCar?.id === id) state.selectedCar = state.cars[0] || null;
-  save(); renderCars(); renderStats(); renderDashboard();
-  toast('Auto vymazané');
+// ══════════════════════════════════════════════
+// CURRENCY
+// ══════════════════════════════════════════════
+var RATES = { EUR: 1, CZK: 25.30, PLN: 4.28 };
+
+function fetchRates() {
+  setV('rateCZK', '…'); setV('ratePLN', '…');
+  fetch('https://api.frankfurter.app/latest?from=EUR&to=CZK,PLN')
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      if (d.rates) { RATES.CZK = d.rates.CZK || RATES.CZK; RATES.PLN = d.rates.PLN || RATES.PLN; }
+      var ck = ge('rateCZK'); if (ck) ck.textContent = RATES.CZK.toFixed(2);
+      var pk = ge('ratePLN'); if (pk) pk.textContent = RATES.PLN.toFixed(2);
+    })
+    .catch(function() {
+      var ck = ge('rateCZK'); if (ck) ck.textContent = RATES.CZK.toFixed(2);
+      var pk = ge('ratePLN'); if (pk) pk.textContent = RATES.PLN.toFixed(2);
+    });
 }
 
-// ─── FUEL ───
-document.getElementById('fLiters').addEventListener('input', calcPricePerL);
-document.getElementById('fTotal').addEventListener('input', calcPricePerL);
-function calcPricePerL() {
-  const l = parseFloat(document.getElementById('fLiters').value);
-  const t = parseFloat(document.getElementById('fTotal').value);
-  if (l && t) document.getElementById('fPriceL').value = (t/l).toFixed(3);
-  else document.getElementById('fPriceL').value = '';
+function toEUR(amt, cur) { return amt / (RATES[cur] || 1); }
+
+// ══════════════════════════════════════════════
+// FUEL CALC (bidirectional)
+// ══════════════════════════════════════════════
+var _flock = false;
+function recalcFuel(changed) {
+  if (_flock) return;
+  _flock = true;
+  var cur = elV('fCurL');
+  var rate = RATES[cur] || 1;
+  var l  = parseFloat(elV('fLiters')) || null;
+  var pl = parseFloat(elV('fPriceL')) || null;
+  var t  = parseFloat(elV('fTotal')) || null;
+  var hL = ge('hL'), hP = ge('hP'), hT = ge('hT');
+  if (hL) hL.textContent = '';
+  if (hP) hP.textContent = '';
+  if (hT) hT.textContent = '';
+
+  if (changed === 'liters' || changed === 'cur') {
+    if (l && pl) {
+      var nt = (l * pl) / rate;
+      setV('fTotal', nt.toFixed(2));
+      if (hT) hT.textContent = '↳ ' + l + 'l × ' + pl + ' ' + cur + ' = ' + nt.toFixed(2) + ' €';
+    } else if (l && t) {
+      var np = (t * rate) / l;
+      setV('fPriceL', np.toFixed(3));
+      if (hP) hP.textContent = '↳ ' + t + '€ / ' + l + 'l = ' + np.toFixed(3) + ' ' + cur;
+    }
+  } else if (changed === 'priceL') {
+    if (l && pl) {
+      var nt2 = (l * pl) / rate;
+      setV('fTotal', nt2.toFixed(2));
+      if (hT) hT.textContent = '↳ ' + l + 'l × ' + pl + ' ' + cur + ' = ' + nt2.toFixed(2) + ' €';
+    } else if (pl && t) {
+      var nl = (t * rate) / pl;
+      setV('fLiters', nl.toFixed(2));
+      if (hL) hL.textContent = '↳ ' + t + '€ / ' + pl + ' ' + cur + ' = ' + nl.toFixed(2) + ' l';
+    }
+  } else if (changed === 'total') {
+    if (l && t) {
+      var np2 = (t * rate) / l;
+      setV('fPriceL', np2.toFixed(3));
+      if (hP) hP.textContent = '↳ ' + t + '€ / ' + l + 'l = ' + np2.toFixed(3) + ' ' + cur;
+    } else if (pl && t) {
+      var nl2 = (t * rate) / pl;
+      setV('fLiters', nl2.toFixed(2));
+      if (hL) hL.textContent = '↳ ' + t + '€ / ' + pl + ' ' + cur + ' = ' + nl2.toFixed(2) + ' l';
+    }
+  }
+
+  // tank warning
+  var lFinal = parseFloat(elV('fLiters')) || 0;
+  var tw = ge('tankWarn');
+  if (tw && lFinal && S.selectedCar && S.selectedCar.tankSize) {
+    tw.style.display = lFinal > S.selectedCar.tankSize ? '' : 'none';
+  }
+  _flock = false;
 }
 
+function recalcCost() {
+  var a = parseFloat(elV('cAmount')) || 0;
+  var cur = elV('cCur');
+  setV('cAmtEUR', a ? toEUR(a, cur).toFixed(2) : '');
+}
+function recalcIncome() {
+  var a = parseFloat(elV('iAmount')) || 0;
+  var cur = elV('iCur');
+  setV('iAmtEUR', a ? toEUR(a, cur).toFixed(2) : '');
+}
+
+// ══════════════════════════════════════════════
+// SAVE RECORDS
+// ══════════════════════════════════════════════
 function saveFuel() {
-  if (!state.selectedCar) { toast('Najprv vyber auto!'); return; }
-  const date = document.getElementById('fDate').value;
-  const km = parseFloat(document.getElementById('fKm').value);
-  const liters = parseFloat(document.getElementById('fLiters').value);
-  const total = parseFloat(document.getElementById('fTotal').value);
-  if (!date || !km || !liters || !total) { toast('Vyplň povinné polia!'); return; }
-  const rec = {
-    id: Date.now()+'',
-    carId: state.selectedCar.id,
+  if (!S.selectedCar) { toast('Najprv vyber vozidlo!'); return; }
+  var date   = elV('fDate');
+  var km     = parseFloat(elV('fKm'));
+  var liters = parseFloat(elV('fLiters'));
+  var total  = parseFloat(elV('fTotal'));
+  var priceL = parseFloat(elV('fPriceL'));
+  var cur    = elV('fCurL');
+  if (!date || !km || !liters || !total) { toast('Vyplň povinné polia: dátum, km, litre, suma!'); return; }
+  var priceEUR = priceL ? toEUR(priceL, cur).toFixed(3) : (total/liters).toFixed(3);
+  var rec = {
+    id: Date.now() + '',
+    carId: S.selectedCar.id,
     type: 'fuel',
-    date, km, liters, total,
-    fuelType: document.getElementById('fFuelType').value,
-    note: document.getElementById('fNote').value,
-    pricePerL: (total/liters).toFixed(3)
+    date: date, km: km, liters: liters, total: total,
+    pricePerL: priceEUR, origPrice: priceL || '', origCurrency: cur,
+    fuelType: elV('fFuelType'),
+    fullTank: elV('fFullTank') === '1',
+    note: elV('fNote')
   };
-  state.records.push(rec);
-  save();
-  renderStats();
-  renderDashboard();
-  clearFuelForm();
+  S.records.push(rec);
+  saveS(); renderStats(); renderDash(); clearFuelForm();
   toast('Tankovanie uložené ✓');
-  if (state.google.url) pushToGoogle(rec, 'Tankovanie');
+  if (S.google.url) pushGs(rec, 'Tankovanie');
 }
 
 function clearFuelForm() {
-  ['fKm','fLiters','fTotal','fPriceL','fNote'].forEach(id => document.getElementById(id).value = '');
-  document.getElementById('fDate').valueAsDate = new Date();
+  ['fKm','fLiters','fTotal','fPriceL','fNote'].forEach(function(id){ setV(id,''); });
+  ['hL','hP','hT'].forEach(function(id){ var e=ge(id); if(e) e.textContent=''; });
+  var fd = ge('fDate'); if (fd) fd.valueAsDate = new Date();
+  setV('fCurL', 'EUR'); setV('fFullTank', '1');
+  var tw = ge('tankWarn'); if (tw) tw.style.display = 'none';
 }
 
-// ─── COSTS ───
 function saveCost() {
-  if (!state.selectedCar) { toast('Najprv vyber auto!'); return; }
-  const date = document.getElementById('cDate').value;
-  const amount = parseFloat(document.getElementById('cAmount').value);
+  if (!S.selectedCar) { toast('Najprv vyber vozidlo!'); return; }
+  var date = elV('cDate'), amount = parseFloat(elV('cAmount')), cur = elV('cCur');
   if (!date || !amount) { toast('Vyplň povinné polia!'); return; }
-  const rec = {
-    id: Date.now()+'',
-    carId: state.selectedCar.id,
-    type: 'cost',
-    date, amount,
-    costType: document.getElementById('cType').value,
-    km: document.getElementById('cKm').value,
-    desc: document.getElementById('cDesc').value,
-    note: document.getElementById('cNote').value
+  var rec = {
+    id: Date.now()+'', carId: S.selectedCar.id, type: 'cost',
+    date: date, amount: toEUR(amount, cur), origAmount: amount, origCurrency: cur,
+    costType: elV('cType'), km: elV('cKm') || '', desc: elV('cDesc'), note: elV('cNote')
   };
-  state.records.push(rec);
-  save();
-  renderStats();
-  renderDashboard();
-  clearCostForm();
+  S.records.push(rec);
+  saveS(); renderStats(); renderDash(); clearCostForm();
   toast('Náklad uložený ✓');
-  if (state.google.url) pushToGoogle(rec, 'Naklady');
+  if (S.google.url) pushGs(rec, 'Naklady');
 }
 
 function clearCostForm() {
-  ['cAmount','cKm','cDesc','cNote'].forEach(id => document.getElementById(id).value = '');
-  document.getElementById('cDate').valueAsDate = new Date();
-document.getElementById('iDate').valueAsDate = new Date();
+  ['cAmount','cAmtEUR','cKm','cDesc','cNote'].forEach(function(id){ setV(id,''); });
+  var cd = ge('cDate'); if (cd) cd.valueAsDate = new Date();
+  setV('cCur', 'EUR');
 }
 
-// ─── DELETE RECORD ───
+function saveIncome() {
+  if (!S.selectedCar) { toast('Najprv vyber vozidlo!'); return; }
+  var date = elV('iDate'), amount = parseFloat(elV('iAmount')), cur = elV('iCur');
+  if (!date || !amount) { toast('Vyplň povinné polia!'); return; }
+  var rec = {
+    id: Date.now()+'', carId: S.selectedCar.id, type: 'income',
+    date: date, amount: toEUR(amount, cur), origAmount: amount, origCurrency: cur,
+    incomeType: elV('iType'), desc: elV('iDesc'), note: elV('iNote')
+  };
+  S.records.push(rec);
+  saveS(); renderStats(); renderDash(); clearIncomeForm();
+  toast('Príjem uložený ✓');
+  if (S.google.url) pushGs(rec, 'Prijmy');
+}
+
+function clearIncomeForm() {
+  ['iAmount','iAmtEUR','iDesc','iNote'].forEach(function(id){ setV(id,''); });
+  var id2 = ge('iDate'); if (id2) id2.valueAsDate = new Date();
+  setV('iCur', 'EUR');
+}
+
 function deleteRecord(id) {
-  state.records = state.records.filter(r => r.id !== id);
-  save(); renderStats(); renderDashboard();
+  if (!confirm('Vymazať tento záznam?')) return;
+  S.records = S.records.filter(function(r){ return r.id !== id; });
+  saveS(); renderStats(); renderDash();
   toast('Záznam vymazaný');
 }
 
-// ─── STATS ───
-function renderStats() {
-  const carId = state.selectedCar?.id;
-  const fuels = state.records.filter(r => r.type==='fuel' && (!carId || r.carId===carId));
-  const costs = state.records.filter(r => r.type==='cost' && (!carId || r.carId===carId));
-
-  const totalL = fuels.reduce((s,r) => s + (r.liters||0), 0);
-  document.getElementById('statLiters').textContent = totalL.toFixed(1);
-
-  const totalC = costs.reduce((s,r) => s + (r.amount||0), 0);
-  document.getElementById('statCosts').textContent = totalC.toFixed(2) + ' €';
-
-  const sorted = [...fuels].sort((a,b) => new Date(b.date)-new Date(a.date));
-  document.getElementById('statKm').textContent = sorted[0]?.km || '–';
-
-  // consumption
-  if (fuels.length >= 2) {
-    const s2 = [...fuels].sort((a,b) => a.km - b.km);
-    const kmDiff = s2[s2.length-1].km - s2[0].km;
-    const lTotal = s2.slice(1).reduce((s,r) => s+r.liters, 0);
-    if (kmDiff > 0) {
-      document.getElementById('statAvg').textContent = (lTotal/kmDiff*100).toFixed(1);
-    } else document.getElementById('statAvg').textContent = '–';
-  } else document.getElementById('statAvg').textContent = '–';
+// ══════════════════════════════════════════════
+// STATS CARDS
+// ══════════════════════════════════════════════
+function calcCons(fuels) {
+  var sorted = fuels.filter(function(r){ return r.km > 0; }).sort(function(a,b){ return a.km - b.km; });
+  if (sorted.length < 2) return null;
+  var totL=0, totKm=0, pendL=0, lastFullKm=null;
+  sorted.forEach(function(r) {
+    var liters = parseFloat(r.liters) || 0;
+    var isFull = r.fullTank !== false && r.fullTank !== 0 && r.fullTank !== '0';
+    pendL += liters;
+    if (isFull) {
+      if (lastFullKm !== null) { var d = r.km - lastFullKm; if (d > 0) { totL += pendL; totKm += d; } }
+      lastFullKm = r.km; pendL = 0;
+    }
+  });
+  if (totKm <= 0) {
+    var kmR = sorted[sorted.length-1].km - sorted[0].km;
+    var lT = sorted.slice(1).reduce(function(s,r){ return s+(parseFloat(r.liters)||0); }, 0);
+    return kmR > 0 ? lT/kmR*100 : null;
+  }
+  return totL / totKm * 100;
 }
 
-// ─── DASHBOARD TABLE ───
-function renderDashboard() {
-  const carId = state.selectedCar?.id;
-  const recs = [...state.records]
-    .filter(r => !carId || r.carId === carId)
-    .sort((a,b) => new Date(b.date)-new Date(a.date))
-    .slice(0, 30);
+function renderStats() {
+  var cid = S.selectedCar ? S.selectedCar.id : null;
+  var fuels  = S.records.filter(function(r){ return r.type==='fuel'  && (!cid||r.carId===cid); });
+  var costs  = S.records.filter(function(r){ return r.type==='cost'  && (!cid||r.carId===cid); });
+  var incs   = S.records.filter(function(r){ return r.type==='income'&& (!cid||r.carId===cid); });
+  var totL   = fuels.reduce(function(s,r){ return s+(parseFloat(r.liters)||0); }, 0);
+  var totC   = costs.reduce(function(s,r){ return s+(r.amount||0); }, 0) + fuels.reduce(function(s,r){ return s+(r.total||0); }, 0);
+  var totI   = incs.reduce(function(s,r){ return s+(r.amount||0); }, 0);
+  var sortedF= fuels.slice().sort(function(a,b){ return new Date(b.date)-new Date(a.date); });
+  var cons   = calcCons(fuels);
+  var el;
+  el=ge('sL'); if(el) el.textContent=totL.toFixed(1);
+  el=ge('sC'); if(el) el.textContent=totC.toFixed(2)+' €';
+  el=ge('sI'); if(el) el.textContent=totI.toFixed(2)+' €';
+  el=ge('sK'); if(el) el.textContent=sortedF[0]?sortedF[0].km:'–';
+  el=ge('sA'); if(el) el.textContent=cons?cons.toFixed(1):'–';
+}
 
-  const tbody = document.getElementById('dashboardTable');
-  const empty = document.getElementById('dashboardEmpty');
+// ══════════════════════════════════════════════
+// DASHBOARD TABLE
+// ══════════════════════════════════════════════
+function renderDash() {
+  var cid = S.selectedCar ? S.selectedCar.id : null;
+  var ySel = ge('dashYear'), mSel = ge('dashMonth');
+  if (!ySel || !mSel) return;
+
+  var years = [];
+  S.records.forEach(function(r){ var y=r.date&&r.date.slice(0,4); if(y&&years.indexOf(y)<0) years.push(y); });
+  years.sort().reverse();
+  var curY = ySel.value;
+  ySel.innerHTML = '<option value="">Všetky roky</option>' + years.map(function(y){ return '<option value="'+y+'">'+y+'</option>'; }).join('');
+  if (curY && years.indexOf(curY) >= 0) ySel.value = curY;
+  else if (years.length > 0) ySel.value = years[0];
+
+  var selY = ySel.value, selM = mSel.value;
+  var recs = S.records.filter(function(r){
+    if (cid && r.carId !== cid) return false;
+    if (selY && !r.date.startsWith(selY)) return false;
+    if (selM && selY && !r.date.startsWith(selY + '-' + selM)) return false;
+    if (selM && !selY && r.date.slice(5,7) !== selM) return false;
+    return true;
+  }).sort(function(a,b){ return new Date(b.date)-new Date(a.date); });
+
+  var cnt = ge('dashCount'); if (cnt) cnt.textContent = recs.length ? recs.length+' záznamov' : '';
+  var tbody = ge('dashboardTable'), empty = ge('dashboardEmpty');
+  if (!tbody) return;
   tbody.innerHTML = '';
+  if (recs.length === 0) { if(empty) empty.style.display=''; return; }
+  if (empty) empty.style.display='none';
 
-  if (recs.length === 0) { empty.style.display = ''; return; }
-  empty.style.display = 'none';
-
-  recs.forEach(r => {
-    const car = state.cars.find(c => c.id === r.carId);
-    const tr = document.createElement('tr');
+  recs.forEach(function(r) {
+    var car = S.cars.find(function(c){ return c.id===r.carId; });
+    var tr = document.createElement('tr');
+    var carName = car ? '<span style="color:'+(car.color||'#94a3b8')+';font-weight:500">'+car.name+'</span>' : '?';
     if (r.type === 'fuel') {
-      tr.innerHTML = `
-        <td>${r.date}</td>
-        <td><span style="color:${car?.color||'#aaa'}">${car?.name||'?'}</span></td>
-        <td><span class="badge fuel">⛽ Palivo</span></td>
-        <td>${r.liters} l · ${r.fuelType} · ${r.km} km${r.note?' · '+r.note:''}</td>
-        <td style="color:var(--fuel);font-weight:600;">${r.total.toFixed(2)} €</td>
-        <td><button class="del-btn" onclick="deleteRecord('${r.id}')">✕</button></td>`;
+      tr.innerHTML = '<td style="font-family:var(--mono);font-size:11px;color:var(--t2);white-space:nowrap">'+fmtD(r.date)+'</td>'
+        + '<td>'+carName+'</td>'
+        + '<td><span class="badge b-fuel">⛽ Palivo</span></td>'
+        + '<td style="font-size:12px;color:var(--t2)">'+r.liters+'l · '+r.fuelType+' · '+r.km+'km'+(r.fullTank===false||r.fullTank===0||r.fullTank==='0'?' · čiast.':'')+(r.note?' · '+r.note:'')+'</td>'
+        + '<td style="font-family:var(--mono);font-size:12px;color:var(--amber);font-weight:600;white-space:nowrap">'+(+r.total).toFixed(2)+' €</td>'
+        + '<td><button class="del-btn" data-rid="'+r.id+'">✕</button></td>';
+    } else if (r.type === 'income') {
+      tr.innerHTML = '<td style="font-family:var(--mono);font-size:11px;color:var(--t2);white-space:nowrap">'+fmtD(r.date)+'</td>'
+        + '<td>'+carName+'</td>'
+        + '<td><span class="badge b-income">💰 '+(r.incomeType||'')+'</span></td>'
+        + '<td style="font-size:12px;color:var(--t2)">'+(r.desc||'')+(r.note?' · '+r.note:'')+'</td>'
+        + '<td style="font-family:var(--mono);font-size:12px;color:var(--green);font-weight:600;white-space:nowrap">+'+(+r.amount).toFixed(2)+' €</td>'
+        + '<td><button class="del-btn" data-rid="'+r.id+'">✕</button></td>';
     } else {
-      const badgeClass = r.costType==='Oprava'?'repair':r.costType==='Poistenie'?'insurance':'other';
-      tr.innerHTML = `
-        <td>${r.date}</td>
-        <td><span style="color:${car?.color||'#aaa'}">${car?.name||'?'}</span></td>
-        <td><span class="badge ${badgeClass}">?? ${r.costType}</span></td>
-        <td>${r.desc||''}${r.note?' · '+r.note:''}</td>
-        <td style="color:var(--cost);font-weight:600;">${r.amount.toFixed(2)} €</td>
-        <td><button class="del-btn" onclick="deleteRecord('${r.id}')">✕</button></td>`;
+      tr.innerHTML = '<td style="font-family:var(--mono);font-size:11px;color:var(--t2);white-space:nowrap">'+fmtD(r.date)+'</td>'
+        + '<td>'+carName+'</td>'
+        + '<td><span class="badge b-cost">🔧 '+(r.costType||'')+'</span></td>'
+        + '<td style="font-size:12px;color:var(--t2)">'+(r.desc||'')+(r.note?' · '+r.note:'')+'</td>'
+        + '<td style="font-family:var(--mono);font-size:12px;color:var(--red);font-weight:600;white-space:nowrap">'+(+r.amount).toFixed(2)+' €</td>'
+        + '<td><button class="del-btn" data-rid="'+r.id+'">✕</button></td>';
     }
     tbody.appendChild(tr);
   });
+
+  // event delegation for delete buttons
+  tbody.addEventListener('click', function(e) {
+    var btn = e.target.closest('.del-btn');
+    if (!btn) return;
+    var rid = btn.getAttribute('data-rid');
+    if (rid) deleteRecord(rid);
+  }, { once: true });
+  // Re-attach after each render (since we replace innerHTML)
+  // Actually use event delegation on the table wrapper instead:
 }
 
-// ─── CHARTS ───
-let chartInstances = {};
-function renderCharts() {
-  const carId = state.selectedCar?.id;
-  const fuels = [...state.records.filter(r => r.type==='fuel' && (!carId || r.carId===carId))].sort((a,b)=>new Date(a.date)-new Date(b.date));
-  const costs = state.records.filter(r => r.type==='cost' && (!carId || r.carId===carId));
+// ══════════════════════════════════════════════
+// CHARTS
+// ══════════════════════════════════════════════
+var _charts = {};
+var _statPeriod = 'all';
+var _axis = 'month';
 
-  const co = { color: 'white', font: { family: "'DM Mono'" } };
-  const gridColor = '#2a2d38';
-
-  // Fuel chart
-  const lastFuels = fuels.slice(-10);
-  renderChart('chartFuel', 'bar', {
-    labels: lastFuels.map(r => r.date.slice(5)),
-    datasets: [{ label: 'Suma €', data: lastFuels.map(r => r.total), backgroundColor: '#f9a82555', borderColor: '#f9a825', borderWidth: 2, borderRadius: 4 }]
-  }, co, gridColor);
-
-  // Costs by category
-  const catMap = {};
-  costs.forEach(r => catMap[r.costType] = (catMap[r.costType]||0) + r.amount);
-  const cats = Object.keys(catMap);
-  const colors = ['#47c3ff','#b47fff','#f9a825','#ff5e5e','#4caf50','#e8ff47','#ff9800','#aaa'];
-  renderChart('chartCosts', 'doughnut', {
-    labels: cats.length ? cats : ['Žiadne dáta'],
-    datasets: [{ data: cats.length ? cats.map(c=>catMap[c]) : [1], backgroundColor: cats.length ? colors.slice(0,cats.length) : ['#2a2d38'], borderWidth: 0 }]
-  }, co, gridColor, true);
-
-  // Consumption
-  const consData = [];
-  const sorted = [...fuels].sort((a,b)=>a.km-b.km);
-  for (let i = 1; i < sorted.length; i++) {
-    const kmD = sorted[i].km - sorted[i-1].km;
-    if (kmD > 0) consData.push({ x: sorted[i].date.slice(5), y: (sorted[i].liters/kmD*100).toFixed(2) });
-  }
-  renderChart('chartConsumption', 'line', {
-    labels: consData.map(d=>d.x),
-    datasets: [{ label: 'l/100km', data: consData.map(d=>d.y), borderColor: '#e8ff47', backgroundColor: '#e8ff4715', tension: 0.3, fill: true, pointRadius: 4, pointBackgroundColor: '#e8ff47' }]
-  }, co, gridColor);
-
-  // Monthly total
-  const monthMap = {};
-  [...fuels.map(r=>({date:r.date,val:r.total})), ...costs.map(r=>({date:r.date,val:r.amount}))].forEach(r => {
-    const m = r.date.slice(0,7);
-    monthMap[m] = (monthMap[m]||0) + r.val;
-  });
-  const months = Object.keys(monthMap).sort();
-  renderChart('chartMonthly', 'bar', {
-    labels: months,
-    datasets: [{ label: 'Výdaje €', data: months.map(m=>monthMap[m].toFixed(2)), backgroundColor: '#47c3ff44', borderColor: '#47c3ff', borderWidth: 2, borderRadius: 4 }]
-  }, co, gridColor);
+function setStatPeriod(p, btn) {
+  _statPeriod = p;
+  ['spAll','spYear','spMonth'].forEach(function(id){ var b=ge(id); if(b)b.classList.remove('active'); });
+  if (btn) btn.classList.add('active');
+  ge('statYear').style.display = p==='all' ? 'none' : '';
+  ge('statMonth').style.display = p==='month' ? '' : 'none';
+  renderCharts();
 }
 
-function renderChart(id, type, data, co, gridColor, isDoughnut) {
-  if (chartInstances[id]) chartInstances[id].destroy();
-  const ctx = document.getElementById(id).getContext('2d');
-  chartInstances[id] = new Chart(ctx, {
-    type,
-    data,
+function setAxis(m, btn) {
+  _axis = m;
+  var axM=ge('axM'), axY=ge('axY');
+  if(axM) axM.classList.toggle('active', m==='month');
+  if(axY) axY.classList.toggle('active', m==='year');
+  renderCharts();
+}
+
+function axKey(r) { return _axis==='year' ? (r.date||'').slice(0,4) : (r.date||'').slice(0,7); }
+
+function filterP(records) {
+  if (_statPeriod === 'all') return records;
+  var yr = elV('statYear');
+  if (!yr) return records;
+  if (_statPeriod === 'year') return records.filter(function(r){ return r.date&&r.date.startsWith(yr); });
+  var mo = elV('statMonth');
+  return records.filter(function(r){ return r.date&&r.date.startsWith(yr+'-'+mo); });
+}
+
+function groupBy(records, fn) {
+  var m = {};
+  records.forEach(function(r){ var k=axKey(r); if(k) m[k]=(m[k]||0)+fn(r); });
+  return m;
+}
+
+function showDrilldown(title, headers, rows) {
+  ge('ddTitle').textContent = title;
+  ge('ddHead').innerHTML = headers.map(function(h){ return '<th style="padding:7px 12px;font-size:10px;color:var(--t3);font-family:var(--mono);text-transform:uppercase;letter-spacing:1px;text-align:left">'+h+'</th>'; }).join('');
+  ge('ddBody').innerHTML = rows.map(function(r){ return '<tr style="border-bottom:1px solid var(--border)">'+r.map(function(c){ return '<td style="padding:7px 12px;font-size:11px;color:var(--t2)">'+c+'</td>'; }).join('')+'</tr>'; }).join('');
+  var dd = ge('drilldown'); if (dd) dd.style.display = '';
+}
+
+function hideDrilldown() { var dd=ge('drilldown'); if(dd) dd.style.display='none'; }
+
+function mkChart(id, type, data, unit, onClickFn) {
+  if (_charts[id]) { try { _charts[id].destroy(); } catch(e){} }
+  var canvas = ge(id); if (!canvas) return;
+  var ctx = canvas.getContext('2d');
+  var isDoughnut = type === 'doughnut';
+  var gridColor = 'rgba(255,255,255,0.05)';
+  var tickColor = '#4a5568';
+  var fontFamily = "'Outfit',sans-serif";
+  _charts[id] = new Chart(ctx, {
+    type: type,
+    data: data,
     options: {
       responsive: true,
+      onClick: onClickFn ? function(evt, els) { if (els&&els.length) onClickFn(els[0].index); } : undefined,
       plugins: {
-        legend: { labels: { color: co.color, font: co.font, boxWidth: isDoughnut ? 12 : undefined } }
+        legend: { labels: { color: tickColor, font: { family: fontFamily, size: 11 }, boxWidth: isDoughnut?12:undefined } },
+        tooltip: { callbacks: { label: function(c){ return ' '+c.formattedValue+' '+(unit||''); } } }
       },
       scales: isDoughnut ? {} : {
-        x: { ticks: { color: '#6b6f80', font: co.font }, grid: { color: gridColor } },
-        y: { ticks: { color: '#6b6f80', font: co.font }, grid: { color: gridColor } }
+        x: { ticks: { color: tickColor, font: { family: fontFamily, size: 10 }, maxRotation: 45 }, grid: { color: gridColor } },
+        y: { ticks: { color: tickColor, font: { family: fontFamily, size: 10 }, callback: function(v){ return v+(unit?' '+unit:''); } }, grid: { color: gridColor } }
       }
     }
   });
+  if (onClickFn) canvas.style.cursor = 'pointer';
 }
 
-// ─── INCOME ───
-function saveIncome() {
-  if (!state.selectedCar) { toast('Najprv vyber auto!'); return; }
-  var date = document.getElementById('iDate').value;
-  var amount = parseFloat(document.getElementById('iAmount').value);
-  if (!date || !amount) { toast('Vyplň povinné polia!'); return; }
-  var rec = { id: Date.now()+'', carId: state.selectedCar.id, type:'income',
-    date: date, amount: amount,
-    incomeType: document.getElementById('iType').value,
-    desc: document.getElementById('iDesc').value, note: '' };
-  state.records.push(rec);
-  save(); renderStats(); renderDashboard(); clearIncomeForm();
-  toast('Príjem uložený ✓');
-}
-function clearIncomeForm() {
-  ['iAmount','iDesc'].forEach(function(id) { document.getElementById(id).value = ''; });
-  document.getElementById('iDate').valueAsDate = new Date();
+function populateStatYears() {
+  var sel = ge('statYear'); if (!sel) return;
+  var years = [];
+  S.records.forEach(function(r){ var y=r.date&&r.date.slice(0,4); if(y&&years.indexOf(y)<0) years.push(y); });
+  years.sort().reverse();
+  var cur = sel.value;
+  sel.innerHTML = years.map(function(y){ return '<option value="'+y+'">'+y+'</option>'; }).join('');
+  if (cur && years.indexOf(cur)>=0) sel.value=cur;
 }
 
-// ─── EXPORT / IMPORT ───
+function renderCharts() {
+  populateStatYears();
+  var cid = S.selectedCar ? S.selectedCar.id : null;
+  var allFuels = S.records.filter(function(r){ return r.type==='fuel'&&(!cid||r.carId===cid); }).sort(function(a,b){ return new Date(a.date)-new Date(b.date); });
+  var allCosts = S.records.filter(function(r){ return r.type==='cost'&&(!cid||r.carId===cid); });
+  var allIncs  = S.records.filter(function(r){ return r.type==='income'&&(!cid||r.carId===cid); });
+  var fuels = filterP(allFuels);
+  var costs = filterP(allCosts);
+  var incs  = filterP(allIncs);
 
-function renderExportCarList() {
-  var wrap = document.getElementById('exportCarList');
-  if (!wrap) return;
-  wrap.innerHTML = state.cars.map(function(car) {
-    return '<label style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:6px;background:var(--surface2);border-radius:8px;font-size:0.82rem;">' +
-      '<input type="checkbox" data-carid="' + car.id + '" checked style="accent-color:var(--accent);width:16px;height:16px;">' +
-      '<span style="width:10px;height:10px;border-radius:50%;background:' + car.color + ';display:inline-block;"></span>' +
-      car.name + ' <span style="color:var(--muted);">' + (car.plate||'') + '</span></label>';
+  // Summary
+  var sortedKm = fuels.filter(function(r){return r.km>0;}).sort(function(a,b){return a.km-b.km;});
+  var kmRange  = sortedKm.length>=2 ? sortedKm[sortedKm.length-1].km - sortedKm[0].km : 0;
+  var totFuelCost  = fuels.reduce(function(s,r){return s+(r.total||0);},0);
+  var totOtherCost = costs.reduce(function(s,r){return s+(r.amount||0);},0);
+  var totAllCost   = totFuelCost + totOtherCost;
+  var totInc  = incs.reduce(function(s,r){return s+(r.amount||0);},0);
+  var profit  = totInc - totAllCost;
+  var cons    = calcCons(fuels);
+  var cpk     = kmRange>0 ? (totFuelCost/kmRange).toFixed(2) : '–';
+
+  function sset(id,v){ var e=ge(id); if(e) e.textContent=v; }
+  sset('ssF', fuels.length);
+  var fsubEl=ge('ssFsub'); if(fsubEl) fsubEl.textContent = fuels.length>1&&kmRange>0 ? 'každých ~'+Math.round(kmRange/(fuels.length-1))+'km':'tankovaní';
+  sset('ssKm', kmRange>0 ? kmRange.toLocaleString('sk-SK') : '–');
+  sset('ssCons', cons ? cons.toFixed(1)+' l' : '–');
+  sset('ssCpk', cpk!=='–' ? cpk+' €' : '–');
+  var cpkEl=ge('ssCpkSub'); if(cpkEl) cpkEl.textContent=cpk!=='–'?cpk+' €/km':'palivo';
+  sset('ssTC', totAllCost>0 ? totAllCost.toFixed(2)+' €' : '0 €');
+  var tcEl=ge('ssTCsub'); if(tcEl) tcEl.textContent=kmRange>0?(totAllCost/kmRange).toFixed(2)+' €/km':'palivo+opravy';
+  sset('ssTI', totInc>0 ? totInc.toFixed(2)+' €' : '0 €');
+  var profEl=ge('ssProfit');
+  if(profEl){profEl.textContent=(profit>=0?'+':'')+profit.toFixed(2)+' €';profEl.style.color=profit>=0?'var(--green)':'var(--red)';}
+
+  // CHART 1: Consumption
+  var consByP={};
+  fuels.forEach(function(r){ var k=axKey(r); if(!consByP[k]) consByP[k]=[]; consByP[k].push(r); });
+  var cKeys=Object.keys(consByP).sort();
+  var cData=cKeys.map(function(k){
+    var rs=consByP[k].slice().sort(function(a,b){return a.km-b.km;});
+    if(rs.length<2) return null;
+    var kmD=rs[rs.length-1].km-rs[0].km, lS=rs.slice(1).reduce(function(s,r){return s+(parseFloat(r.liters)||0);},0);
+    return kmD>0?+(lS/kmD*100).toFixed(1):null;
+  }).filter(function(v){return v!==null;});
+  mkChart('chCons','line',{labels:cKeys,datasets:[{label:'l/100km',data:cData,borderColor:'#38bdf8',backgroundColor:'rgba(56,189,248,0.08)',tension:0.3,fill:true,pointRadius:3,pointBackgroundColor:'#38bdf8'}]},'l',function(i){
+    var k=cKeys[i], rs=fuels.filter(function(r){return axKey(r)===k;});
+    showDrilldown('Spotreba – '+k,['Dátum','Km','Litrov','l/100km'],rs.map(function(r,j,a){var p=a[j-1],d=p?r.km-p.km:0;return[fmtD(r.date),r.km,r.liters+'l',d>0?(r.liters/d*100).toFixed(1):'–'];}));
+  });
+
+  // CHART 2: Fuel price
+  var pM=groupBy(fuels,function(r){return parseFloat(r.pricePerL)||0;}), pC={};
+  fuels.forEach(function(r){var k=axKey(r);pC[k]=(pC[k]||0)+1;});
+  var pKeys=Object.keys(pM).sort();
+  mkChart('chPrice','line',{labels:pKeys,datasets:[{label:'€/l',data:pKeys.map(function(k){return pC[k]?+(pM[k]/pC[k]).toFixed(3):0;}),borderColor:'#fbbf24',backgroundColor:'rgba(251,191,36,0.08)',tension:0.3,fill:true,pointRadius:3,pointBackgroundColor:'#fbbf24'}]},'€',function(i){
+    var k=pKeys[i],rs=fuels.filter(function(r){return axKey(r)===k;});
+    showDrilldown('Cena paliva – '+k,['Dátum','€/l','Litrov','Celkom'],rs.map(function(r){return[fmtD(r.date),r.pricePerL+'€',r.liters+'l',(r.total||0).toFixed(2)+'€'];}));
+  });
+
+  // CHART 3: Monthly costs
+  var fM={},cM={};
+  allFuels.forEach(function(r){var k=axKey(r);if(k)fM[k]=(fM[k]||0)+(r.total||0);});
+  allCosts.forEach(function(r){var k=axKey(r);if(k)cM[k]=(cM[k]||0)+(r.amount||0);});
+  var mKeys=[]; Object.keys(fM).forEach(function(k){if(mKeys.indexOf(k)<0)mKeys.push(k);});
+  Object.keys(cM).forEach(function(k){if(mKeys.indexOf(k)<0)mKeys.push(k);});
+  mKeys.sort(); mKeys=mKeys.slice(-24);
+  mkChart('chMonthly','bar',{labels:mKeys,datasets:[
+    {label:'Palivo €',data:mKeys.map(function(k){return+(fM[k]||0).toFixed(2);}),backgroundColor:'rgba(251,191,36,0.3)',borderColor:'#fbbf24',borderWidth:2,borderRadius:3},
+    {label:'Ostatné €',data:mKeys.map(function(k){return+(cM[k]||0).toFixed(2);}),backgroundColor:'rgba(192,132,252,0.3)',borderColor:'#c084fc',borderWidth:2,borderRadius:3}
+  ]},'€',function(i){
+    var k=mKeys[i];
+    var fRs=allFuels.filter(function(r){return axKey(r)===k;}), cRs=allCosts.filter(function(r){return axKey(r)===k;});
+    var rows=[].concat(fRs.map(function(r){return[fmtD(r.date),'⛽ Palivo',r.liters+'l',(r.total||0).toFixed(2)+'€'];}),cRs.map(function(r){return[fmtD(r.date),'🔧 '+r.costType,r.desc||'–',(r.amount||0).toFixed(2)+'€'];})).sort(function(a,b){return a[0]>b[0]?1:-1;});
+    showDrilldown(k,['Dátum','Typ','Detail','Suma'],rows);
+  });
+
+  // CHART 4: Categories doughnut
+  var catM={};
+  costs.forEach(function(r){catM[r.costType]=(catM[r.costType]||0)+r.amount;});
+  var fTot=fuels.reduce(function(s,r){return s+(r.total||0);},0);
+  if(fTot>0) catM['Palivo']=(catM['Palivo']||0)+fTot;
+  var cats=Object.keys(catM);
+  var pal=['#38bdf8','#fbbf24','#c084fc','#f87171','#34d399','#fb923c','#94a3b8'];
+  mkChart('chCats','doughnut',{labels:cats.length?cats:['Žiadne dáta'],datasets:[{data:cats.length?cats.map(function(c){return+catM[c].toFixed(2);}):
+  [1],backgroundColor:cats.length?pal.slice(0,cats.length):['#1e2630'],borderWidth:0}]},'€',function(i){
+    var cat=cats[i];
+    if(cat==='Palivo'){showDrilldown('Palivo',['Dátum','Litrov','Celkom €','Typ'],fuels.map(function(r){return[fmtD(r.date),r.liters+'l',(r.total||0).toFixed(2)+'€',r.fuelType||''];}));}
+    else{var rs=costs.filter(function(r){return r.costType===cat;});showDrilldown(cat,['Dátum','Popis','Suma €'],rs.map(function(r){return[fmtD(r.date),r.desc||'–',(r.amount||0).toFixed(2)+'€'];}));}
+  });
+
+  // CHART 5: Fuel cost wide
+  var fuelMap=groupBy(fuels,function(r){return r.total||0;}), fuelKeys=Object.keys(fuelMap).sort();
+  mkChart('chFuel','bar',{labels:fuelKeys,datasets:[{label:'Palivo €',data:fuelKeys.map(function(k){return+fuelMap[k].toFixed(2);}),backgroundColor:'rgba(251,191,36,0.2)',borderColor:'#fbbf24',borderWidth:2,borderRadius:4}]},'€',function(i){
+    var k=fuelKeys[i], rs=fuels.filter(function(r){return axKey(r)===k;});
+    showDrilldown('Palivo – '+k,['Dátum','Km','Litrov','€/l','Celkom'],rs.map(function(r){return[fmtD(r.date),r.km,r.liters+'l',r.pricePerL+'€',(r.total||0).toFixed(2)+'€'];}));
+  });
+
+  // CHART 6: Profit stacked
+  var incCats=[]; allIncs.forEach(function(r){var c=r.incomeType||'Príjem';if(incCats.indexOf(c)<0)incCats.push(c);});
+  var fP={}, oP={}, incByCat={};
+  incCats.forEach(function(c){incByCat[c]={};});
+  allFuels.forEach(function(r){var k=axKey(r);if(k)fP[k]=(fP[k]||0)+(r.total||0);});
+  allCosts.forEach(function(r){var k=axKey(r);if(k)oP[k]=(oP[k]||0)+(r.amount||0);});
+  allIncs.forEach(function(r){var k=axKey(r);var c=r.incomeType||'Príjem';if(k&&incByCat[c])incByCat[c][k]=(incByCat[c][k]||0)+(r.amount||0);});
+  var pKeys=[]; Object.keys(fP).forEach(function(k){if(pKeys.indexOf(k)<0)pKeys.push(k);});
+  Object.keys(oP).forEach(function(k){if(pKeys.indexOf(k)<0)pKeys.push(k);});
+  pKeys.sort(); pKeys=pKeys.slice(-24);
+  var iColors=['#34d399','#86efac','#6ee7b7','#10b981'];
+  var stackedDS=[
+    {label:'⛽ Palivo',data:pKeys.map(function(k){return+(fP[k]||0).toFixed(2);}),backgroundColor:'rgba(251,191,36,0.75)',borderColor:'#fbbf24',borderWidth:1,stack:'costs'},
+    {label:'🔧 Náklady',data:pKeys.map(function(k){return+(oP[k]||0).toFixed(2);}),backgroundColor:'rgba(192,132,252,0.75)',borderColor:'#c084fc',borderWidth:1,stack:'costs'}
+  ];
+  incCats.forEach(function(cat,i){
+    stackedDS.push({label:'💰 '+cat,data:pKeys.map(function(k){return+(incByCat[cat][k]||0).toFixed(2);}),backgroundColor:'rgba(52,211,153,0.75)',borderColor:iColors[i%4],borderWidth:1,stack:'income'});
+  });
+  if(_charts['chProfit']){try{_charts['chProfit'].destroy();}catch(e){}}
+  var ctx6=ge('chProfit'); if(!ctx6) return;
+  _charts['chProfit']=new Chart(ctx6.getContext('2d'),{type:'bar',data:{labels:pKeys,datasets:stackedDS},options:{
+    responsive:true,
+    onClick:function(evt,els){
+      if(!els||!els.length) return;
+      var k=pKeys[els[0].index];
+      var iRs=allIncs.filter(function(r){return axKey(r)===k;}), fRs=allFuels.filter(function(r){return axKey(r)===k;}), cRs=allCosts.filter(function(r){return axKey(r)===k;});
+      var rows=[].concat(fRs.map(function(r){return[fmtD(r.date),'⛽ Palivo',r.liters+'l',(r.total||0).toFixed(2)+'€'];}),cRs.map(function(r){return[fmtD(r.date),'🔧 '+r.costType,r.desc||'–',(r.amount||0).toFixed(2)+'€'];}),iRs.map(function(r){return[fmtD(r.date),'💰 '+r.incomeType,r.desc||'–','+'+(r.amount||0).toFixed(2)+'€'];})).sort(function(a,b){return a[0]>b[0]?1:-1;});
+      showDrilldown(k+' – prehľad',['Dátum','Typ','Detail','Suma'],rows);
+    },
+    plugins:{legend:{labels:{color:'#4a5568',font:{family:"'Outfit',sans-serif",size:11}}},tooltip:{callbacks:{label:function(c){return ' '+c.formattedValue+' €';}}}},
+    scales:{x:{stacked:true,ticks:{color:'#4a5568',font:{family:"'Outfit',sans-serif",size:10},maxRotation:45},grid:{color:'rgba(255,255,255,0.05)'}},y:{stacked:true,ticks:{color:'#4a5568',font:{family:"'Outfit',sans-serif",size:10},callback:function(v){return v+'€';}},grid:{color:'rgba(255,255,255,0.05)'}}}
+  }});
+  ctx6.style.cursor='pointer';
+
+  // Income by period table
+  var iCats=[]; allIncs.forEach(function(r){var c=r.incomeType||'Príjem';if(iCats.indexOf(c)<0)iCats.push(c);});
+  var iPeriods=[]; allIncs.forEach(function(r){var p=axKey(r);if(p&&iPeriods.indexOf(p)<0)iPeriods.push(p);});
+  iPeriods.sort().reverse(); iPeriods=iPeriods.slice(0,18);
+  var iMatrix={}, iTotals={};
+  iCats.forEach(function(c){iMatrix[c]={};});
+  iPeriods.forEach(function(p){iTotals[p]=0;});
+  allIncs.forEach(function(r){var p=axKey(r),c=r.incomeType||'Príjem';if(p&&iMatrix[c]){iMatrix[c][p]=(iMatrix[c][p]||0)+(r.amount||0);iTotals[p]=(iTotals[p]||0)+(r.amount||0);}});
+  var catTotals={};iCats.forEach(function(c){catTotals[c]=iPeriods.reduce(function(s,p){return s+(iMatrix[c][p]||0);},0);});
+  var grand=iPeriods.reduce(function(s,p){return s+(iTotals[p]||0);},0);
+  var hHead=ge('incPeriodHead'), hBody=ge('incPeriodBody'), hWrap=ge('incPeriodWrap');
+  if(hHead&&hBody&&hWrap){
+    hHead.innerHTML='<tr><th>Kategória</th>'+iPeriods.map(function(p){return'<th style="text-align:right">'+p+'</th>';}).join('')+'<th style="text-align:right">Spolu</th></tr>';
+    var bHTML='<tr class="tot"><td>∑ Celkom</td>'+iPeriods.map(function(p){return'<td class="vg">'+(iTotals[p]>0?iTotals[p].toFixed(0)+' €':'–')+'</td>';}).join('')+'<td class="vg">'+grand.toFixed(0)+' €</td></tr>';
+    iCats.forEach(function(c){if(!catTotals[c])return;bHTML+='<tr><td>💰 '+c+'</td>'+iPeriods.map(function(p){var v=iMatrix[c][p]||0;return'<td class="'+(v>0?'vg':'')+'">'+(v>0?v.toFixed(0)+' €':'–')+'</td>';}).join('')+'<td class="vg">'+catTotals[c].toFixed(0)+' €</td></tr>';});
+    hBody.innerHTML=bHTML;
+    hWrap.style.display=iCats.length>0&&grand>0?'':'none';
+  }
+}
+
+// ══════════════════════════════════════════════
+// EXPORT — EXACT FUELIO FORMAT
+// ══════════════════════════════════════════════
+function renderExpList() {
+  var el = ge('expCarList'); if (!el) return;
+  if (S.cars.length === 0) { el.innerHTML='<div style="font-size:12px;color:var(--t3);padding:8px 0">Žiadne vozidlá.</div>'; return; }
+  el.innerHTML = S.cars.map(function(car){
+    var nF=S.records.filter(function(r){return r.type==='fuel'&&r.carId===car.id;}).length;
+    var nC=S.records.filter(function(r){return r.type==='cost'&&r.carId===car.id;}).length;
+    var nI=S.records.filter(function(r){return r.type==='income'&&r.carId===car.id;}).length;
+    var isSel=S.selectedCar&&S.selectedCar.id===car.id;
+    return '<div class="exp-item'+(isSel?' sel':'')+'"><div style="display:flex;align-items:center;gap:10px">'
+      +'<div style="width:10px;height:10px;border-radius:50%;background:'+car.color+';flex-shrink:0"></div>'
+      +'<div><div style="font-weight:600;font-size:13px;color:var(--text)">'+car.name+' <span style="font-size:10px;color:var(--t3);font-family:var(--mono)">'+(car.plate||'')+'</span></div>'
+      +'<div style="font-size:11px;color:var(--t3);margin-top:2px"><span style="color:var(--amber)">⛽ '+nF+'</span> <span style="color:var(--purple)">🔧 '+nC+'</span> <span style="color:var(--green)">💰 '+nI+'</span></div></div></div>'
+      +'<button class="btn-sm" onclick="exportOne(\''+car.id+'\')">'
+      +'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>'
+      +'Exportovať</button></div>';
   }).join('');
 }
 
-function exportFuelioCSV() {
-  if (state.cars.length === 0) { toast('Ziadne auta!'); return; }
-  renderExportCarList();
-  var checks = document.querySelectorAll('#exportCarList input:checked');
-  var ids = Array.from(checks).map(function(c) { return c.dataset.carid; });
-  if (!ids.length) ids = state.cars.map(function(c) { return c.id; });
-
-  var ftMap = {'Benzin':'110','Benzín':'110','Diesel':'112','LPG':'120','CNG':'130','Elektrina (kWh)':'200'};
-  var catMap = {'Oprava':'9','Poistenie':'31','STK / EK':'33','Pneumatiky':'8','Olej / filtre':'9','Dialnicna znamka':'7','Diaľničná známka':'7','Parkovanie':'5','Ine':'1','Iné':'1','Spolujazda':'35','Firemne jazdy':'36','Firemné jazdy':'36','Prenajom auta':'36','Prenájom auta':'36','Nahrada za cestu':'36','Náhrada za cestu':'36','Predaj dielu':'32'};
-
-  ids.forEach(function(cid) {
-    var car = state.cars.find(function(c) { return c.id === cid; });
-    if (!car) return;
-    var fuels = state.records.filter(function(r) { return r.type==='fuel' && r.carId===cid; }).sort(function(a,b){return new Date(a.date)-new Date(b.date);});
-    var costs = state.records.filter(function(r) { return (r.type==='cost'||r.type==='income') && r.carId===cid; }).sort(function(a,b){return new Date(a.date)-new Date(b.date);});
-
-    var rows = [];
-    rows.push('"## Vehicle"');
-    rows.push('"Name","Description","DistUnit","FuelUnit","ConsumptionUnit","ImportCSVDateFormat","VIN","Insurance","Plate","Make","Model","Year","TankCount","Tank1Type","Tank2Type","Active","Tank1Capacity","Tank2Capacity","FuelUnitTank2","FuelConsumptionTank2"');
-    rows.push('"' + car.name + '","' + (car.color||'') + '","0","0","0","yyyy-MM-dd","","","' + (car.plate||'') + '","Skoda","Octavia","2025","1","110","0","1","' + (car.tankSize||50) + '.0","0.0","0","0"');
-    rows.push('"## Log"');
-    rows.push('"Data","Odo (km)","Fuel (litres)","Full","Price (optional)","l/100km (optional)","latitude (optional)","longitude (optional)","City (optional)","Notes (optional)","Missed","TankNumber","FuelType","VolumePrice","StationID (optional)","ExcludeDistance","UniqueId","TankCalc","Weather"');
-    var uid = 100;
-    fuels.forEach(function(r) {
-      var ft = ftMap[r.fuelType] || '110';
-      var full = (r.fullTank === false || r.fullTank === 0 || r.fullTank === '0') ? '0' : '1';
-      rows.push('"' + r.date + ' 10:00","' + (r.km||0) + '.0","' + (r.liters||0) + '","' + full + '","' + (parseFloat(r.total)||0).toFixed(2) + '","","0.0","0.0","","' + (r.note||'') + '","0","1","' + ft + '","' + (parseFloat(r.pricePerL)||0).toFixed(3) + '","0","0.0","' + (uid++) + '","0.0",');
-    });
-    rows.push('"## CostCategories"');
-    rows.push('"CostTypeID","Name","priority","color"');
-    rows.push('"1","Sluzba","0",""');
-    rows.push('"9","Servis","0",""');
-    rows.push('"31","Poistenie","0","#3F51B5"');
-    rows.push('"8","Pneumatiky","0","#FF9800"');
-    rows.push('"33","STK+EK","0",""');
-    rows.push('"7","Myto","0",""');
-    rows.push('"5","Parkovanie","0",""');
-    rows.push('"35","Spolujazda","0","#B71C1C"');
-    rows.push('"36","Firemne jazdy","0","#FF5722"');
-    rows.push('"32","Material","0",""');
-    rows.push('"## Costs"');
-    rows.push('"CostTitle","Date","Odo","CostTypeID","Notes","Cost","flag","idR","read","RemindOdo","RemindDate","isTemplate","RepeatOdo","RepeatMonths","isIncome","UniqueId"');
-    costs.forEach(function(r) {
-      var isIncome = r.type === 'income' ? '1' : '0';
-      var catId = r.type === 'income' ? (catMap[r.incomeType]||'35') : (catMap[r.costType]||'1');
-      var title = r.type === 'income' ? (r.desc||r.incomeType||'Prijem') : (r.desc||r.costType||'Naklad');
-      var amt = (parseFloat(r.amount)||0).toFixed(2);
-      rows.push('"' + title + '","' + r.date + ' 10:00","0","' + catId + '","' + (r.note||'') + '","' + amt + '","0","0","1","0","2011-01-01","0","0","0","' + isIncome + '","' + (uid++) + '"');
-    });
-    rows.push('"## Category"');
-    rows.push('"IdCategory","Name"');
-    rows.push('"1","Sukromne"');
-    rows.push('"2","Praca"');
-
-    var csv = rows.join('\n');
-    var blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
-    var a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = 'fuelio_' + car.name.replace(/[^a-zA-Z0-9]/g,'_') + '.csv';
-    a.click();
-  });
-  toast('Export hotovy!');
+function exportOne(carId) {
+  var car=S.cars.find(function(c){return c.id===carId;});
+  if(!car){toast('Vozidlo nenájdené!');return;}
+  doExport(car);
+  toast('Exportované: '+car.name+' ✓');
 }
 
-function toggleGoogleSetup() { switchTab('google'); }
-function saveGoogleConfig() {}
-function testGoogle() {}
-function pushToGoogle() {}
-function syncToGoogle() {}
+function exportSel() {
+  if(!S.selectedCar){toast('Najprv vyber vozidlo!');return;}
+  exportOne(S.selectedCar.id);
+}
 
-// ─── FUELIO CSV IMPORT ───
-function handleImportFile(e) {
-  var file = e.target.files[0];
-  if (!file) return;
+function exportAll() {
+  if(S.cars.length===0){toast('Žiadne vozidlá!');return;}
+  S.cars.forEach(function(car){doExport(car);});
+  toast('Exportované: '+S.cars.length+' vozidiel ✓');
+}
+
+// ── EXACT FUELIO CSV FORMAT ──
+function doExport(car) {
+  // Category maps matching Fuelio app IDs
+  var costCatMap = {
+    'Oprava':'1','Servis':'9','Poistenie':'31','STK / EK':'33','STK+EK':'33',
+    'Pneumatiky':'8','Olej / filtre':'9','Diaľničná známka':'7','Parkovanie':'5',
+    'Umytie':'6','Materiál':'32','AdBlue':'34','Registrácia':'4','Cena vozidla':'2','Iné':'1'
+  };
+  var incomeCatMap = {
+    'Spolujazda':'35','Firemne jazdy':'36','Firemná jazda':'36',
+    'Náhrada za cestu':'36','Predaj dielu':'32','Iné':'35'
+  };
+  var fuelTypeMap = {'Benzín':'110','Nafta':'112','LPG':'120','CNG':'130','Elektrina':'200'};
+
+  var carFuels = S.records.filter(function(r){return r.type==='fuel'&&r.carId===car.id;}).sort(function(a,b){return new Date(a.date)-new Date(b.date);});
+  var carCosts = S.records.filter(function(r){return (r.type==='cost'||r.type==='income')&&r.carId===car.id;}).sort(function(a,b){return new Date(a.date)-new Date(b.date);});
+
+  var allCats = {'1':'Služba','2':'Cena vozidla','4':'Registrácia','5':'Parkovanie','6':'Umytie','7':'Mýto','8':'Pneumatiky','9':'Servis','31':'Poistenie','32':'Materiál','33':'STK+EK','34':'AdBlue','35':'Spolujazda','36':'Firemne jazdy'};
+
+  var uid = 1;
+  var tankSize = car.tankSize || 50;
+  var nameParts = (car.name||'').split(' ');
+  var make = nameParts[0] || '';
+  var model = nameParts.slice(1).join(' ') || '';
+
+  // ## Vehicle section
+  var csv = '"## Vehicle"\n';
+  csv += '"Name","Description","DistUnit","FuelUnit","ConsumptionUnit","ImportCSVDateFormat","VIN","Insurance","Plate","Make","Model","Year","TankCount","Tank1Type","Tank2Type","Active","Tank1Capacity","Tank2Capacity","FuelUnitTank2","FuelConsumptionTank2"\n';
+  csv += '"'+car.name+'","'+( car.color||'')+
+    '","0","0","0","yyyy-MM-dd","","","'+(car.plate||'')+'","'+make+'","'+model+
+    '","2025","1","110","0","1","'+tankSize+'.0","0.0","0","0"\n';
+
+  // ## Log section
+  csv += '"## Log"\n';
+  csv += '"Data","Odo (km)","Fuel (litres)","Full","Price (optional)","l/100km (optional)","latitude (optional)","longitude (optional)","City (optional)","Notes (optional)","Missed","TankNumber","FuelType","VolumePrice","StationID (optional)","ExcludeDistance","UniqueId","TankCalc","Weather"\n';
+  carFuels.forEach(function(r) {
+    var full = (r.fullTank===true||r.fullTank===1||r.fullTank==='1') ? '1' : '0';
+    var ft   = fuelTypeMap[r.fuelType] || '110';
+    var priceL = parseFloat(r.pricePerL) || 0;
+    csv += '"'+r.date+' 10:00","'+(r.km||0)+'.0","'+r.liters+'","'+full+'","'+
+      ((+r.total||0).toFixed(2))+'","","0.0","0.0","","'+(r.note||'')+'","0","1","'+ft+'","'+
+      priceL.toFixed(3)+'","0","0.0","'+uid+'","0.0",\n';
+    uid++;
+  });
+
+  // ## CostCategories section
+  csv += '"## CostCategories"\n';
+  csv += '"CostTypeID","Name","priority","color"\n';
+  Object.keys(allCats).forEach(function(id) {
+    csv += '"'+id+'","'+allCats[id]+'","0",""\n';
+  });
+
+  // ## Costs section
+  csv += '"## Costs"\n';
+  csv += '"CostTitle","Date","Odo","CostTypeID","Notes","Cost","flag","idR","read","RemindOdo","RemindDate","isTemplate","RepeatOdo","RepeatMonths","isIncome","UniqueId"\n';
+  carCosts.forEach(function(r) {
+    var isIncome = r.type==='income' ? '1' : '0';
+    var catId = r.type==='income' ? (incomeCatMap[r.incomeType]||'35') : (costCatMap[r.costType]||'1');
+    var title = r.type==='income' ? (r.desc||r.incomeType||'Príjem') : (r.desc||r.costType||'Náklad');
+    csv += '"'+title+'","'+r.date+' 10:00","'+(r.km||0)+'","'+catId+'","'+
+      (r.note||'')+'","'+((+r.amount||0).toFixed(2))+'","0","0","1","0","2011-01-01","0","0","0","'+isIncome+'","'+uid+'"\n';
+    uid++;
+  });
+
+  // ## Category
+  csv += '"## Category"\n"IdCategory","Name"\n"1","Súkromné"\n"2","Práca"\n';
+
+  // Download
+  var blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+  var url  = URL.createObjectURL(blob);
+  var a    = document.createElement('a');
+  a.href   = url;
+  a.download = 'fuelio_' + (car.name||'auto').replace(/[^a-zA-Z0-9]/g,'_') + '_export.csv';
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(function(){ document.body.removeChild(a); URL.revokeObjectURL(url); }, 500);
+}
+
+function dlSampleCSV() {
+  var csv = '"## Vehicle"\n"Name","Description","DistUnit","FuelUnit","ConsumptionUnit","ImportCSVDateFormat","VIN","Insurance","Plate","Make","Model","Year","TankCount","Tank1Type","Tank2Type","Active","Tank1Capacity","Tank2Capacity","FuelUnitTank2","FuelConsumptionTank2"\n"Škoda Octavia IV","Čierna","0","0","0","yyyy-MM-dd","","","BA123AB","Škoda","Octavia IV","2025","1","110","0","1","45.0","0.0","0","0"\n"## Log"\n"Data","Odo (km)","Fuel (litres)","Full","Price (optional)","l/100km (optional)","latitude (optional)","longitude (optional)","City (optional)","Notes (optional)","Missed","TankNumber","FuelType","VolumePrice","StationID (optional)","ExcludeDistance","UniqueId","TankCalc","Weather"\n"2026-01-15 10:00","85000.0","48.5","1","76.95","","0.0","0.0","","","0","1","110","1.587","0","0.0","1","0.0",\n"2026-02-10 10:00","87200.0","51.2","1","81.65","","0.0","0.0","","Diaľnica D1","0","1","110","1.595","0","0.0","2","0.0",\n"## CostCategories"\n"CostTypeID","Name","priority","color"\n"1","Služba","0",""\n"9","Servis","0",""\n"31","Poistenie","0",""\n"35","Spolujazda","0","#B71C1C"\n"36","Firemne jazdy","0","#FF5722"\n"## Costs"\n"CostTitle","Date","Odo","CostTypeID","Notes","Cost","flag","idR","read","RemindOdo","RemindDate","isTemplate","RepeatOdo","RepeatMonths","isIncome","UniqueId"\n"Spolujazda do Košíc","2026-01-20 10:00","85500","35","","50.0","0","0","1","0","2011-01-01","0","0","0","1","3"\n"Výmena oleja a filtrov","2026-01-25 10:00","85100","9","Servis MOT","120.0","0","0","1","0","2011-01-01","0","0","0","0","4"\n"Poistenie PZP","2026-01-01 10:00","85000","31","","245.0","0","0","1","0","2011-01-01","0","0","0","0","5"\n"## Category"\n"IdCategory","Name"\n"1","Súkromné"\n"2","Práca"\n';
+  var blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+  var a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='fuelio-vzor.csv';
+  document.body.appendChild(a); a.click(); setTimeout(function(){document.body.removeChild(a);},500);
+  toast('Vzorový CSV stiahnutý ✓');
+}
+
+// ══════════════════════════════════════════════
+// IMPORT — PARSE FUELIO CSV
+// ══════════════════════════════════════════════
+function handleImport(e) {
+  var file = e.target.files[0]; if (!file) return;
   var reader = new FileReader();
   reader.onload = function(ev) { parseFuelioCSV(ev.target.result); };
   reader.readAsText(file, 'UTF-8');
 }
 
+function parseCSVRow(line) {
+  var res=[], cur='', inQ=false;
+  for (var i=0; i<line.length; i++) {
+    var c=line[i];
+    if (c==='"') { inQ=!inQ; }
+    else if (c===',' && !inQ) { res.push(cur.trim()); cur=''; }
+    else { cur+=c; }
+  }
+  res.push(cur.trim());
+  return res;
+}
+
+function normDate(d) {
+  if (!d) return '';
+  var p = d.split(' ')[0];
+  if (/^\d{4}-\d{2}-\d{2}$/.test(p)) return p;
+  if (/^\d{2}\.\d{2}\.\d{4}$/.test(p)) { var pts=p.split('.'); return pts[2]+'-'+pts[1]+'-'+pts[0]; }
+  return p;
+}
+
 function parseFuelioCSV(text) {
-  var preview = document.getElementById('importPreview');
+  var preview = ge('importPreview');
   try {
-    var lines = text.replace(/\r/g,'').split('\n').map(function(l){return l.trim();}).filter(function(l){return l;});
-
-    function parseRow(line) {
-      var result = [], cur = '', inQ = false;
-      for (var i = 0; i < line.length; i++) {
-        var c = line[i];
-        if (c === '"') { inQ = !inQ; }
-        else if (c === ',' && !inQ) { result.push(cur.trim()); cur = ''; }
-        else { cur += c; }
-      }
-      result.push(cur.trim());
-      return result;
-    }
-
-    function normDate(d) {
-      if (!d) return '';
-      var part = d.split(' ')[0];
-      if (/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(part)) return part;
-      var m = part.match(/(\d{1,2})\.(\d{2})\.(\d{4})/);
-      if (m) return m[3]+'-'+m[2]+'-'+m[1].padStart(2,'0');
-      return part;
-    }
-
-    var section = null, vehicleName = '', vehiclePlate = '', vehicleDesc = '';
-    var fuelRows = [], costRows = [], catMap = {};
-    var fuelTypeMap = {'100':'Benzín','110':'Benzín','112':'Diesel','120':'LPG','130':'CNG','200':'Elektrina (kWh)'};
+    var lines = text.split(/\r?\n/).map(function(l){return l.trim();}).filter(function(l){return l;});
+    var section=null, vName='', vPlate='', vDesc='';
+    var fuelRows=[], costRows=[], catMap={};
 
     lines.forEach(function(line) {
       var clean = line.replace(/^"+|"+$/g,'').trim();
-      if (clean === '## Vehicle') { section = 'vhdr'; return; }
-      if (clean === '## Log') { section = 'lhdr'; return; }
-      if (clean === '## CostCategories') { section = 'cathdr'; return; }
-      if (clean === '## Costs') { section = 'costhdr'; return; }
-      if (clean.startsWith('##')) { section = null; return; }
-
-      var cols = parseRow(line);
-      if (section === 'vhdr' && cols[0] === 'Name') { section = 'vdata'; return; }
-      if (section === 'vdata') { vehicleName = cols[0]||'Auto'; vehiclePlate = cols[8]||''; vehicleDesc = cols[1]||''; section = null; return; }
-      if (section === 'lhdr' && (cols[0] === 'Data' || cols[0] === 'Date')) { section = 'ldata'; return; }
-      if (section === 'ldata' && cols.length > 2 && cols[0]) fuelRows.push(cols);
-      if (section === 'cathdr' && cols[0] === 'CostTypeID') { section = 'catdata'; return; }
-      if (section === 'catdata' && cols[0] && cols[1]) catMap[cols[0]] = cols[1];
-      if (section === 'costhdr' && cols[0] === 'CostTitle') { section = 'costdata'; return; }
-      if (section === 'costdata' && cols.length > 5 && cols[1]) costRows.push(cols);
+      if (clean==='## Vehicle')        { section='vhdr'; return; }
+      if (clean==='## Log')            { section='lhdr'; return; }
+      if (clean==='## CostCategories') { section='cathdr'; return; }
+      if (clean==='## Costs')          { section='costhdr'; return; }
+      if (clean.startsWith('##'))      { section=null; return; }
+      var cols = parseCSVRow(line);
+      if (section==='vhdr'&&cols[0]==='Name') { section='vdata'; return; }
+      if (section==='vdata') { vName=cols[0]||'Fuelio'; vPlate=cols[8]||''; vDesc=cols[1]||''; section=null; return; }
+      if (section==='lhdr'&&(cols[0]==='Data'||cols[0]==='Date')) { section='ldata'; return; }
+      if (section==='ldata'&&cols.length>2&&cols[0]) { fuelRows.push(cols); return; }
+      if (section==='cathdr'&&cols[0]==='CostTypeID') { section='catdata'; return; }
+      if (section==='catdata'&&cols[0]&&cols[1]) { catMap[cols[0]]=cols[1]; return; }
+      if (section==='costhdr'&&cols[0]==='CostTitle') { section='costdata'; return; }
+      if (section==='costdata'&&cols.length>5&&cols[1]) { costRows.push(cols); return; }
     });
 
-    var importedFuels = fuelRows.map(function(r) {
-      var liters = parseFloat(r[2])||0, total = parseFloat(r[4])||0;
-      var priceL = parseFloat(r[13])||(liters>0&&total>0?total/liters:0);
-      return { date: normDate(r[0]), km: parseFloat(r[1])||0, liters: liters, total: total,
-               pricePerL: priceL.toFixed(3), fuelType: fuelTypeMap[r[12]]||'Benzín', fullTank: r[3]==='1', note: r[9]||'' };
-    }).filter(function(r) { return r.date && r.liters > 0; });
+    var ftMap={'100':'Benzín','110':'Benzín','112':'Nafta','120':'LPG','130':'CNG','200':'Elektrina'};
+    var iF = fuelRows.map(function(r) {
+      var l=parseFloat(r[2])||0, tot=parseFloat(r[4])||0, priceL=parseFloat(r[13])||(l>0&&tot>0?tot/l:0);
+      return { date:normDate(r[0]), km:parseFloat(r[1])||0, liters:l, total:tot,
+               pricePerL:priceL.toFixed(3), fuelType:ftMap[r[12]]||'Benzín',
+               fullTank:r[3]==='1', note:r[9]||'' };
+    }).filter(function(r){return r.date&&r.liters>0;});
 
-    var importedCosts = [], importedIncomes = [];
+    var iC=[], iI=[];
     costRows.forEach(function(r) {
-      var date = normDate(r[1]), cost = parseFloat(r[5])||0, isIncome = r[14]==='1';
-      var catName = catMap[r[3]]||'Iné';
-      var desc = (r[0]||'') + (r[4]?' - '+r[4]:'');
-      if (!date || cost <= 0) return;
-      if (isIncome) importedIncomes.push({ date:date, amount:cost, incomeType:catName, desc:desc, note:'' });
-      else importedCosts.push({ date:date, amount:cost, costType:catName, desc:desc, note:'', km:parseFloat(r[2])||0 });
+      var date=normDate(r[1]), cost=parseFloat(r[5])||0, isIncome=r[14]==='1';
+      var cat=catMap[r[3]]||'Iné';
+      var desc=(r[0]||'')+(r[4]?' – '+r[4]:'');
+      var km=parseFloat(r[2])||0;
+      if (!date||cost<=0) return;
+      if (isIncome) iI.push({date:date,amount:cost,incomeType:cat,desc:desc,note:'',origCurrency:'EUR'});
+      else iC.push({date:date,amount:cost,costType:cat,desc:desc,note:'',km:km});
     });
 
-    preview.innerHTML = '<strong>' + vehicleName + '</strong><br>⛽ ' + importedFuels.length + ' tankovaní, 🔧 ' + importedCosts.length + ' nákladov, 💰 ' + importedIncomes.length + ' príjmov';
-    window._pendingImport = { vehicleName:vehicleName, vehiclePlate:vehiclePlate, vehicleDesc:vehicleDesc, importedFuels:importedFuels, importedCosts:importedCosts, importedIncomes:importedIncomes };
-    document.getElementById('importConfirmBtn').style.display = '';
+    if (preview) {
+      preview.innerHTML = '<div style="font-size:12px;color:var(--t2);padding:10px;background:var(--bg3);border-radius:10px;line-height:1.8">'
+        +'<strong style="color:var(--text)">'+vName+'</strong>'+(vPlate?' ('+vPlate+')')+'<br>'
+        +'<span style="color:var(--amber)">⛽ '+iF.length+' tankovaní</span> · '
+        +'<span style="color:var(--purple)">🔧 '+iC.length+' nákladov</span> · '
+        +'<span style="color:var(--green)">💰 '+iI.length+' príjmov</span></div>';
+    }
+    window._pending = {vName:vName, vPlate:vPlate, iF:iF, iC:iC, iI:iI};
+    var cb = ge('importConfBtn'); if(cb) cb.style.display='';
   } catch(err) {
-    preview.innerHTML = 'Chyba: ' + err.message;
+    if (preview) preview.innerHTML='<div style="color:var(--red);font-size:12px">Chyba: '+err.message+'</div>';
   }
 }
 
 function confirmImport() {
-  var data = window._pendingImport;
-  if (!data) return;
-  var desc = (data.vehicleDesc||'').toLowerCase(), nameLC = (data.vehicleName||'').toLowerCase();
-  var autoColor = '#47c3ff';
-  if (/cier|black/.test(desc+nameLC)) autoColor = '#374151';
-  else if (/biel|white/.test(desc+nameLC)) autoColor = '#e2e8f0';
-  else if (/cerv|red/.test(desc+nameLC)) autoColor = '#ff5e5e';
-  else if (/modr|blue/.test(desc+nameLC)) autoColor = '#47c3ff';
-  else if (/zelen|green/.test(desc+nameLC)) autoColor = '#4caf50';
-
-  var car = state.cars.find(function(c) { return c.name.toLowerCase() === data.vehicleName.toLowerCase(); });
-  if (!car) {
-    car = { id: Date.now()+'', name: data.vehicleName, plate: data.vehiclePlate, color: autoColor };
-    state.cars.push(car);
-  }
-  state.selectedCar = car;
-
-  var now = Date.now();
-  data.importedFuels.forEach(function(r) {
-    state.records.push({ id: (now++)+'', carId: car.id, type:'fuel', date:r.date, km:r.km, liters:r.liters, total:r.total, pricePerL:r.pricePerL, fuelType:r.fuelType, fullTank:r.fullTank, note:r.note });
-  });
-  data.importedCosts.forEach(function(r) {
-    state.records.push({ id: (now++)+'', carId: car.id, type:'cost', date:r.date, amount:r.amount, costType:r.costType, desc:r.desc, note:r.note, km:r.km });
-  });
-  data.importedIncomes.forEach(function(r) {
-    state.records.push({ id: (now++)+'', carId: car.id, type:'income', date:r.date, amount:r.amount, incomeType:r.incomeType, desc:r.desc, note:r.note });
-  });
-
-  save(); renderCars(); renderStats(); renderDashboard();
-  document.getElementById('importPreview').innerHTML = '';
-  document.getElementById('importConfirmBtn').style.display = 'none';
-  window._pendingImport = null;
-  toast('Import hotový! ' + (data.importedFuels.length + data.importedCosts.length + data.importedIncomes.length) + ' záznamov');
+  var data=window._pending; if(!data) return;
+  var car=S.cars.find(function(c){return c.name.toLowerCase()===data.vName.toLowerCase();});
+  if(!car){ car={id:Date.now()+'',name:data.vName,plate:data.vPlate,color:'#38bdf8',tankSize:50}; S.cars.push(car); }
+  S.selectedCar=car;
+  var added=0, ts=Date.now();
+  data.iF.forEach(function(r){ if(S.records.find(function(x){return x.type==='fuel'&&x.carId===car.id&&x.date===r.date&&x.km===r.km;})) return; S.records.push(Object.assign({id:(ts+added)+'',carId:car.id,type:'fuel'},r)); added++; });
+  data.iC.forEach(function(r){ if(S.records.find(function(x){return x.type==='cost'&&x.carId===car.id&&x.date===r.date&&x.amount===r.amount;})) return; S.records.push(Object.assign({id:(ts+added)+'',carId:car.id,type:'cost'},r)); added++; });
+  data.iI.forEach(function(r){ if(S.records.find(function(x){return x.type==='income'&&x.carId===car.id&&x.date===r.date&&x.amount===r.amount;})) return; S.records.push(Object.assign({id:(ts+added)+'',carId:car.id,type:'income',origCurrency:'EUR'},r)); added++; });
+  saveS(); renderCars(); renderStats(); renderDash(); renderExpList();
+  closeOverlay('importOvl');
+  var ip=ge('importPreview'); if(ip) ip.innerHTML='';
+  var fi=ge('importFile'); if(fi) fi.value='';
+  var cb=ge('importConfBtn'); if(cb) cb.style.display='none';
+  window._pending=null;
+  toast('Import hotový: '+added+' nových záznamov ✓');
 }
 
+// ══════════════════════════════════════════════
+// GOOGLE SHEETS
+// ══════════════════════════════════════════════
+function saveGsConfig() {
+  S.google.url = (elV('gsUrl')||'').trim();
+  S.google.sheetId = (elV('gsId')||'').trim();
+  var ak = (elV('anthropicKey')||'').trim();
+  if (ak) S.anthropicKey = ak;
+  saveS();
+  toast('Nastavenia uložené ✓');
+}
+
+function testGs() {
+  var url=elV('gsUrl').trim(), id=elV('gsId').trim();
+  if(!url||!id){toast('Vyplň URL a Sheet ID!');return;}
+  var st=ge('gsStatus'); if(st){st.textContent='Testujem…';st.style.color='var(--t3)';}
+  fetch(url+'?sheetId='+id+'&sheetName=Test')
+    .then(function(){if(st){st.textContent='✓ Spojenie funguje!';st.style.color='var(--green)';}})
+    .catch(function(e){if(st){st.textContent='✗ '+e.message;st.style.color='var(--red)';}});
+}
+
+function pushGs(rec, sheetName) {
+  if(!S.google.url||!S.google.sheetId) return;
+  var car=S.cars.find(function(c){return c.id===rec.carId;})||{};
+  var d=fmtD(rec.date); var headers, row;
+  if(rec.type==='fuel'){
+    headers=['ID','Auto','ŠPZ','Dátum','Km','Litrov','Suma €','Cena/L EUR','Orig Cena/L','Mena','Typ paliva','Poznámka'];
+    row=[rec.id,car.name||'',car.plate||'',d,rec.km,rec.liters,(+rec.total||0).toFixed(2),(+rec.pricePerL||0).toFixed(3),rec.origPrice||'',rec.origCurrency||'EUR',rec.fuelType||'',rec.note||''];
+  } else if(rec.type==='income'){
+    headers=['ID','Auto','ŠPZ','Dátum','Typ','Suma €','Orig','Mena','Popis','Poznámka'];
+    row=[rec.id,car.name||'',car.plate||'',d,rec.incomeType||'',(+rec.amount||0).toFixed(2),rec.origAmount||'',rec.origCurrency||'EUR',rec.desc||'',rec.note||''];
+  } else {
+    headers=['ID','Auto','ŠPZ','Dátum','Typ','Suma €','Orig','Mena','Km','Popis','Poznámka'];
+    row=[rec.id,car.name||'',car.plate||'',d,rec.costType||'',(+rec.amount||0).toFixed(2),rec.origAmount||'',rec.origCurrency||'EUR',rec.km||'',rec.desc||'',rec.note||''];
+  }
+  fetch(S.google.url,{method:'POST',body:JSON.stringify({sheetId:S.google.sheetId,sheetName:sheetName,headers:headers,row:row})}).catch(function(){});
+}
+
+function syncGs() {
+  if(!S.google.url||!S.google.sheetId){toast('Nastav Google Sheets!');return;}
+  var st=ge('gsStatus'); if(st){st.textContent='Synchronizujem…';st.style.color='var(--t3)';}
+  var ok=0, errs=0;
+  var total=S.records.length, done=0;
+  if(total===0){if(st){st.textContent='Žiadne záznamy.';} return;}
+  S.records.forEach(function(rec){
+    var sn=rec.type==='fuel'?'Tankovanie':rec.type==='income'?'Prijmy':'Naklady';
+    var car=S.cars.find(function(c){return c.id===rec.carId;})||{};
+    var d=fmtD(rec.date); var headers, row;
+    if(rec.type==='fuel'){headers=['ID','Auto','ŠPZ','Dátum','Km','Litrov','Suma €','Cena/L EUR','Orig Cena/L','Mena','Typ paliva','Poznámka'];row=[rec.id,car.name||'',car.plate||'',d,rec.km,rec.liters,(+rec.total||0).toFixed(2),(+rec.pricePerL||0).toFixed(3),rec.origPrice||'',rec.origCurrency||'EUR',rec.fuelType||'',rec.note||''];}
+    else if(rec.type==='income'){headers=['ID','Auto','ŠPZ','Dátum','Typ','Suma €','Orig','Mena','Popis','Poznámka'];row=[rec.id,car.name||'',car.plate||'',d,rec.incomeType||'',(+rec.amount||0).toFixed(2),rec.origAmount||'',rec.origCurrency||'EUR',rec.desc||'',rec.note||''];}
+    else{headers=['ID','Auto','ŠPZ','Dátum','Typ','Suma €','Orig','Mena','Km','Popis','Poznámka'];row=[rec.id,car.name||'',car.plate||'',d,rec.costType||'',(+rec.amount||0).toFixed(2),rec.origAmount||'',rec.origCurrency||'EUR',rec.km||'',rec.desc||'',rec.note||''];}
+    fetch(S.google.url,{method:'POST',body:JSON.stringify({sheetId:S.google.sheetId,sheetName:sn,headers:headers,row:row})})
+      .then(function(){ok++;done++;if(done===total&&st){st.textContent='✓ Sync hotový: '+ok+' záznamov';st.style.color='var(--green)';toast('Sync hotový ✓');}})
+      .catch(function(){errs++;done++;if(done===total&&st){st.textContent='⚠ '+ok+' ok, '+errs+' chýb';st.style.color='var(--red)';}});
+  });
+}
+
+// ══════════════════════════════════════════════
+// OCR SCAN
+// ══════════════════════════════════════════════
+var _scanData = null;
+
+function handleScan(e) {
+  var file=e.target.files[0]; if(!file) return;
+  var reader=new FileReader();
+  reader.onload=function(ev){var img=ge('scanPrev');if(img){img.src=ev.target.result;img.style.display='block';}};
+  reader.readAsDataURL(file);
+  var sp=ge('scanSpinner'), sr=ge('scanRes'), sb=ge('scanUseBtn'), se=ge('scanErr');
+  if(sp) sp.style.display='block';
+  if(sr) sr.style.display='none';
+  if(sb) sb.style.display='none';
+  if(se) se.style.display='none';
+
+  Tesseract.recognize(file,'ces+slk+eng',{
+    logger:function(m){if(m.status==='recognizing text'){var sl=ge('scanSpinner');if(sl){var d=sl.querySelector('div:last-child');if(d)d.textContent='OCR: '+Math.round(m.progress*100)+'%…';}}}
+  }).then(function(result){
+    _scanData=parseReceipt(result.data.text);
+    function sv(id,v){var e=ge(id);if(e)e.textContent=v;}
+    sv('srL', _scanData.liters!=null?_scanData.liters+' l':'–');
+    sv('srP', _scanData.pricePerLiter!=null?_scanData.pricePerLiter+' '+(_scanData.currency||''):'–');
+    sv('srT', _scanData.totalAmount!=null?_scanData.totalAmount+' '+(_scanData.currency||''):'–');
+    sv('srC', _scanData.currency||'–');
+    sv('srF', _scanData.fuelType||'–');
+    sv('srD', _scanData.date?fmtD(_scanData.date):'–');
+    sv('srS', _scanData.station||'–');
+    if(sp) sp.style.display='none';
+    if(sr) sr.style.display='block';
+    if(sb) sb.style.display='';
+  }).catch(function(err){
+    if(sp) sp.style.display='none';
+    if(se){se.textContent='Chyba: '+err.message;se.style.display='block';}
+  });
+}
+
+function parseReceipt(text) {
+  var res={liters:null,pricePerLiter:null,totalAmount:null,currency:'EUR',fuelType:'Benzín',date:null,station:null};
+  if(/slovnaft/i.test(text))res.station='Slovnaft';
+  else if(/\bMOL\b/i.test(text))res.station='MOL';
+  else if(/\bOMV\b/i.test(text))res.station='OMV';
+  else if(/shell/i.test(text))res.station='Shell';
+  if(/Kč|CZK/i.test(text))res.currency='CZK';
+  else if(/PLN|zł/i.test(text))res.currency='PLN';
+  if(/diesel|nafta|EVO\s*D/i.test(text))res.fuelType='Nafta';
+  else if(/\bLPG\b/i.test(text))res.fuelType='LPG';
+  var lpats=[/(\d+[.,]\d+)\s*[Ll](?:\s|$)/,/(\d+[.,]\d+)\s*litr/i];
+  for(var i=0;i<lpats.length;i++){var m=text.match(lpats[i]);if(m){res.liters=parseFloat(m[1].replace(',','.'));break;}}
+  var ppats=[/(\d+[.,]\d+)\s*(?:EUR|€)\s*\/\s*[Ll]/i,/(\d+[.,]\d+)\s*\/\s*[Ll]/i];
+  for(var j=0;j<ppats.length;j++){var m2=text.match(ppats[j]);if(m2){var v=parseFloat(m2[1].replace(',','.'));if(v>0.5&&v<6){res.pricePerLiter=v;break;}}}
+  var tpats=[/(?:SUMA|Suma|CELKEM|Total)[:\s]+(\d+[.,]\d+)/i,/UHRADENÉ[:\s]+(\d+[.,]\d+)/i];
+  for(var k=0;k<tpats.length;k++){var m3=text.match(tpats[k]);if(m3){res.totalAmount=parseFloat(m3[1].replace(',','.'));break;}}
+  var dm=text.match(/(\d{1,2})[.\/-](\d{2})[.\/-](\d{4})/);
+  if(dm)res.date=dm[3]+'-'+dm[2].padStart(2,'0')+'-'+dm[1].padStart(2,'0');
+  return res;
+}
+
+function useScan() {
+  if(!_scanData) return;
+  if(_scanData.liters) setV('fLiters',_scanData.liters);
+  if(_scanData.pricePerLiter) setV('fPriceL',_scanData.pricePerLiter);
+  if(_scanData.currency){var c=['EUR','CZK','PLN'].indexOf(_scanData.currency)>=0?_scanData.currency:'EUR';setV('fCurL',c);}
+  if(_scanData.fuelType){var sel=ge('fFuelType');if(sel){for(var i=0;i<sel.options.length;i++){if(sel.options[i].value===_scanData.fuelType){sel.value=_scanData.fuelType;break;}}}}
+  if(_scanData.date) setV('fDate',_scanData.date);
+  if(_scanData.totalAmount) setV('fTotal',_scanData.totalAmount);
+  recalcFuel('liters');
+  closeOverlay('scanOvl');
+  switchTab('fuel');
+  toast('Hodnoty načítané ✓');
+}
+
+function handleOdo(e) {
+  var file=e.target.files[0]; if(!file) return;
+  var reader=new FileReader();
+  reader.onload=function(ev){var img=ge('odoPrev');if(img){img.src=ev.target.result;img.style.display='block';}};
+  reader.readAsDataURL(file);
+  var sp=ge('odoSpinner'), or2=ge('odoRes'), ob=ge('odoUseBtn'), oe=ge('odoErr');
+  if(sp) sp.style.display='block';
+  if(or2) or2.style.display='none';
+  if(ob) ob.style.display='none';
+  if(oe) oe.style.display='none';
+  Tesseract.recognize(file,'eng',{}).then(function(result){
+    var text=result.data.text, nums=[], m;
+    var p1=/(\d{4,7})\s*km/gi; while((m=p1.exec(text))!==null){var v=parseInt(m[1]);if(v>=100)nums.push(v);}
+    var p2=/(\d{4,7})/g; while((m=p2.exec(text))!==null){var v2=parseInt(m[1]);if(v2>=1000&&v2<=999999)nums.push(v2);}
+    var km=nums.slice().sort(function(a,b){return b-a;})[0];
+    if(!km||km<100){if(oe){oe.textContent='Nepodarilo sa vyčítať km.';oe.style.display='block';}}
+    else{var ov=ge('odoVal');if(ov)ov.textContent=km.toLocaleString('sk-SK');if(or2)or2.style.display='block';if(ob){ob.style.display='';ob.dataset.km=km;}}
+    if(sp) sp.style.display='none';
+  }).catch(function(err){if(sp)sp.style.display='none';if(oe){oe.textContent='Chyba: '+err.message;oe.style.display='block';}});
+}
+
+function useOdo() {
+  var ob=ge('odoUseBtn'), km=ob?ob.dataset.km:null;
+  if(km){ setV('fKm',km); }
+  closeOverlay('odoOvl');
+  switchTab('fuel');
+  toast('Tachometer: '+parseInt(km).toLocaleString('sk-SK')+' km ✓');
+}
+
+// ══════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════
+loadS();
+
+document.addEventListener('DOMContentLoaded', function() {
+  // Set today's date
+  var today = new Date();
+  ['fDate','cDate','iDate'].forEach(function(id){
+    var el = ge(id); if (el) el.valueAsDate = today;
+  });
+
+  // Fuel calc listeners
+  ge('fLiters').addEventListener('input', function(){ recalcFuel('liters'); });
+  ge('fPriceL').addEventListener('input', function(){ recalcFuel('priceL'); });
+  ge('fTotal').addEventListener('input',  function(){ recalcFuel('total'); });
+  ge('cAmount').addEventListener('input', recalcCost);
+  ge('iAmount').addEventListener('input', recalcIncome);
+
+  // Car pill button
+  var cpb = ge('carPillBtn');
+  if (cpb) cpb.addEventListener('click', function(){ openOverlay('carsOvl'); });
+
+  // Restore google settings
+  if (S.google.url)     setV('gsUrl', S.google.url);
+  if (S.google.sheetId) setV('gsId', S.google.sheetId);
+  if (S.anthropicKey)   setV('anthropicKey', S.anthropicKey);
+
+  // Init renders
+  renderCars();
+  renderStats();
+  renderDash();
+  renderExpList();
+  fetchRates();
+});
 </script>
 </body>
 </html>
