@@ -2053,22 +2053,151 @@ function handleScan(e) {
 
 function parseReceipt(text) {
   var res={liters:null,pricePerLiter:null,totalAmount:null,currency:'EUR',fuelType:'Benzín',date:null,station:null};
-  if(/slovnaft/i.test(text))res.station='Slovnaft';
-  else if(/\bMOL\b/i.test(text))res.station='MOL';
-  else if(/\bOMV\b/i.test(text))res.station='OMV';
-  else if(/shell/i.test(text))res.station='Shell';
-  if(/Kč|CZK/i.test(text))res.currency='CZK';
-  else if(/PLN|zł/i.test(text))res.currency='PLN';
-  if(/diesel|nafta|EVO\s*D/i.test(text))res.fuelType='Nafta';
-  else if(/\bLPG\b/i.test(text))res.fuelType='LPG';
-  var lpats=[/(\d+[.,]\d+)\s*[Ll](?:\s|$)/,/(\d+[.,]\d+)\s*litr/i];
-  for(var i=0;i<lpats.length;i++){var m=text.match(lpats[i]);if(m){res.liters=parseFloat(m[1].replace(',','.'));break;}}
-  var ppats=[/(\d+[.,]\d+)\s*(?:EUR|€)\s*\/\s*[Ll]/i,/(\d+[.,]\d+)\s*\/\s*[Ll]/i];
-  for(var j=0;j<ppats.length;j++){var m2=text.match(ppats[j]);if(m2){var v=parseFloat(m2[1].replace(',','.'));if(v>0.5&&v<6){res.pricePerLiter=v;break;}}}
-  var tpats=[/(?:SUMA|Suma|CELKEM|Total)[:\s]+(\d+[.,]\d+)/i,/UHRADENÉ[:\s]+(\d+[.,]\d+)/i];
-  for(var k=0;k<tpats.length;k++){var m3=text.match(tpats[k]);if(m3){res.totalAmount=parseFloat(m3[1].replace(',','.'));break;}}
-  var dm=text.match(/(\d{1,2})[.\/-](\d{2})[.\/-](\d{4})/);
-  if(dm)res.date=dm[3]+'-'+dm[2].padStart(2,'0')+'-'+dm[1].padStart(2,'0');
+
+  // --- Normalize text: unify decimal separators, remove extra spaces ---
+  // OCR often returns "1,589" or "1.589" or "1 589" for prices
+  var lines = text.split(/\r?\n/).map(function(l){return l.trim();}).filter(function(l){return l.length>0;});
+  var norm = lines.join('\n');
+
+  // --- Station detection ---
+  if(/slovnaft/i.test(norm)) res.station='Slovnaft';
+  else if(/\bBenzina\b/i.test(norm)) res.station='Benzina';
+  else if(/\bMOL\b/i.test(norm)) res.station='MOL';
+  else if(/\bOMV\b/i.test(norm)) res.station='OMV';
+  else if(/\bShell\b/i.test(norm)) res.station='Shell';
+  else if(/\bEUROIL\b/i.test(norm)) res.station='EUROOIL';
+  else if(/\bLUKOIL\b/i.test(norm)) res.station='LUKOIL';
+
+  // --- Currency ---
+  if(/Kč|CZK/i.test(norm)) res.currency='CZK';
+  else if(/PLN|zł/i.test(norm)) res.currency='PLN';
+  else res.currency='EUR';
+
+  // --- Fuel type ---
+  if(/natural\s*95|BA\s*95|benzin\s*95|benzín\s*95|N95|Super\s*95/i.test(norm)) res.fuelType='Benzín';
+  else if(/natural\s*98|BA\s*98|N98|Super\s*98/i.test(norm)) res.fuelType='Benzín';
+  else if(/diesel|nafta|EVOD|EVO\s*D|B7|HVO|gasoil/i.test(norm)) res.fuelType='Nafta';
+  else if(/\bLPG\b/i.test(norm)) res.fuelType='LPG';
+  else if(/\bCNG\b/i.test(norm)) res.fuelType='CNG';
+
+  // --- Helper: parse number from string (handles 1.234,56 and 1,234.56 and spaces) ---
+  function parseNum(s) {
+    if (!s) return NaN;
+    s = s.trim();
+    // If both . and , present: last one is decimal separator
+    if (s.indexOf(',') > -1 && s.indexOf('.') > -1) {
+      if (s.lastIndexOf(',') > s.lastIndexOf('.')) {
+        s = s.replace(/\./g,'').replace(',','.');
+      } else {
+        s = s.replace(/,/g,'');
+      }
+    } else {
+      s = s.replace(',','.');
+    }
+    s = s.replace(/\s/g,'');
+    return parseFloat(s);
+  }
+
+  // --- LITERS ---
+  // Patterns: "45.52 l", "45,52L", "Množstvo: 45.52", "Menge 45,52 L"
+  // Also "45.520 l" (3 decimal Slovak format = 45.520 liters)
+  var literPats = [
+    /[Mm]no[žz]stvo[:\s]+([\d\s.,]+)\s*[lL]/,
+    /[Mm]enge[:\s]+([\d.,]+)\s*[lL]/,
+    /[Qq]uantity[:\s]+([\d.,]+)\s*[lL]/,
+    /([\d]+[.,][\d]{2,3})\s*[lL](?:\s|$)/,
+    /([\d]+[.,][\d]+)\s*litr/i,
+    /^([\d]+[.,][\d]+)\s*[lL]$/m
+  ];
+  for (var i=0; i<literPats.length; i++) {
+    var m = norm.match(literPats[i]);
+    if (m) {
+      var v = parseNum(m[1]);
+      if (!isNaN(v) && v > 0.5 && v < 200) { res.liters = v; break; }
+    }
+  }
+
+  // --- PRICE PER LITER ---
+  // Patterns: "1,589 EUR/l", "1.589€/l", "Cena/l: 1,589", "Preis/L 1.589"
+  // Also look for patterns like "* 1,589" on a line near liter value
+  var pricePats = [
+    /([\d]+[.,][\d]{3})\s*(?:EUR|€|Kč|CZK|PLN)?\s*\/\s*[lL]/i,
+    /([\d]+[.,][\d]{2,3})\s*(?:EUR|€)\/[lL]/i,
+    /[Cc]ena\s*\/\s*[lL][:\s]+([\d.,]+)/i,
+    /[Pp]reis\s*\/\s*[lL][:\s]+([\d.,]+)/i,
+    /[Pp]rice\s*\/\s*[lL][:\s]+([\d.,]+)/i,
+    /[Jj]ednotk[a-z.]*\s*cen[a-z.]*[:\s]+([\d.,]+)/i,
+    /\*\s*([\d]+[.,][\d]{3})/
+  ];
+  for (var j=0; j<pricePats.length; j++) {
+    var m2 = norm.match(pricePats[j]);
+    if (m2) {
+      var v2 = parseNum(m2[1]);
+      if (!isNaN(v2) && v2 > 0.3 && v2 < 10) { res.pricePerLiter = v2; break; }
+    }
+  }
+
+  // --- TOTAL AMOUNT ---
+  // Patterns: "SUMA: 72,35", "Celkom: 72.35", "CELKEM 81,65", "Zaplatené: 72,35"
+  // "UHRADENÉ", "K úhrade", "Total", "Betrag", "Summe"
+  var totalPats = [
+    /(?:SUMA|Suma)[:\s]+([\d\s.,]+)/i,
+    /(?:CELKEM|Celkem)[:\s]+([\d\s.,]+)/i,
+    /(?:CELKOVO|Celkovo)[:\s]+([\d\s.,]+)/i,
+    /(?:UHRADENÉ|Uhradené|Zaplatené|Zaplatene)[:\s]+([\d\s.,]+)/i,
+    /(?:K\s+úhrade|K\s+uhrade)[:\s]+([\d\s.,]+)/i,
+    /(?:Total|TOTAL)[:\s]+([\d\s.,]+)/i,
+    /(?:Betrag|Summe)[:\s]+([\d\s.,]+)/i,
+    /(?:SPOLU|Spolu)[:\s]+([\d\s.,]+)/i,
+    /(?:Na\s+zaplatenie)[:\s]+([\d\s.,]+)/i
+  ];
+  for (var k=0; k<totalPats.length; k++) {
+    var m3 = norm.match(totalPats[k]);
+    if (m3) {
+      var v3 = parseNum(m3[1]);
+      if (!isNaN(v3) && v3 > 0.5 && v3 < 50000) { res.totalAmount = v3; break; }
+    }
+  }
+
+  // --- If we have liters and pricePerLiter but no total, calculate it ---
+  if (res.liters && res.pricePerLiter && !res.totalAmount) {
+    res.totalAmount = Math.round(res.liters * res.pricePerLiter * 100) / 100;
+  }
+  // --- If we have liters and total but no pricePerLiter, calculate it ---
+  if (res.liters && res.totalAmount && !res.pricePerLiter) {
+    res.pricePerLiter = Math.round(res.totalAmount / res.liters * 1000) / 1000;
+  }
+
+  // --- DATE ---
+  // Try multiple formats: DD.MM.YYYY, DD/MM/YYYY, YYYY-MM-DD, DD.MM.YY
+  var datePats = [
+    /(\d{4})-(\d{2})-(\d{2})/,               // ISO: 2026-03-15
+    /(\d{1,2})[.\/](\d{2})[.\/](\d{4})/,    // DD.MM.YYYY or DD/MM/YYYY
+    /(\d{1,2})\.(\d{2})\.(\d{2})(?!\d)/,    // DD.MM.YY (2-digit year)
+    /(\d{1,2})-(\d{2})-(\d{4})/               // DD-MM-YYYY
+  ];
+  for (var d=0; d<datePats.length; d++) {
+    var dm = norm.match(datePats[d]);
+    if (dm) {
+      var yr, mo, dy;
+      if (d === 0) { yr=dm[1]; mo=dm[2]; dy=dm[3]; }
+      else if (d === 2) {
+        // 2-digit year
+        yr = parseInt(dm[3]) < 50 ? '20'+dm[3] : '19'+dm[3];
+        mo=dm[2]; dy=dm[1];
+      } else {
+        yr=dm[3]; mo=dm[2]; dy=dm[1];
+      }
+      yr = String(yr); mo = String(mo).padStart(2,'0'); dy = String(dy).padStart(2,'0');
+      // Sanity check
+      var yInt=parseInt(yr), mInt=parseInt(mo), dInt=parseInt(dy);
+      if (yInt>=2000 && yInt<=2040 && mInt>=1 && mInt<=12 && dInt>=1 && dInt<=31) {
+        res.date = yr+'-'+mo+'-'+dy;
+        break;
+      }
+    }
+  }
+
   return res;
 }
 
