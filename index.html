@@ -1243,28 +1243,124 @@ function deleteRecord(id) {
   toast('Záznam vymazaný');
 }
 
+
+// ══════════════════════════════════════════════
+// EDIT RECORD
+// ══════════════════════════════════════════════
+function openEdit(id) {
+  var rec = S.records.find(function(r){ return r.id === id; });
+  if (!rec) return;
+  // Fill edit form fields
+  setV('editId', rec.id);
+  setV('editType', rec.type);
+  setV('editDate', rec.date);
+  setV('editNote', rec.note || '');
+
+  var fuelSection = ge('editFuelSection');
+  var costSection = ge('editCostSection');
+  var incomeSection = ge('editIncomeSection');
+  if (fuelSection) fuelSection.style.display = 'none';
+  if (costSection) costSection.style.display = 'none';
+  if (incomeSection) incomeSection.style.display = 'none';
+
+  if (rec.type === 'fuel') {
+    if (fuelSection) fuelSection.style.display = '';
+    setV('editKm', rec.km);
+    setV('editLiters', rec.liters);
+    setV('editTotal', rec.total);
+    setV('editPriceL', rec.pricePerL || '');
+    setV('editFuelType', rec.fuelType || 'Benzín');
+    setV('editFullTank', rec.fullTank ? '1' : '0');
+    var et = ge('editTitle'); if(et) et.textContent = '⛽ Upraviť tankovanie';
+  } else if (rec.type === 'cost') {
+    if (costSection) costSection.style.display = '';
+    setV('editAmount', rec.amount ? rec.amount.toFixed(2) : '');
+    setV('editCostType', rec.costType || 'Oprava');
+    setV('editKm', rec.km || '');
+    setV('editDesc', rec.desc || '');
+    var et2 = ge('editTitle'); if(et2) et2.textContent = '🔧 Upraviť náklad';
+  } else if (rec.type === 'income') {
+    if (incomeSection) incomeSection.style.display = '';
+    setV('editAmount', rec.amount ? rec.amount.toFixed(2) : '');
+    setV('editIncomeType', rec.incomeType || 'Spolujazda');
+    setV('editDesc', rec.desc || '');
+    var et3 = ge('editTitle'); if(et3) et3.textContent = '💰 Upraviť príjem';
+  }
+
+  openOverlay('editOvl');
+}
+
+function saveEdit() {
+  var id = elV('editId');
+  var idx = S.records.findIndex(function(r){ return r.id === id; });
+  if (idx === -1) { toast('Záznam nenájdený!'); return; }
+  var rec = S.records[idx];
+  var type = rec.type;
+
+  rec.date = elV('editDate') || rec.date;
+  rec.note = elV('editNote');
+
+  if (type === 'fuel') {
+    var km = parseFloat(elV('editKm'));
+    var liters = parseFloat(elV('editLiters'));
+    var total = parseFloat(elV('editTotal'));
+    if (!km || !liters || !total) { toast('Vyplň km, litre a sumu!'); return; }
+    rec.km = km;
+    rec.liters = liters;
+    rec.total = total;
+    rec.pricePerL = (total / liters).toFixed(3);
+    rec.fuelType = elV('editFuelType') || rec.fuelType;
+    rec.fullTank = elV('editFullTank') === '1';
+  } else if (type === 'cost') {
+    var amt = parseFloat(elV('editAmount'));
+    if (!amt) { toast('Vyplň sumu!'); return; }
+    rec.amount = amt;
+    rec.costType = elV('editCostType') || rec.costType;
+    rec.km = elV('editKm') || '';
+    rec.desc = elV('editDesc') || '';
+  } else if (type === 'income') {
+    var amtI = parseFloat(elV('editAmount'));
+    if (!amtI) { toast('Vyplň sumu!'); return; }
+    rec.amount = amtI;
+    rec.incomeType = elV('editIncomeType') || rec.incomeType;
+    rec.desc = elV('editDesc') || '';
+  }
+
+  S.records[idx] = rec;
+  saveS(); renderStats(); renderDash();
+  closeOverlay('editOvl');
+  toast('Záznam upravený ✓');
+}
+
 // ══════════════════════════════════════════════
 // STATS CARDS
 // ══════════════════════════════════════════════
 function calcCons(fuels) {
-  var sorted = fuels.filter(function(r){ return r.km > 0; }).sort(function(a,b){ return a.km - b.km; });
+  // Exact Fuelio method: accumulate liters+km between full-tank fills only
+  var sorted = fuels.filter(function(r){ return r.km > 0; })
+                    .sort(function(a,b){ return a.km - b.km; });
   if (sorted.length < 2) return null;
-  var totL=0, totKm=0, pendL=0, lastFullKm=null;
-  sorted.forEach(function(r) {
+  var totalL = 0, totalKm = 0, pendingL = 0, lastFullKm = null;
+  for (var i = 0; i < sorted.length; i++) {
+    var r = sorted[i];
     var liters = parseFloat(r.liters) || 0;
-    var isFull = r.fullTank !== false && r.fullTank !== 0 && r.fullTank !== '0';
-    pendL += liters;
+    var isFull = (r.fullTank === true || r.fullTank === 1 || r.fullTank === '1');
+    pendingL += liters;
     if (isFull) {
-      if (lastFullKm !== null) { var d = r.km - lastFullKm; if (d > 0) { totL += pendL; totKm += d; } }
-      lastFullKm = r.km; pendL = 0;
+      if (lastFullKm !== null) {
+        var km = r.km - lastFullKm;
+        if (km > 0) { totalL += pendingL; totalKm += km; }
+      }
+      lastFullKm = r.km;
+      pendingL = 0;
     }
-  });
-  if (totKm <= 0) {
-    var kmR = sorted[sorted.length-1].km - sorted[0].km;
-    var lT = sorted.slice(1).reduce(function(s,r){ return s+(parseFloat(r.liters)||0); }, 0);
-    return kmR > 0 ? lT/kmR*100 : null;
   }
-  return totL / totKm * 100;
+  if (totalKm > 0) return totalL / totalKm * 100;
+  // Fallback: no full-tank pairs found
+  var kmRange = sorted[sorted.length-1].km - sorted[0].km;
+  if (kmRange <= 0) return null;
+  var allL = sorted.reduce(function(s,r){ return s+(parseFloat(r.liters)||0); }, 0);
+  return allL / kmRange * 100;
 }
 
 function renderStats() {
@@ -1327,34 +1423,38 @@ function renderDash() {
         + '<td><span class="badge b-fuel">⛽ Palivo</span></td>'
         + '<td style="font-size:12px;color:var(--t2)">'+r.liters+'l · '+r.fuelType+' · '+r.km+'km'+(r.fullTank===false||r.fullTank===0||r.fullTank==='0'?' · čiast.':'')+(r.note?' · '+r.note:'')+'</td>'
         + '<td style="font-family:var(--mono);font-size:12px;color:var(--amber);font-weight:600;white-space:nowrap">'+(+r.total).toFixed(2)+' €</td>'
-        + '<td><button class="del-btn" data-rid="'+r.id+'">✕</button></td>';
+        + '<td style="white-space:nowrap"><button class="edit-btn" data-eid="'+r.id+'" title="Upraviť">✏</button><button class="del-btn" data-rid="'+r.id+'" title="Vymazať">✕</button></td>';
     } else if (r.type === 'income') {
       tr.innerHTML = '<td style="font-family:var(--mono);font-size:11px;color:var(--t2);white-space:nowrap">'+fmtD(r.date)+'</td>'
         + '<td>'+carName+'</td>'
         + '<td><span class="badge b-income">💰 '+(r.incomeType||'')+'</span></td>'
         + '<td style="font-size:12px;color:var(--t2)">'+(r.desc||'')+(r.note?' · '+r.note:'')+'</td>'
         + '<td style="font-family:var(--mono);font-size:12px;color:var(--green);font-weight:600;white-space:nowrap">+'+(+r.amount).toFixed(2)+' €</td>'
-        + '<td><button class="del-btn" data-rid="'+r.id+'">✕</button></td>';
+        + '<td style="white-space:nowrap"><button class="edit-btn" data-eid="'+r.id+'" title="Upraviť">✏</button><button class="del-btn" data-rid="'+r.id+'" title="Vymazať">✕</button></td>';
     } else {
       tr.innerHTML = '<td style="font-family:var(--mono);font-size:11px;color:var(--t2);white-space:nowrap">'+fmtD(r.date)+'</td>'
         + '<td>'+carName+'</td>'
         + '<td><span class="badge b-cost">🔧 '+(r.costType||'')+'</span></td>'
         + '<td style="font-size:12px;color:var(--t2)">'+(r.desc||'')+(r.note?' · '+r.note:'')+'</td>'
         + '<td style="font-family:var(--mono);font-size:12px;color:var(--red);font-weight:600;white-space:nowrap">'+(+r.amount).toFixed(2)+' €</td>'
-        + '<td><button class="del-btn" data-rid="'+r.id+'">✕</button></td>';
+        + '<td style="white-space:nowrap"><button class="edit-btn" data-eid="'+r.id+'" title="Upraviť">✏</button><button class="del-btn" data-rid="'+r.id+'" title="Vymazať">✕</button></td>';
     }
     tbody.appendChild(tr);
   });
 
   // event delegation for delete buttons
   tbody.addEventListener('click', function(e) {
-    var btn = e.target.closest('.del-btn');
-    if (!btn) return;
-    var rid = btn.getAttribute('data-rid');
-    if (rid) deleteRecord(rid);
-  }, { once: true });
-  // Re-attach after each render (since we replace innerHTML)
-  // Actually use event delegation on the table wrapper instead:
+    var delBtn = e.target.closest ? e.target.closest('.del-btn') : null;
+    var editBtn = e.target.closest ? e.target.closest('.edit-btn') : null;
+    if (delBtn) {
+      var rid = delBtn.getAttribute('data-rid');
+      if (rid) deleteRecord(rid);
+    }
+    if (editBtn) {
+      var eid = editBtn.getAttribute('data-eid');
+      if (eid) openEdit(eid);
+    }
+  });
 }
 
 // ══════════════════════════════════════════════
@@ -1478,19 +1578,50 @@ function renderCharts() {
   var profEl=ge('ssProfit');
   if(profEl){profEl.textContent=(profit>=0?'+':'')+profit.toFixed(2)+' €';profEl.style.color=profit>=0?'var(--green)':'var(--red)';}
 
-  // CHART 1: Consumption
-  var consByP={};
-  fuels.forEach(function(r){ var k=axKey(r); if(!consByP[k]) consByP[k]=[]; consByP[k].push(r); });
-  var cKeys=Object.keys(consByP).sort();
-  var cData=cKeys.map(function(k){
-    var rs=consByP[k].slice().sort(function(a,b){return a.km-b.km;});
-    if(rs.length<2) return null;
-    var kmD=rs[rs.length-1].km-rs[0].km, lS=rs.slice(1).reduce(function(s,r){return s+(parseFloat(r.liters)||0);},0);
-    return kmD>0?+(lS/kmD*100).toFixed(1):null;
-  }).filter(function(v){return v!==null;});
-  mkChart('chCons','line',{labels:cKeys,datasets:[{label:'l/100km',data:cData,borderColor:'#38bdf8',backgroundColor:'rgba(56,189,248,0.08)',tension:0.3,fill:true,pointRadius:3,pointBackgroundColor:'#38bdf8'}]},'l',function(i){
-    var k=cKeys[i], rs=fuels.filter(function(r){return axKey(r)===k;});
-    showDrilldown('Spotreba – '+k,['Dátum','Km','Litrov','l/100km'],rs.map(function(r,j,a){var p=a[j-1],d=p?r.km-p.km:0;return[fmtD(r.date),r.km,r.liters+'l',d>0?(r.liters/d*100).toFixed(1):'–'];}));
+  // CHART 1: Consumption per period — Exact Fuelio method
+  // Use ALL fuels (not just filtered) sorted by km to get cross-period km references
+  var allByKm = allFuels.filter(function(r){return r.km>0;})
+                        .sort(function(a,b){return a.km-b.km;});
+  // For each consecutive pair of full-tank fills, assign the segment to the period of the SECOND fill
+  // This matches exactly how Fuelio calculates per-period consumption
+  var segByPeriod = {}; // period -> {totalL, totalKm, segments[]}
+  var segPendingL = 0, segLastFullKm = null, segLastFullPeriod = null;
+  for (var si = 0; si < allByKm.length; si++) {
+    var sr = allByKm[si];
+    var sL = parseFloat(sr.liters) || 0;
+    var sFull = (sr.fullTank === true || sr.fullTank === 1 || sr.fullTank === '1');
+    var sPeriod = axKey(sr);
+    segPendingL += sL;
+    if (sFull) {
+      if (segLastFullKm !== null) {
+        var segKm = sr.km - segLastFullKm;
+        if (segKm > 0) {
+          if (!segByPeriod[sPeriod]) segByPeriod[sPeriod] = {totalL:0, totalKm:0, segs:[]};
+          segByPeriod[sPeriod].totalL  += segPendingL;
+          segByPeriod[sPeriod].totalKm += segKm;
+          segByPeriod[sPeriod].segs.push({date:sr.date,km:sr.km,liters:segPendingL,cons:+(segPendingL/segKm*100).toFixed(1)});
+        }
+      }
+      segLastFullKm = sr.km;
+      segPendingL = 0;
+    }
+  }
+  // Only show periods that appear in the filtered fuels
+  var filteredPKeys = {};
+  fuels.forEach(function(r){ filteredPKeys[axKey(r)] = true; });
+  var cKeys = Object.keys(segByPeriod).filter(function(k){ return filteredPKeys[k]; }).sort();
+  var cData = cKeys.map(function(k){
+    var p = segByPeriod[k];
+    return p.totalKm > 0 ? +(p.totalL / p.totalKm * 100).toFixed(2) : null;
+  });
+  // Remove nulls
+  var finalCKeys=[], finalCData=[];
+  cKeys.forEach(function(k,i){ if(cData[i]!=null){finalCKeys.push(k);finalCData.push(cData[i]);} });
+  cKeys=finalCKeys; cData=finalCData;
+  mkChart('chCons','line',{labels:cKeys,datasets:[{label:'l/100km',data:cData,borderColor:'#38bdf8',backgroundColor:'rgba(56,189,248,0.08)',tension:0.3,fill:true,pointRadius:4,pointBackgroundColor:'#38bdf8'}]},'l',function(i){
+    var k=cKeys[i];
+    var segs=segByPeriod[k]?segByPeriod[k].segs:[];
+    showDrilldown('Spotreba – '+k,['Dátum','Km','Litrov','l/100km'],segs.map(function(f){return[fmtD(f.date),f.km,f.liters.toFixed(2)+'l',f.cons+''];}));
   });
 
   // CHART 2: Fuel price
@@ -1550,13 +1681,14 @@ function renderCharts() {
   var pKeys=[]; Object.keys(fP).forEach(function(k){if(pKeys.indexOf(k)<0)pKeys.push(k);});
   Object.keys(oP).forEach(function(k){if(pKeys.indexOf(k)<0)pKeys.push(k);});
   pKeys.sort(); pKeys=pKeys.slice(-24);
-  var iColors=['#34d399','#86efac','#6ee7b7','#10b981'];
+  var iColors=['#4ade80','#86efac','#16a34a','#bbf7d0','#15803d','#dcfce7'];
   var stackedDS=[
     {label:'⛽ Palivo',data:pKeys.map(function(k){return+(fP[k]||0).toFixed(2);}),backgroundColor:'rgba(251,191,36,0.75)',borderColor:'#fbbf24',borderWidth:1,stack:'costs'},
     {label:'🔧 Náklady',data:pKeys.map(function(k){return+(oP[k]||0).toFixed(2);}),backgroundColor:'rgba(192,132,252,0.75)',borderColor:'#c084fc',borderWidth:1,stack:'costs'}
   ];
+  var incBgColors=['rgba(74,222,128,0.75)','rgba(134,239,172,0.75)','rgba(22,163,74,0.75)','rgba(187,247,208,0.85)','rgba(21,128,61,0.75)','rgba(220,252,231,0.85)'];
   incCats.forEach(function(cat,i){
-    stackedDS.push({label:'💰 '+cat,data:pKeys.map(function(k){return+(incByCat[cat][k]||0).toFixed(2);}),backgroundColor:'rgba(52,211,153,0.75)',borderColor:iColors[i%4],borderWidth:1,stack:'income'});
+    stackedDS.push({label:'💰 '+cat,data:pKeys.map(function(k){return+(incByCat[cat][k]||0).toFixed(2);}),backgroundColor:incBgColors[i%6],borderColor:iColors[i%6],borderWidth:1,stack:'income'});
   });
   if(_charts['chProfit']){try{_charts['chProfit'].destroy();}catch(e){}}
   var ctx6=ge('chProfit'); if(!ctx6) return;
@@ -1795,7 +1927,7 @@ function parseFuelioCSV(text) {
 
     if (preview) {
       preview.innerHTML = '<div style="font-size:12px;color:var(--t2);padding:10px;background:var(--bg3);border-radius:10px;line-height:1.8">'
-        +'<strong style="color:var(--text)">'+vName+'</strong>'+(vPlate?' ('+vPlate+')')+'<br>'
+        +'<strong style="color:var(--text)">'+vName+'</strong>'+(vPlate?' ('+vPlate+')':'')+'<br>'
         +'<span style="color:var(--amber)">⛽ '+iF.length+' tankovaní</span> · '
         +'<span style="color:var(--purple)">🔧 '+iC.length+' nákladov</span> · '
         +'<span style="color:var(--green)">💰 '+iI.length+' príjmov</span></div>';
@@ -2019,5 +2151,76 @@ document.addEventListener('DOMContentLoaded', function() {
   fetchRates();
 });
 </script>
+
+<!-- EDIT RECORD MODAL -->
+<div class="overlay" id="editOvl" onclick="if(event.target===this)closeOverlay('editOvl')">
+  <div class="modal">
+    <div class="modal-drag"></div>
+    <h3 id="editTitle">Upraviť záznam</h3>
+    <input type="hidden" id="editId">
+    <input type="hidden" id="editType">
+    <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:16px">
+
+      <div class="field"><label>Dátum</label><input type="date" id="editDate"></div>
+
+      <!-- FUEL fields -->
+      <div id="editFuelSection" style="display:none">
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <div class="field"><label>Odometer (km)</label><input type="number" id="editKm" placeholder="napr. 85420"></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <div class="field"><label>Litrov</label><input type="number" step="0.01" id="editLiters" placeholder="napr. 45.5"></div>
+            <div class="field"><label>Celková suma (€)</label><input type="number" step="0.01" id="editTotal" placeholder="napr. 72.50"></div>
+          </div>
+          <div class="field"><label>Typ tankovania</label>
+            <select id="editFullTank"><option value="1">✅ Plná nádrž</option><option value="0">⚡ Čiastočné</option></select>
+          </div>
+          <div class="field"><label>Typ paliva</label>
+            <select id="editFuelType">
+              <option value="Benzín">⛽ Benzín</option><option value="Nafta">🛢 Nafta</option>
+              <option value="LPG">🔵 LPG</option><option value="CNG">🟡 CNG</option><option value="Elektrina">⚡ Elektrina</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- COST fields -->
+      <div id="editCostSection" style="display:none">
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <div class="field"><label>Suma (€)</label><input type="number" step="0.01" id="editAmount" placeholder="napr. 120.00"></div>
+          <div class="field"><label>Typ nákladu</label>
+            <select id="editCostType">
+              <option>Oprava</option><option>Poistenie</option><option>STK / EK</option>
+              <option>Pneumatiky</option><option>Olej / filtre</option>
+              <option>Diaľničná známka</option><option>Parkovanie</option><option>Iné</option>
+            </select>
+          </div>
+          <div class="field"><label>Odometer (km)</label><input type="number" id="editCostKm" placeholder="nepovinné"></div>
+          <div class="field"><label>Popis</label><input type="text" id="editDesc" placeholder="napr. Výmena bŕzd"></div>
+        </div>
+      </div>
+
+      <!-- INCOME fields -->
+      <div id="editIncomeSection" style="display:none">
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <div class="field"><label>Suma (€)</label><input type="number" step="0.01" id="editAmountI" placeholder="napr. 15.00"></div>
+          <div class="field"><label>Typ príjmu</label>
+            <select id="editIncomeType">
+              <option>Spolujazda</option><option>Firemná jazda</option>
+              <option>Náhrada za cestu</option><option>Predaj dielu</option><option>Iné</option>
+            </select>
+          </div>
+          <div class="field"><label>Popis</label><input type="text" id="editDescI" placeholder="napr. Spolujazda BA–KE"></div>
+        </div>
+      </div>
+
+      <div class="field"><label>Poznámka</label><input type="text" id="editNote" placeholder="nepovinné"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-p" onclick="saveEdit()">Uložiť zmeny</button>
+      <button class="btn-s" onclick="closeOverlay('editOvl')">Zrušiť</button>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
